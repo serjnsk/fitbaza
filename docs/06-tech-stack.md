@@ -50,6 +50,7 @@
 | Файлы и видео | S3-совместимое хранилище РФ (Яндекс Object Storage / Selectel) + ffmpeg-воркеры + HLS | VID-1 (этап 2); стоимость хранения закладываем в тарифы (OQ-6) |
 | Auth | Телефонный OTP: СМС-провайдер РФ (SMS Aero / SMSC), дешёвые альтернативы — flash call, Telegram Gateway; JWT + refresh | REG-2; Firebase Auth в РФ не опора |
 | Push | FCM + APNs через Expo Notifications | NTF |
+| Платежи (этап 2) | **Т-Банк** (интернет-эквайринг / касса) | Решение OQ-4: уже используется в других продуктах основателя |
 | Хостинг | Яндекс Cloud / Selectel (managed Postgres + Docker Compose на старте) | 152-ФЗ; Kubernetes на старте не нужен |
 | Мониторинг | Sentry (crash + errors), простые метрики | Скорость конструктора — продуктовая метрика (NFR-4), меряем с первого дня |
 
