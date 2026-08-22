@@ -13,6 +13,7 @@
 | [03 — MVP и роадмап](docs/03-mvp-and-roadmap.md) | Приоритизация всех функций, состав MVP, этапы развития продукта |
 | [04 — Конкуренты](docs/04-competitors.md) | Анализ trnr.ru и hwpotraining.com, выводы для продукта |
 | [05 — Открытые вопросы](docs/05-open-questions.md) | Решения, которые нужно принять до/в ходе разработки |
+| [06 — Технологический стек](docs/06-tech-stack.md) | Принятый стек: React Native + React + PowerSync + Node.js/Postgres, обоснование и спайки |
 
 ## Как пользоваться
 
