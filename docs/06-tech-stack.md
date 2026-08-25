@@ -1,13 +1,13 @@
 # 06 — Технологический стек
 
-**Статус:** рекомендация принята как основа (решение OQ-3, август 2026). Финальная валидация — с нанятым разработчиком; допустимое отклонение описано в разделе «Альтернативы».
+Принятый стек продукта. Финальная валидация — с нанятым разработчиком; допустимое отклонение описано в разделе «Альтернативы».
 
 ## Требования, которые определили выбор
 
-1. **Три платформы одним небольшим коллективом:** iOS + Android (тренер и клиент) + веб (конструктор тренера — в MVP по решению OQ-2, плюс админка).
+1. **Три платформы одним небольшим коллективом:** iOS + Android (тренер и клиент) + веб (конструктор тренера — в составе MVP, плюс админка).
 2. **Local-first оффлайн с синхронизацией** (NFR-3, CLI-3…CLI-5) — закладывается с первого дня, «прикрутить потом» нельзя.
 3. Drag-and-drop конструктор (CON-8), фоновый таймер с заблокированным экраном (TMR-3), загрузка/стриминг видео (VID, этап 2), пуш-уведомления (NTF), графики (PRO-6), HealthKit (INT-1, этап 3).
-4. РФ-специфика: хранение персональных данных в РФ (152-ФЗ, OQ-7), СМС-авторизация, платёжные провайдеры РФ.
+4. РФ-специфика: хранение персональных данных в РФ (152-ФЗ), СМС-авторизация, платёжные провайдеры РФ.
 
 ## Итоговый стек
 
@@ -16,7 +16,7 @@
 | Слой | Технология | Обоснование |
 |---|---|---|
 | Мобильные приложения (тренер + клиент) | **React Native + Expo** (dev builds), TypeScript | Один язык со всем остальным стеком; зрелые библиотеки под все наши фичи; HealthKit/фоновые сервисы доступны через dev builds |
-| Веб (конструктор тренера, админка) | **React + Vite**, TypeScript | Веб-конструктор — ядро продукта (OQ-2); React делит с mobile типы, бизнес-логику, парсер и API-клиент |
+| Веб (конструктор тренера, админка) | **React + Vite**, TypeScript | Веб-конструктор — ядро продукта; React делит с mobile типы, бизнес-логику, парсер и API-клиент |
 | Публичная страница тренера (BRD-2, этап 3) | Отдельный небольшой Next.js-сайт | Нужен SEO; не тащить SSR в основное SPA ради одной фичи |
 | Монорепо | **pnpm workspaces + Turborepo** | Общие пакеты: `domain-types`, `workout-parser`, `api-client`, `design-tokens` |
 
@@ -30,12 +30,12 @@
 - Self-hosted редакция закрывает требование 152-ФЗ — весь контур в РФ.
 - Медиа (GIF, видео) через PowerSync **не** синхронизируется — только структурированные данные; загрузкой медиа управляет отдельный кэш-слой по правилам из [07 — Оффлайн-режим](07-offline-mode.md).
 
-Почему PowerSync, а не альтернативы (состояние на 2026):
+Почему PowerSync, а не альтернативы:
 
 | Вариант | Вердикт |
 |---|---|
-| **PowerSync** | ✅ Самый зрелый для production-mobile; SDK v2.0 для RN и веба (обновления июнь–июль 2026); self-hosted; Postgres |
-| ElectricSQL | Хорош для веба, но после перезапуска «electric-next» стал read-path-движком общего назначения; RN — не основной фокус |
+| **PowerSync** | ✅ Самый зрелый вариант для production-mobile; полноценные SDK для RN и веба; self-hosted; Postgres |
+| ElectricSQL | Хорош для веба, но это read-path-движок общего назначения; RN — не основной фокус |
 | WatermelonDB | Только локальная БД, серверный sync-протокол пишем сами — лишний объём работы |
 | CRDT (Automerge/Yjs) | Для совместного редактирования документов; наша модель данных реляционная, конфликтов мало — overkill |
 | Самописный sync | Классическая яма на месяцы; берём готовое |
@@ -48,10 +48,10 @@
 | Контракт API | tRPC внутри монорепо (или REST + OpenAPI — по вкусу команды, некритично) | End-to-end типы против целого класса багов |
 | БД | **PostgreSQL 16+** | Источник истины; требование PowerSync |
 | Очереди | Redis + BullMQ | Уведомления (NTF-1), еженедельные анкеты (SUR-1), транскодинг видео |
-| Файлы и видео | S3-совместимое хранилище РФ (Яндекс Object Storage / Selectel) + ffmpeg-воркеры + HLS | VID-1 (этап 2); стоимость хранения закладываем в тарифы (OQ-6) |
+| Файлы и видео | S3-совместимое хранилище РФ (Яндекс Object Storage / Selectel) + ffmpeg-воркеры + HLS | VID-1 (этап 2); стоимость хранения закладывается в тарифы |
 | Auth | Телефонный OTP: СМС-провайдер РФ (SMS Aero / SMSC), дешёвые альтернативы — flash call, Telegram Gateway; JWT + refresh | REG-2; Firebase Auth в РФ не опора |
 | Push | FCM + APNs через Expo Notifications | NTF |
-| Платежи (этап 2) | **Т-Банк** (интернет-эквайринг / касса) | Решение OQ-4: уже используется в других продуктах основателя |
+| Платежи (этап 2) | **Т-Банк** (интернет-эквайринг / касса) | Уже используется в других продуктах основателя |
 | Хостинг | Яндекс Cloud / Selectel (managed Postgres + Docker Compose на старте) | 152-ФЗ; Kubernetes на старте не нужен |
 | Мониторинг | Sentry (crash + errors), простые метрики | Скорость конструктора — продуктовая метрика (NFR-4), меряем с первого дня |
 
@@ -62,7 +62,7 @@
 | Drag-and-drop (CON-8) | dnd-kit | react-native-gesture-handler + reanimated |
 | Графики (PRO-6) | recharts | victory-native (Skia) |
 | Таймер (TMR-1…4) | — | expo-audio background mode + local notifications; Android — foreground service |
-| Парсер «EMOM 12» (TMR-1, CON-5) | Общий TS-пакет `workout-parser`, правила/грамматика (без LLM в MVP — OQ-10) | тот же пакет |
+| Парсер «EMOM 12» (TMR-1, CON-5) | Общий TS-пакет `workout-parser`, правила/грамматика (без LLM в MVP) | тот же пакет |
 
 ## Почему не Flutter и не нативная разработка
 
@@ -82,6 +82,6 @@
 
 ## Источники
 
-- [PowerSync](https://powersync.com/) — [changelog июнь–июль 2026](https://powersync.com/blog/powersync-changelog-june-july-2026), [RN SDK](https://www.npmjs.com/package/@powersync/react-native), [синхронизация Postgres ↔ SQLite](https://powersync.com/sync-postgres)
-- [ElectricSQL (electric-next) vs PowerSync](https://powersync.com/blog/electricsql-electric-next-vs-powersync)
-- [Сравнение ElectricSQL / PowerSync / Zero, 2026](https://trybuildpilot.com/648-electric-sql-vs-powersync-vs-zero-2026)
+- [PowerSync](https://powersync.com/) — [changelog](https://powersync.com/blog/powersync-changelog-june-july-2026), [RN SDK](https://www.npmjs.com/package/@powersync/react-native), [синхронизация Postgres ↔ SQLite](https://powersync.com/sync-postgres)
+- [ElectricSQL vs PowerSync](https://powersync.com/blog/electricsql-electric-next-vs-powersync)
+- [Сравнение ElectricSQL / PowerSync / Zero](https://trybuildpilot.com/648-electric-sql-vs-powersync-vs-zero-2026)
