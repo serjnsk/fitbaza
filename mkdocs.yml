@@ -1,0 +1,41 @@
+site_name: fitbaza — документация
+site_url: https://serjnsk.github.io/fitbaza/
+repo_url: https://github.com/serjnsk/fitbaza
+docs_dir: docs
+
+theme:
+  name: material
+  language: ru
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep purple
+      toggle:
+        icon: material/brightness-7
+        name: Тёмная тема
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      toggle:
+        icon: material/brightness-4
+        name: Светлая тема
+  features:
+    - navigation.instant
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+
+nav:
+  - Главная: index.md
+  - 01 — Обзор продукта: 01-product-overview.md
+  - 02 — Функциональные требования: 02-functional-requirements.md
+  - 03 — MVP и роадмап: 03-mvp-and-roadmap.md
+  - 04 — Конкуренты: 04-competitors.md
+  - 05 — Решения и открытые вопросы: 05-decisions.md
+  - 06 — Технологический стек: 06-tech-stack.md
+  - 07 — Оффлайн-режим: 07-offline-mode.md
+
+markdown_extensions:
+  - tables
+  - admonition
+  - attr_list
