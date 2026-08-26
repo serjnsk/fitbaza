@@ -1,0 +1,30 @@
+/* 03 · BRUTAL SPORT — наследник HWPO: чёрно-белый плакат, один сигнальный
+   красный, прямые углы. Oswald на заголовках, Golos Text в интерфейсе. */
+:root{
+  --bg:#0A0A0A; --s0:#0D0D0C; --s1:#141413; --s2:#1A1A18; --s3:#22221F; --s4:#2C2C28;
+  --line:rgba(255,255,255,.1); --line2:rgba(255,255,255,.18); --line3:rgba(255,255,255,.3);
+  --tx:#FFFFFF; --tx2:#B4B4AE; --tx3:#8E8E88; --tx4:#5C5C57;
+  --acid:#FF3B18; --acid2:#C42D11; --acid-a:rgba(255,59,24,.14); --acid-h:#FF5433;
+  --on-acc:#FFFFFF;
+  --ui:"Golos Text",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  --fdisp:"Oswald",sans-serif;
+  --disp:normal; --dcase:uppercase; --dweight:700; --dtrack:.015em; --dsize:30px;
+  --bcase:uppercase; --btrack:.05em; --rad-s:2px; --rad:2px; --rad-l:3px;
+}
+/* Углы почти прямые, но не бритвенные: 2px снимают резь и не трогают характер.
+   Круглое остаётся круглым, полоски прогресса — почти прямыми. */
+*,*:before,*:after{border-radius:2px !important}
+.card,.modal,.rail,.pctpop,.sugg,.phone,.empty{border-radius:3px !important}
+.dot,.av{border-radius:50% !important}
+.bar,.bar i,.cbk,.cline.dropbefore:before,.cline.dropafter:after{border-radius:1px !important}
+/* переключатель витрины — не часть продукта, оставляем как у остальных */
+.demobar{border-radius:14px !important}
+.demobar a{border-radius:10px !important}
+.demobar a i{border-radius:50% !important}
+.btn.pri{font-weight:700;font-family:"Oswald",sans-serif;letter-spacing:.06em}
+.doctitle,.ptitle,.h2,.sechead .t,.nav .wm b,.modal .mh .t{font-family:"Oswald",sans-serif;font-weight:700}
+.cline .ckg,.kpi .v,.bigkg{font-family:"Oswald",sans-serif;font-weight:600;letter-spacing:0}
+.cbk{width:3px}
+.wd.on{border-color:var(--acid);background:rgba(255,59,24,.07)}
+.wd.on .dw{color:var(--acid)}
+.aibar{border-color:rgba(255,59,24,.35);background:rgba(255,59,24,.07);color:var(--acid)}

@@ -1,0 +1,25 @@
+/* 05 · NEON PULSE — вечерний зал: индиго, градиент в электрик и мяту.
+   Unbounded на заголовках, Inter Tight в интерфейсе. */
+:root{
+  --bg:#0B0718; --s0:#0F0A22; --s1:#160F32; --s2:#1B1340; --s3:#241A52; --s4:#2E2266;
+  --line:rgba(180,160,255,.14); --line2:rgba(180,160,255,.24); --line3:rgba(180,160,255,.36);
+  --tx:#F2EEFF; --tx2:#B5AEDA; --tx3:#8B84B0; --tx4:#635C88;
+  --acid:#3DF5C0; --acid2:#26A886; --acid-a:rgba(61,245,192,.12); --acid-h:#5CFFD0;
+  --on-acc:#0B0718;
+  --ui:"Inter Tight",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  --fdisp:"Unbounded",system-ui,sans-serif;
+  --disp:normal; --dcase:none; --dweight:700; --dtrack:-.03em; --dsize:24px;
+  --bcase:none; --btrack:0; --rad-s:20px; --rad:14px; --rad-l:20px;
+}
+.btn.pri{background:linear-gradient(100deg,#7C5CFF,#3DF5C0);border:0;color:#0B0718;font-weight:700}
+.btn.pri:hover{filter:brightness(1.08)}
+.card,.modal,.rail .icard{background:linear-gradient(165deg,rgba(27,18,64,.8),rgba(18,11,40,.8))}
+.card,.modal,.pctpop,.sugg{border-radius:20px}
+.nav .mk{background:linear-gradient(140deg,#7C5CFF,#3DF5C0)}
+.nitem.on{background:rgba(124,92,255,.2);color:#C9BCFF}
+.filters button.on,.tabs button.on{background:linear-gradient(100deg,#7C5CFF,#5B3FE0);color:#fff}
+.clirow.on .cb,.asrow.on .cb{background:linear-gradient(100deg,#7C5CFF,#3DF5C0);border:0}
+.wd.on{border-color:rgba(124,92,255,.5);background:rgba(124,92,255,.14)}
+.wd.on .dw{color:#C9BCFF}
+.doctitle,.ptitle,.nav .wm b,.modal .mh .t{font-family:"Unbounded",sans-serif}
+.bigkg,.kpi .v{font-family:"Unbounded",sans-serif;font-weight:700}

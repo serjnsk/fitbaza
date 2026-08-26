@@ -1,0 +1,800 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Brutal Sport — конструктор fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Golos+Text:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/base.css">
+<link rel="stylesheet" href="assets/theme-03.css">
+</head>
+<body>
+<div class="app">
+  <aside class="nav" id="nav"></aside>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <div class="page cons" id="page">
+      <div class="consh">
+        <main class="canvas">
+          <div class="wk" id="wk"></div>
+          <div class="doc" id="doc"></div>
+        </main>
+        <aside class="rail">
+          <div class="railhead">
+            <div class="tabs" id="srcTabs">
+              <button data-tab="ex" class="on">Упражнения</button>
+              <button data-tab="blk">Блоки</button>
+              <button data-tab="wo">Тренировки</button>
+            </div>
+            <div class="search" style="margin-top:10px">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+              <input id="q" placeholder="Поиск…" autocomplete="off">
+            </div>
+          </div>
+          <div class="railbody" id="src"></div>
+          <div class="railfoot">
+            <div style="font-size:10px;color:var(--tx4);line-height:1.5">
+              Всё это можно и просто напечатать в строке тренировки —
+              панель нужна, когда хочется посмотреть, что есть.
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="scrim" id="scrim"></div>
+<div class="toasts" id="toasts"></div>
+<script src="assets/data.js"></script>
+<script src="assets/ui.js"></script>
+<script src="assets/demo.js"></script>
+<script>
+/* ════════════════════════════════════════════════════════════
+   КОНСТРУКТОР — тренировка как документ
+
+   Иерархия из 02 определяет, что куда вкладывается:
+     упражнение → в блок · блок → в тренировку · тренировка → в день
+   Неделя и программа — уровни выше, ими не наполняют день,
+   их копируют и переносят (CON-4, CON-12, CON-14). Поэтому в
+   панели источников только три уровня, а неделя живёт в полосе
+   сверху и в кнопке «копировать прошлую неделю».
+
+   Текст вводится в самой строке: CON-1 и CON-5 — один интерфейс
+   поверх структуры, парсер работает на лету, подсказки по базы
+   предлагаются по мере набора (CON-2). Кнопки «распознать» нет.
+
+   ПМ клиента здесь не редактируются: клиент вводит их у себя в
+   профиле (PRO-4), тренер пишет проценты, расчёт автоматический
+   (CON-16, CON-17). В конструкторе килограммы — это превью под
+   выбранного атлета, и об этом сказано прямо в шапке.
+   ════════════════════════════════════════════════════════════ */
+const Q = new URLSearchParams(location.search);
+const S = {
+  pid: Q.get('p') || STATE.curProg || 'p1',
+  wk:  +(Q.get('w') || STATE.curWeek || 4),
+  day: Q.get('d')!=null ? +Q.get('d') : null,
+  cid: Q.get('c') || null,          /* под кого показываем килограммы */
+  tab:'ex', q:'', editing:null, sugg:[], suggIdx:0,
+};
+if(!program(S.pid)) S.pid='p1';
+if(!S.cid) S.cid = program(S.pid).clients[0] || 'c1';
+S.wk = Math.max(1, Math.min(program(S.pid).weeks, S.wk));
+
+const WCACHE = {};
+function week(){ return WCACHE[S.pid+':'+S.wk] ||= buildWeek(S.pid, S.wk) }
+function day(){
+  if(S.day==null){
+    const i = week().days.findIndex(x=>x.date===TODAY);
+    S.day = i>=0 ? i : Math.max(0, week().days.findIndex(x=>!x.rest));
+  }
+  return week().days[Math.min(S.day,6)];
+}
+const PM = () => pmOf(S.cid);
+const KINDS = {warmup:'Разминка', strength:'Силовой блок', metcon:'Комплекс', cooldown:'Заминка'};
+
+/* ─────── нотация ⇄ структура ─────── */
+function toNotation(item){
+  if(!item.exId) return item.raw || '';
+  const e = byId(item.exId);
+  let s = e.ru;
+  if(item.scheme) s += ' ' + item.scheme;
+  if(item.pct != null) s += ' ' + fmtNum(item.pct) + '%';
+  if(item.val) s += ' ' + item.val + ' ' + item.unit;
+  return s;
+}
+function findLine(id){
+  for(const b of day().blocks){
+    const i = b.items.findIndex(x=>x.id===id);
+    if(i>=0) return {blk:b, idx:i, item:b.items[i]};
+  }
+  return null;
+}
+const findBlk = id => day().blocks.find(b=>b.id===id);
+function ensureBlock(kind){
+  const d = day();
+  if(!d.blocks.length){
+    d.rest=false;
+    if(d.title==='Отдых'||d.title==='—') d.title='Новая тренировка';
+    d.blocks.push(mkBlock(kind||'strength', KINDS[kind||'strength'], '', null, []));
+    COMPOSED_WEEKS[S.pid]=Math.max(COMPOSED_WEEKS[S.pid],S.wk);
+  }
+  return d.blocks[d.blocks.length-1];
+}
+const cloneBlock = b => ({...b, id:nid('b'), items:b.items.map(i=>({...i,id:nid('i')}))});
+const cloneDay  = d => ({...d, blocks:d.blocks.map(cloneBlock)});
+/* ─── у каждого уровня шаблона свой адресат (TPL-3) ───
+   упражнение и блок → в открытую тренировку
+   тренировка       → занимает день
+   неделя           → заполняет все семь дней сразу
+   программа        → создаётся на странице программ                */
+function applyTpl(t){
+  const d = day();
+  if(t.lvl==='упражнение'){
+    if(d.rest&&!d.blocks.length) d.title='Новая тренировка';
+    ensureBlock().items.push(tplToItem(t));
+    toast(t.title+' добавлено','TPL-3'); return;
+  }
+  if(t.lvl==='блок'){
+    d.rest=false; if(d.title==='Отдых'||d.title==='—') d.title='Новая тренировка';
+    d.blocks.push(tplToBlock(t));
+    toast('Блок «'+t.title+'» вставлен','CON-3'); return;
+  }
+  if(t.lvl==='тренировка'){
+    const w = tplToWorkout(t);
+    d.rest=false; d.title=w.title; d.blocks=w.blocks;
+    toast('Тренировка «'+t.title+'» вставлена в '+d.w,'TPL-3'); return;
+  }
+  if(t.lvl==='неделя'){
+    const days = tplToWeekDays(t);
+    week().days.forEach((dd,i)=>{
+      const w = days[i];
+      if(w){ dd.rest=false; dd.title=w.title; dd.blocks=w.blocks }
+      else  { dd.rest=true;  dd.title='Отдых';  dd.blocks=[] }
+    });
+    toast('Неделя «'+t.title+'» разложена по дням','TPL-3'); return;
+  }
+  toast('Программа создаётся на странице программ','TPL-2');
+}
+
+/* ═══════════ ПОЛОСА НЕДЕЛИ ═══════════ */
+function renderWeek(){
+  $('#wk').innerHTML = week().days.map((d,i)=>{
+    const n = d.blocks.reduce((a,b)=>a+b.items.length,0);
+    return `<div class="wd ${i===S.day?'on':''} ${d.rest?'rest':''}" data-day="${i}" draggable="${!d.rest}">
+      ${d.date===TODAY?'<span class="today"></span>':''}
+      <div class="d1"><span class="dw">${d.w}</span><span class="dd">${d.d}</span></div>
+      <div class="dt">${esc(d.rest?'Отдых':d.title)}</div>
+      <div class="dn">${d.rest?'':n+' упр.'}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════ ДОКУМЕНТ ═══════════ */
+function lineHTML(b, item){
+  if(S.editing===item.id){
+    return `<div class="cedit" data-item="${item.id}" data-blk="${b.id}">
+      <input value="${esc(toNotation(item))}" spellcheck="false" autocomplete="off"
+             placeholder="Начните печатать: присед 5×3 80%">
+      <span class="live"></span>
+      <div class="sugg" style="display:none"></div>
+    </div>`;
+  }
+  const e = item.exId && byId(item.exId);
+  if(!e){
+    return `<div class="cline raw" data-item="${item.id}" data-blk="${b.id}">
+      <span class="grip" draggable="true">${ICON.grip}</span>
+      <span class="thumb pending sm">?</span>
+      <span class="cn">${esc(item.raw||'')}</span>
+      <span class="cpx" style="color:var(--warn)">текстом</span>
+      <span class="ckg none">—</span>
+      <span class="cact"><button class="iact dgr" data-a="del">${ICON.x}</button></span>
+    </div>`;
+  }
+  const kg = workKg(item, PM());
+  const px = [item.scheme, item.pct!=null?fmtNum(item.pct)+'%':null, item.val?item.val+' '+item.unit:null]
+             .filter(Boolean).join(' · ');
+  /* упражнение считается от ПМ, но процент не задан — зовём его задать (CON-16) */
+  const askPct = kg==null && e.pm && item.pct==null && PM()[e.pm];
+  return `<div class="cline" data-item="${item.id}" data-blk="${b.id}">
+    <span class="grip" draggable="true">${ICON.grip}</span>
+    <span class="thumb ${e.m==='pending'?'pending':''} sm">${e.m==='ok'?initials(e):'·'}</span>
+    <span class="cn">${esc(e.ru)}<em>${esc(e.eq)}</em></span>
+    <span class="cpx">${esc(px)||'—'}</span>
+    ${askPct
+      ? `<span class="askpct" data-pct-for="${item.id}">указать %</span>`
+      : `<span class="ckg ${kg==null?'none':''}">${kg!=null?fmtNum(kg)+'<u>кг</u>':'—'}</span>`}
+    <span class="cact"><button class="iact dgr" data-a="del">${ICON.x}</button></span>
+  </div>`;
+}
+function blockHTML(b){
+  const n = b.items.length;
+  return `<div class="cblk" data-blk="${b.id}">
+    <div class="cbh">
+      <span class="grip" draggable="true">${ICON.grip}</span>
+      <span class="cbk ${b.kind}"></span>
+      <input class="cbt" data-f="title" value="${esc(b.title)}" size="${Math.max(9,b.title.length+4)}">
+      ${b.fmt?`<span class="chip acid">${esc(b.fmt)}</span>`:''}
+      <span class="cbm">${plural(n,'упражнение','упражнения','упражнений')}</span>
+      <span class="cba">
+        <button class="iact" data-a="tpl" title="Сохранить блок в шаблоны">${ICON.star}</button>
+        <button class="iact" data-a="dupblk" title="Дублировать">${ICON.copy}</button>
+        <button class="iact dgr" data-a="delblk" title="Удалить">${ICON.x}</button>
+      </span>
+    </div>
+    ${b.items.map(i=>lineHTML(b,i)).join('')}
+    <div class="cadd" data-add="${b.id}">${ICON.plus} Упражнение или строка тренировки</div>
+  </div>`;
+}
+function rawCount(){ return day().blocks.reduce((a,b)=>a+b.items.filter(i=>!i.exId&&(i.raw||'').trim()).length,0) }
+
+function renderDoc(){
+  const d = day();
+  d.blocks.forEach(b=>{ b.items = b.items.filter(i=> i.id===S.editing || i.exId || (i.raw||'').trim()) });
+  if(d.rest && !d.blocks.length){
+    $('#doc').innerHTML = `
+      <div class="dochead"><div class="doctitle" style="color:var(--tx3)">Отдых</div></div>
+      <div class="empty" id="dz">
+        <div class="t">День свободен</div>
+        <div class="d">Напечатайте тренировку сами, разложите готовую неделю<br>или повторите прошлую</div>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <button class="btn pri" data-a="startday">${ICON.plus} Создать тренировку <span class="rid" style="color:#0A0C05;border-color:rgba(0,0,0,.25)">CON-1</span></button>
+          <button class="btn" data-a="weektpl">${ICON.tpl} Из шаблонов недели <span class="rid">TPL-3</span></button>
+          <button class="btn" data-a="fromwk">${ICON.copy} Копия прошлой недели <span class="rid">CON-4</span></button>
+        </div>
+      </div>`;
+    return;
+  }
+  const total = d.blocks.reduce((a,b)=>a+b.items.length,0);
+  const raw = rawCount();
+  $('#doc').innerHTML = `
+    <div class="dochead">
+      <input class="doctitle" id="docTitle" value="${esc(d.title)}">
+      <div class="docmeta">
+        <span class="chip ghost">${d.w}, ${d.d}</span>
+        <span class="chip ghost"><span class="num">${total}</span> упр.</span>
+      </div>
+    </div>
+    ${raw?`<div class="aibar">
+      <span class="dot warn"></span>
+      <span class="t">${plural(raw,'строка осталась','строки остались','строк остались')} текстом — база их не узнала</span>
+      <button class="btn sm" data-a="ai">Разобрать нераспознанное</button>
+    </div>`:''}
+    ${d.blocks.map(blockHTML).join('')}
+    <div class="addblk">
+      ${Object.entries(KINDS).map(([k,n])=>`<button class="btn sm" data-addblk="${k}"><span class="cbk ${k}" style="height:10px"></span>${n}</button>`).join('')}
+      <span class="spacer"></span>
+      <button class="btn sm gh" data-a="fromwk">${ICON.copy} Копия прошлой недели <span class="rid hot">CON-4</span></button>
+      <button class="btn sm gh" data-a="weektpl">${ICON.tpl} Неделя из шаблона <span class="rid hot">TPL-3</span></button>
+    </div>`;
+}
+
+/* ═══════════ ПАНЕЛЬ ИСТОЧНИКОВ — только то, что влезает в день ═══════════ */
+function renderSrc(){
+  const box = $('#src'), q = norm(S.q);
+  if(S.tab==='ex'){
+    const list = EX.filter(e=>!q||norm(e.ru).includes(q)||norm(e.en).includes(q)||norm(e.eq).includes(q)
+                              ||(ALIAS[e.id]||[]).some(a=>norm(a).includes(q)));
+    const g = {}; list.forEach(e=>(g[e.g] ||= []).push(e));
+    box.innerHTML = Object.entries(g).map(([k,arr])=>`
+      <div class="grpttl"><span class="lab">${k}</span><span class="ln"></span><span class="n">${arr.length}</span></div>
+      ${arr.map(e=>`<div class="exc" draggable="true" data-ex="${e.id}">
+        <div class="thumb ${e.m==='pending'?'pending':''} sm">${e.m==='ok'?initials(e):'·'}</div>
+        <div class="body"><div class="nm">${esc(e.ru)}</div>
+          <div class="en">${esc(e.en)} · ${esc(e.eq)}</div></div>
+        <button class="add" title="Добавить">${ICON.plus}</button>
+      </div>`).join('')}`).join('')
+      || `<div style="padding:24px 8px;text-align:center;color:var(--tx4);font-size:11.5px">
+          Ничего не найдено · <a href="exercises.html" style="text-decoration:underline">своё упражнение</a></div>`;
+  }
+  else {
+    const lvl = S.tab==='blk' ? 'блок' : 'тренировка';
+    const list = TPL.filter(t=>t.lvl===lvl && (!q||norm(t.title).includes(q)||norm(t.folder||'').includes(q)));
+    box.innerHTML = (list.map(t=>`<div class="tplc" draggable="true" data-tpl="${t.id}">
+        <div class="h"><span class="cbk ${tplKind(t)}" style="height:11px"></span>
+          <span class="nm">${esc(t.title)}</span>${t.fmt?`<span class="chip acid">${esc(t.fmt)}</span>`:''}</div>
+        <div class="ls">${lvl==='блок'
+          ? t.items.map(i=>{const e=byId(i[0]); const v=i[2]?` · ${i[2]}${i[3]==='%'?' %':' '+(i[3]||'')}`:'';
+              return `<span>${esc(e.ru)}${i[1]?' — '+esc(i[1]):''}${esc(v)}</span>`}).join('')
+          : (t.blocks||[]).map(id=>{const b=tplById(id); return b?`<span>${esc(b.title)}</span>`:''}).join('')}</div>
+      </div>`).join('')
+      || `<div style="padding:24px 8px;text-align:center;color:var(--tx4);font-size:11.5px">Пусто</div>`)
+      + `<div class="hint" style="margin:10px 4px">${lvl==='блок'
+          ? 'Блок вставляется в открытую тренировку <span class="rid hot">CON-3</span>'
+          : 'Шаблон тренировки занимает день целиком <span class="rid hot">TPL-3</span>'}</div>`
+      + `<div style="padding:10px 4px 0"><a class="btn sm" style="width:100%;justify-content:center" href="templates.html">Вся библиотека</a></div>`;
+  }
+}
+
+function render(){ renderWeek(); renderDoc(); renderSrc(); }
+
+/* ═══════════ НАБОР: разбор на лету + подсказки из базы (CON-1, CON-2, CON-5) ═══════════ */
+/* делим строку на «название» и «числовую» часть, чтобы подсказывать по названию */
+function splitLine(L){
+  let rest = L, tail = [];
+  for(const [u,re] of UNITS){ const m = rest.match(re); if(m){ tail.push(m[0].trim()); rest = rest.replace(m[0],' '); break } }
+  const mp = rest.match(/@?\s*(\d{1,3}(?:[.,]\d)?)\s*%/); if(mp){ tail.unshift(mp[0].trim()); rest = rest.replace(mp[0],' ') }
+  const ms = rest.match(RE_SCHEME) || rest.match(RE_SETS); if(ms){ tail.unshift(ms[0].replace(/\s/g,'')); rest = rest.replace(ms[0],' ') }
+  return {name: rest.replace(/\s+/g,' ').trim(), tail};
+}
+function suggestFor(namePart){
+  const n = norm(namePart);
+  if(n.length < 2) return [];
+  const out = [];
+  for(const e of EX){
+    let score = 0;
+    for(const c of [e.ru, e.en, ...(ALIAS[e.id]||[])].map(norm)){
+      if(!c) continue;
+      if(c.startsWith(n)) score = Math.max(score, 120 - c.length);
+      else if(c.includes(n)) score = Math.max(score, 70 - c.length);
+      else if(c.split(' ').some(w=>w.startsWith(n))) score = Math.max(score, 45);
+    }
+    if(score) out.push({e, score});
+  }
+  return out.sort((a,b)=>b.score-a.score).slice(0,5).map(x=>x.e);
+}
+
+function liveHint(inp){
+  const wrap = inp.parentElement;
+  const box = wrap.querySelector('.live'), sg = wrap.querySelector('.sugg');
+  const v = inp.value.trim();
+  S.sugg = []; S.suggIdx = 0;
+  if(!v){ box.innerHTML = `<span class="g">название упражнения, схема, процент</span>`; sg.style.display='none'; return }
+
+  const r = parseText(v)[0];
+  if(r && r.type==='fmt'){ box.innerHTML = `<span class="ok">✓</span><span class="g">формат комплекса</span>`; sg.style.display='none'; return }
+
+  if(r && r.type==='ok'){
+    const kg = workKg(r.item, PM());
+    const px = [r.item.scheme, r.item.pct!=null?fmtNum(r.item.pct)+'%':null].filter(Boolean).join(' · ');
+    const needPct = kg==null && r.ex.pm && r.item.pct==null && PM()[r.ex.pm];
+    box.innerHTML = `<span class="ok">✓</span><span class="g">${esc(r.ex.ru)}${px?' · '+esc(px):''}</span>`
+      + (kg!=null ? `<span class="kgv">${fmtNum(kg)} кг</span>`
+        : needPct ? `<span class="g">— допишите % и посчитаю вес</span>` : '');
+    sg.style.display='none'; return;
+  }
+
+  /* не узнали — предлагаем варианты, а не молчим */
+  const {name} = splitLine(v);
+  S.sugg = suggestFor(name);
+  box.innerHTML = S.sugg.length
+    ? `<span class="g">выберите ниже или ↵ оставить текстом</span>`
+    : `<span class="no">не в базе — останется текстом</span>`;
+  sg.innerHTML = S.sugg.length
+    ? `<div class="sh">Из базы упражнений</div>` + S.sugg.map((e,i)=>`
+        <div class="sr ${i===0?'on':''}" data-pick="${e.id}">
+          <span class="thumb ${e.m==='pending'?'pending':''} sm">${e.m==='ok'?initials(e):'·'}</span>
+          <span class="n">${esc(e.ru)}</span><span class="m">${esc(e.eq)}</span></div>`).join('')
+      + `<div class="ai" data-a="ai-one">✦ Не то — разобрать строку с ИИ</div>`
+    : `<div class="ai" data-a="ai-one">✦ Разобрать строку с ИИ</div>`;
+  sg.style.display = '';
+}
+const PCTS = [60,65,70,75,80,85,90,95];
+function openPct(itemId){
+  const f = findLine(itemId); if(!f) return;
+  const e = byId(f.item.exId), max = PM()[e.pm];
+  const line = $(`.cline[data-item="${itemId}"]`); if(!line) return;
+  $$('.pctpop').forEach(n=>n.remove());
+  line.appendChild(el(`<div class="pctpop">
+    <div class="ph">Процент от «${PMNAMES[e.pm]||e.pm}» · <span class="num">${fmtNum(max)} кг</span></div>
+    <div class="pg">${PCTS.map(v=>`<button data-pv="${v}">${v}%<s>${fmtNum(Math.round(max*v/100/2.5)*2.5)}</s></button>`).join('')}</div>
+    <div class="pf">или просто допишите «80%» в строке</div></div>`));
+}
+function setPct(itemId, v){
+  const f = findLine(itemId); if(!f) return;
+  f.item.pct = v; touch(); render();
+}
+function pickSugg(exId){
+  const wrap = $('.cedit'); if(!wrap) return;
+  const inp = wrap.querySelector('input');
+  const {tail} = splitLine(inp.value.trim());
+  inp.value = byId(exId).ru + (tail.length ? ' ' + tail.join(' ') : '');
+  inp.focus(); liveHint(inp);
+}
+
+function startEdit(id){
+  S.editing = id; renderDoc();
+  const inp = $(`.cedit[data-item="${id}"] input`);
+  if(inp){ inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); liveHint(inp) }
+}
+function commitEdit(id, text, andNext){
+  const f = findLine(id); if(!f) return;
+  const v = (text||'').trim();
+  if(!v){ f.blk.items.splice(f.idx,1); S.editing=null; touch(); render(); return }
+  const parsed = parseText(v.split('\n').map(x=>x.trim()).filter(Boolean).join('\n'));
+  const built = [];
+  for(const r of parsed){
+    if(r.type==='fmt'){ f.blk.fmt = r.src; continue }
+    built.push(r.type==='ok' ? r.item : rawItem(r.src));
+  }
+  f.blk.items.splice(f.idx, 1, ...built);
+  S.editing = null;
+  COMPOSED_WEEKS[S.pid]=Math.max(COMPOSED_WEEKS[S.pid],S.wk);
+  touch();
+  if(andNext){
+    const blank = rawItem('');
+    f.blk.items.splice(f.idx + built.length, 0, blank);
+    S.editing = blank.id; renderDoc();
+    const inp = $(`.cedit[data-item="${blank.id}"] input`);
+    if(inp){ inp.focus(); liveHint(inp) }
+  } else render();
+}
+function addLine(blkId){
+  const b = findBlk(blkId); if(!b) return;
+  const blank = rawItem(''); b.items.push(blank); startEdit(blank.id);
+}
+
+/* ═══════════ РАЗБОР НЕРАСПОЗНАННОГО · ИИ предлагает, тренер подтверждает ═══════════ */
+function aiResolve(only){
+  const raws = [];
+  day().blocks.forEach(b=>b.items.forEach(i=>{
+    if(!i.exId && (i.raw||'').trim() && (!only || i.id===only)) raws.push({blk:b, item:i});
+  }));
+  if(!raws.length){ toast('Нераспознанных строк нет'); return }
+  /* здесь будет вызов модели; пока — то же сопоставление в мягком режиме */
+  const guesses = raws.map(r=>{
+    const {name, tail} = splitLine(r.item.raw);
+    const cands = suggestFor(name);
+    return {...r, guess: cands[0] || null, tail};
+  });
+  openModal({title:'Разбор нераспознанного', rid:'CON-5', wide:true, body:`
+    <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:14px">
+      Модель предлагает толкование — вы подтверждаете. Ничего не применяется молча:
+      неверное упражнение с процентом — это неверная нагрузка у атлета.
+    </div>
+    ${guesses.map((g,i)=>`
+      <div class="asrow ${g.guess?'on':''}" data-ai="${i}" ${g.guess?'':'style="opacity:.5;pointer-events:none"'}>
+        <span class="cb"></span>
+        <div style="flex:1;min-width:0">
+          <div class="pm">${esc(g.item.raw)}</div>
+          <div class="nm" style="margin-top:3px">${g.guess?esc(g.guess.ru)+(g.tail.length?' · '+esc(g.tail.join(' ')):''):'нет подходящего упражнения'}</div>
+        </div>
+      </div>`).join('')}
+    <div class="hint">Что не подтвердите — останется текстом. Это штатное состояние: тренер
+      конвертирует такие строки вручную.</div>`,
+    foot:`<span class="spacer"></span><button class="btn" data-close>Отмена</button>
+          <button class="btn pri" data-a="ai-apply">Применить</button>`});
+  window.__ai = guesses;
+}
+function aiApply(){
+  const picked = $$('.modal .asrow.on').map(n=>+n.dataset.ai);
+  const g = window.__ai || [];
+  let n = 0;
+  picked.forEach(i=>{
+    const x = g[i]; if(!x || !x.guess) return;
+    const it = mkItem(x.guess.id);
+    const t = x.tail.join(' ');
+    if(t){ const p = parseText(x.guess.ru + ' ' + t)[0]; if(p && p.type==='ok'){ Object.assign(it, p.item, {id:it.id}) } }
+    const idx = x.blk.items.indexOf(x.item);
+    if(idx>=0){ x.blk.items.splice(idx,1,it); n++ }
+  });
+  closeModal(); touch(); render();
+  toast(n?plural(n,'строка разобрана','строки разобраны','строк разобрано'):'Ничего не выбрано','CON-5');
+}
+
+/* неделя достаётся из библиотеки целиком и ложится на семь дней (TPL-2, TPL-3) */
+function openWeekTpl(){
+  const weeks = TPL.filter(t=>t.lvl==='неделя');
+  openModal({title:'Неделя из шаблона', rid:'TPL-3', wide:true, body:`
+    <div style="font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:14px">
+      Заполнит все семь дней недели ${S.wk} — то, что стоит сейчас, будет заменено.
+    </div>
+    ${weeks.map(t=>{
+      const days = tplToWeekDays(t), s = tplStats(t);
+      return `<div class="asrow" data-wtpl="${t.id}" style="align-items:flex-start">
+        <div style="flex:1;min-width:0">
+          <div class="nm">${esc(t.title)}</div>
+          <div class="pm">${s.days} тренировок · ${s.n} упражнений</div>
+          <div class="tweek" style="margin-top:8px">${days.map((d,i)=>`
+            <div class="td ${d?'':'rest'}"><div class="tdw">${RU[i]}</div>
+              <div class="tdt">${d?esc(d.title):'—'}</div></div>`).join('')}</div>
+        </div></div>`}).join('')
+      || `<div class="empty"><div class="t">Недельных шаблонов нет</div>
+           <div class="d">Сохраните неделю из конструктора — появится здесь</div></div>`}
+    <div class="hint">Неделя — уровень иерархии, а не папка: внутри лежат дни,
+      внутри дней блоки <span class="rid hot">TPL-2</span></div>`,
+    foot:`<span class="spacer"></span><button class="btn" data-close>Отмена</button>`});
+}
+
+/* ═══════════ НАЗНАЧЕНИЕ · сюда же переехал клиент и его ПМ ═══════════ */
+function openAssign(){
+  const p = program(S.pid), d = day();
+  openModal({title:'Назначить программу', rid:'CON-9', wide:true, body:`
+    <div style="display:flex;align-items:center;gap:12px;padding-bottom:15px;border-bottom:1px solid var(--line);margin-bottom:15px">
+      <span class="cbk strength" style="height:28px"></span>
+      <div><div style="font-size:13.5px;font-weight:600">${esc(p.title)}</div>
+        <div class="mono" style="font-size:10.5px;color:var(--tx4);margin-top:3px">неделя ${S.wk} из ${p.weeks} · открыт день ${esc(d.w)}, ${esc(d.d)}</div></div>
+    </div>
+    <div class="lab" style="margin-bottom:9px">Кому назначить <span class="rid hot">CON-10</span></div>
+    ${CLIENTS.map(c=>{
+      const pm = pmOf(c.id), keys = Object.keys(pm);
+      return `<div class="asrow ${p.clients.includes(c.id)?'on':''}" data-cli="${c.id}">
+        <span class="cb"></span><span class="av s">${c.ini}</span>
+        <div style="flex:1;min-width:0">
+          <div class="nm">${esc(c.n)}</div>
+          <div class="pm">${keys.length?keys.slice(0,4).map(k=>(PMNAMES[k]||k)+' '+fmtNum(pm[k])).join(' · '):'максимумы не заданы'}</div>
+        </div>
+        ${keys.length?`<div class="pv">${fmtNum(pm[keys[0]])}<s>${PMNAMES[keys[0]]||keys[0]}</s></div>`:''}
+      </div>`}).join('')}
+    <div class="hint">Максимумы клиент вводит сам в своём профиле <span class="rid hot">PRO-4</span> —
+      тренер их видит и пишет проценты. Килограммы каждый атлет получает свои
+      <span class="rid hot">CON-16</span>, пересчёт после нового ПМ автоматический <span class="rid hot">CON-17</span>.</div>`,
+    foot:`<button class="btn" data-a="all">Все</button><span class="spacer"></span>
+          <button class="btn" data-close>Отмена</button><button class="btn pri" data-a="do-assign">Назначить</button>`});
+}
+function doAssign(){
+  const p = program(S.pid);
+  p.clients = $$('.modal .asrow[data-cli].on').map(n=>n.dataset.cli);
+  if(!p.clients.length){ toast('Выберите клиентов'); return }
+  p.clients.forEach(id=>client(id).prog=p.id);
+  if(!p.clients.includes(S.cid)) S.cid = p.clients[0];
+  closeModal(); touch(); boot();
+  toast(p.clients.length===1 ? 'Назначено: '+client(p.clients[0]).n : 'Назначено '+p.clients.length+' клиентам',
+        p.clients.length===1?'CON-9':'CON-10');
+}
+
+/* ═══════════ DRAG-AND-DROP · CON-8 / CON-13 ═══════════ */
+let DRAG = null;
+function copyPrevWeek(){
+  if(S.wk<2){ toast('Предыдущей недели нет'); return }
+  const src = WCACHE[S.pid+':'+(S.wk-1)] || buildWeek(S.pid, S.wk-1), dst = week();
+  dst.days.forEach((d,i)=>{ const s=src.days[i]; d.blocks=cloneDay(s).blocks; d.title=s.title; d.rest=s.rest });
+  COMPOSED_WEEKS[S.pid]=Math.max(COMPOSED_WEEKS[S.pid],S.wk);
+  touch(); render(); toast('Неделя '+(S.wk-1)+' скопирована как основа недели '+S.wk,'CON-4');
+}
+document.addEventListener('dragstart', e=>{
+  if(!e.target.closest) return;
+  const grip=e.target.closest('.grip'), exc=e.target.closest('.exc[data-ex]'),
+        tpl=e.target.closest('.tplc[data-tpl]'), wd=e.target.closest('.wd[data-day]');
+  if(grip){
+    const line=grip.closest('.cline'), blk=grip.closest('.cblk');
+    if(line){ DRAG={t:'line',id:line.dataset.item}; line.classList.add('dragging') }
+    else if(blk){ DRAG={t:'blk',id:blk.dataset.blk}; blk.classList.add('dragging') }
+  }
+  else if(exc){ DRAG={t:'ex',id:exc.dataset.ex}; exc.classList.add('drag') }
+  else if(tpl){ DRAG={t:'tpl',id:tpl.dataset.tpl} }
+  else if(wd){ DRAG={t:'day',i:+wd.dataset.day} }
+  else return;
+  e.dataTransfer.effectAllowed='copyMove';
+  try{ e.dataTransfer.setData('text/plain',DRAG.t) }catch(_){}
+});
+document.addEventListener('dragend', ()=>{
+  DRAG=null;
+  $$('.drag,.dragging,.dropbefore,.dropafter,.dragover,.hot').forEach(n=>
+    n.classList.remove('drag','dragging','dropbefore','dropafter','dragover','hot'));
+  $$('.cblk').forEach(b=>{ b.style.boxShadow=''; delete b.dataset.side });
+});
+document.addEventListener('dragover', e=>{
+  if(!DRAG) return;
+  const line=e.target.closest?.('.cline'), blk=e.target.closest?.('.cblk'),
+        wd=e.target.closest?.('.wd[data-day]'), dz=e.target.closest?.('.empty,.cadd');
+  $$('.dropbefore,.dropafter').forEach(n=>n.classList.remove('dropbefore','dropafter'));
+  $$('.dragover,.hot').forEach(n=>n.classList.remove('dragover','hot'));
+  if((DRAG.t==='day') && wd){ e.preventDefault(); wd.classList.add('dragover');
+    e.dataTransfer.dropEffect=e.altKey?'copy':'move'; return }
+  if(DRAG.t==='line'||DRAG.t==='ex'){
+    if(line){ e.preventDefault(); const r=line.getBoundingClientRect();
+      line.classList.add(e.clientY<r.top+r.height/2?'dropbefore':'dropafter'); return }
+    if(dz){ e.preventDefault(); dz.classList.add('hot'); return }
+  }
+  if((DRAG.t==='blk'||DRAG.t==='tpl') && blk){
+    e.preventDefault();
+    const r=blk.getBoundingClientRect(), before=e.clientY<r.top+r.height/2;
+    blk.style.boxShadow = before?'inset 0 2px 0 var(--acid)':'inset 0 -2px 0 var(--acid)';
+    blk.dataset.side = before?'before':'after';
+  }
+  if(DRAG.t==='tpl' && dz){ e.preventDefault(); dz.classList.add('hot') }
+});
+document.addEventListener('drop', e=>{
+  if(!DRAG) return;
+  e.preventDefault();
+  const alt=e.altKey, line=e.target.closest?.('.cline'), blk=e.target.closest?.('.cblk'),
+        wd=e.target.closest?.('.wd[data-day]'), dz=e.target.closest?.('.empty,.cadd');
+  const side = blk?blk.dataset.side:null;
+  $$('.cblk').forEach(b=>{ b.style.boxShadow=''; delete b.dataset.side });
+
+  if(DRAG.t==='day' && wd){
+    const to=+wd.dataset.day, from=DRAG.i;
+    if(to!==from){
+      const src=week().days[from], dst=week().days[to];
+      dst.blocks=cloneDay(src).blocks; dst.title=src.title; dst.rest=false;
+      if(!alt){ src.blocks=[]; src.title='Отдых'; src.rest=true }
+      S.day=to; touch(); render();
+      toast(alt?'Тренировка скопирована в '+dst.w:'Тренировка перенесена в '+dst.w,'CON-13');
+    }
+    DRAG=null; return;
+  }
+  if(DRAG.t==='ex'){
+    let target, at=null;
+    if(line){ target=line.dataset.blk; const b=findBlk(target);
+      at=b.items.findIndex(x=>x.id===line.dataset.item); if(line.classList.contains('dropafter')) at++ }
+    else { const d=day(); if(d.rest&&!d.blocks.length) d.title='Новая тренировка'; target=ensureBlock().id }
+    const b=findBlk(target); b.items.splice(at==null?b.items.length:at, 0, mkItem(DRAG.id));
+    touch(); render(); toast(byId(DRAG.id).ru+' добавлено','CON-2'); DRAG=null; return;
+  }
+  if(DRAG.t==='line'){
+    const f=findLine(DRAG.id); if(!f){DRAG=null;return}
+    let target, at=null;
+    if(line){
+      if(line.dataset.item===DRAG.id){DRAG=null;return}
+      target=line.dataset.blk; at=findBlk(target).items.findIndex(x=>x.id===line.dataset.item);
+      if(line.classList.contains('dropafter')) at++;
+    } else { DRAG=null; return }
+    const [moved]=f.blk.items.splice(f.idx,1);
+    if(target===f.blk.id && at!=null && at>f.idx) at--;
+    findBlk(target).items.splice(at,0,moved);
+    touch(); render(); DRAG=null; return;
+  }
+  if(DRAG.t==='tpl'){
+    const t = tplById(DRAG.id);
+    if(t.lvl==='блок' && blk){                       /* уронили точно между блоками */
+      const d=day(); d.rest=false;
+      if(d.title==='Отдых'||d.title==='—') d.title='Новая тренировка';
+      const tb=findBlk(blk.dataset.blk);
+      d.blocks.splice(d.blocks.indexOf(tb)+(side==='after'?1:0), 0, tplToBlock(t));
+      toast('Блок «'+t.title+'» вставлен','CON-3');
+    } else applyTpl(t);
+    COMPOSED_WEEKS[S.pid]=Math.max(COMPOSED_WEEKS[S.pid],S.wk);
+    touch(); render(); DRAG=null; return;
+  }
+  if(DRAG.t==='blk' && blk && blk.dataset.blk!==DRAG.id){
+    const d=day(), src=findBlk(DRAG.id), tb=findBlk(blk.dataset.blk);
+    d.blocks.splice(d.blocks.indexOf(src),1);
+    d.blocks.splice(d.blocks.indexOf(tb)+(side==='after'?1:0),0,src);
+    touch(); render();
+  }
+  DRAG=null;
+});
+
+/* ═══════════ КЛИКИ ═══════════ */
+document.addEventListener('click', e=>{
+  const t = e.target; if(!t.closest) return;
+  if(t.closest('.grip')) return;
+
+  const pick = t.closest('[data-pick]'); if(pick){ pickSugg(pick.dataset.pick); return }
+  if(t.closest('[data-a="ai-one"]')){ const ed=t.closest('.cedit');
+    if(ed){ commitEdit(ed.dataset.item, ed.querySelector('input').value, false); setTimeout(()=>aiResolve(),60) } return }
+  if(t.closest('[data-a="ai"]')){ aiResolve(); return }
+  if(t.closest('[data-a="ai-apply"]')){ aiApply(); return }
+  const air = t.closest('.modal .asrow[data-ai]'); if(air){ air.classList.toggle('on'); return }
+  const acl = t.closest('.modal .asrow[data-cli]'); if(acl){ acl.classList.toggle('on'); return }
+  if(t.closest('[data-a="all"]')){ const rows=$$('.modal .asrow[data-cli]'), all=rows.every(r=>r.classList.contains('on'));
+    rows.forEach(r=>r.classList.toggle('on',!all)); return }
+  if(t.closest('[data-a="do-assign"]')){ doAssign(); return }
+  if(t.closest('#btnAssign')){ openAssign(); return }
+
+  const st = t.closest('#srcTabs button'); if(st){ S.tab=st.dataset.tab;
+    $$('#srcTabs button').forEach(b=>b.classList.toggle('on',b===st)); renderSrc(); return }
+  const wd = t.closest('.wd[data-day]'); if(wd){ S.day=+wd.dataset.day; S.editing=null; render(); return }
+
+  const add = t.closest('.exc .add');
+  if(add){ const ex=add.closest('.exc').dataset.ex, d=day();
+    if(d.rest&&!d.blocks.length) d.title='Новая тренировка';
+    ensureBlock().items.push(mkItem(ex)); touch(); render(); toast(byId(ex).ru+' добавлено','CON-2'); return }
+  const tc = t.closest('.tplc[data-tpl]');
+  if(tc){ applyTpl(tplById(tc.dataset.tpl));
+    COMPOSED_WEEKS[S.pid]=Math.max(COMPOSED_WEEKS[S.pid],S.wk); touch(); render(); return }
+
+  const del = t.closest('.cline [data-a="del"]');
+  if(del){ const f=findLine(del.closest('.cline').dataset.item);
+    if(f){ f.blk.items.splice(f.idx,1); touch(); render() } return }
+  const ba = t.closest('.cbh [data-a]');
+  if(ba){ const b=findBlk(ba.closest('.cblk').dataset.blk), d=day(), a=ba.dataset.a;
+    if(a==='delblk'){ d.blocks.splice(d.blocks.indexOf(b),1); if(!d.blocks.length){ d.rest=true; d.title='Отдых' } }
+    else if(a==='dupblk'){ d.blocks.splice(d.blocks.indexOf(b)+1,0,cloneBlock(b)) }
+    else { TPL.push({id:'tn'+TPL.length, lvl:'блок',
+        folder:b.kind==='warmup'?'Разминки':b.kind==='metcon'?'Комплексы':b.kind==='cooldown'?'Заминки':'Силовые блоки',
+        title:b.title, kind:b.kind, fmt:b.fmt, used:0,
+        items:b.items.filter(i=>i.exId).map(i=>[i.exId,i.scheme,i.pct??i.val,i.pct!=null?'%':i.unit])});
+      toast('Блок «'+b.title+'» сохранён в шаблоны','TPL-1'); renderSrc(); return }
+    touch(); render(); return }
+
+  const pv = t.closest('[data-pv]');
+  if(pv){ setPct(pv.closest('.cline').dataset.item, +pv.dataset.pv); return }
+  const ap = t.closest('[data-pct-for]'); if(ap){ openPct(ap.dataset.pctFor); return }
+  if(!t.closest('.pctpop')) $$('.pctpop').forEach(n=>n.remove());
+  const cl = t.closest('.cline'); if(cl){ startEdit(cl.dataset.item); return }
+  const ad = t.closest('[data-add]'); if(ad){ addLine(ad.dataset.add); return }
+  const ab = t.closest('[data-addblk]');
+  if(ab){ const d=day(); d.rest=false; if(d.title==='Отдых'||d.title==='—') d.title='Новая тренировка';
+    const b=mkBlock(ab.dataset.addblk,KINDS[ab.dataset.addblk],'',null,[]);
+    d.blocks.push(b); COMPOSED_WEEKS[S.pid]=Math.max(COMPOSED_WEEKS[S.pid],S.wk);
+    touch(); render(); addLine(b.id); return }
+  if(t.closest('[data-a="startday"]')){
+    const d=day(); d.rest=false; d.title='Новая тренировка';
+    const b=mkBlock('warmup','Разминка','',null,[]); d.blocks.push(b);
+    COMPOSED_WEEKS[S.pid]=Math.max(COMPOSED_WEEKS[S.pid],S.wk);
+    touch(); render(); addLine(b.id); return }
+  if(t.closest('[data-a="fromwk"]')){ copyPrevWeek(); return }
+  if(t.closest('[data-a="weektpl"]')){ openWeekTpl(); return }
+  const wt = t.closest('[data-wtpl]');
+  if(wt){ applyTpl(tplById(wt.dataset.wtpl));
+    COMPOSED_WEEKS[S.pid]=Math.max(COMPOSED_WEEKS[S.pid],S.wk); closeModal(); touch(); render(); return }
+  if(t.closest('#btnSrc')){ document.body.classList.toggle('src-off'); return }
+  if(t.closest('#wkPrev')){ if(S.wk>1){ S.wk--; S.day=null; S.editing=null; STATE.curWeek=S.wk; saveState(); render() } return }
+  if(t.closest('#wkNext')){ if(S.wk<program(S.pid).weeks){ S.wk++; S.day=null; S.editing=null; STATE.curWeek=S.wk; saveState(); render() } return }
+});
+
+/* ═══════════ ВВОД ═══════════ */
+document.addEventListener('input', e=>{
+  const t=e.target;
+  if(t.closest('.cedit')){ liveHint(t); return }
+  if(t.id==='q'){ S.q=t.value; renderSrc(); return }
+  if(t.id==='docTitle'){ day().title=t.value; touch(); renderWeek(); return }
+  const blk=t.closest('.cblk');
+  if(blk && t.dataset.f==='title'){ const b=findBlk(blk.dataset.blk);
+    if(b){ b.title=t.value; t.size=Math.max(9,t.value.length+4); touch() } }
+});
+document.addEventListener('keydown', e=>{
+  const ed = e.target.closest?.('.cedit');
+  if(!ed) return;
+  const inp = ed.querySelector('input');
+  if(e.key==='ArrowDown' && S.sugg.length){ e.preventDefault();
+    S.suggIdx=(S.suggIdx+1)%S.sugg.length; $$('.sugg .sr').forEach((r,i)=>r.classList.toggle('on',i===S.suggIdx)); return }
+  if(e.key==='ArrowUp' && S.sugg.length){ e.preventDefault();
+    S.suggIdx=(S.suggIdx-1+S.sugg.length)%S.sugg.length; $$('.sugg .sr').forEach((r,i)=>r.classList.toggle('on',i===S.suggIdx)); return }
+  if(e.key==='Enter'){
+    e.preventDefault();
+    if(S.sugg.length && $('.sugg').style.display!=='none'){ pickSugg(S.sugg[S.suggIdx].id); return }
+    commitEdit(ed.dataset.item, inp.value, true); return;
+  }
+  if(e.key==='Escape'){ e.preventDefault();
+    const f=findLine(ed.dataset.item);
+    if(f && !f.item.exId && !f.item.raw) f.blk.items.splice(f.idx,1);
+    S.editing=null; render(); return }
+  if(e.key==='Backspace' && !inp.value){ e.preventDefault(); commitEdit(ed.dataset.item,'',false) }
+});
+document.addEventListener('focusout', e=>{
+  const ed=e.target.closest?.('.cedit');
+  if(ed) setTimeout(()=>{ if(S.editing===ed.dataset.item) commitEdit(ed.dataset.item, ed.querySelector('input').value, false) }, 160);
+});
+document.addEventListener('paste', e=>{
+  const ed=e.target.closest?.('.cedit'); if(!ed) return;
+  const txt=(e.clipboardData||window.clipboardData).getData('text');
+  if(!txt.includes('\n')) return;
+  e.preventDefault();
+  commitEdit(ed.dataset.item, txt, false);
+  toast(plural(txt.trim().split('\n').filter(Boolean).length,'строка распознана','строки распознаны','строк распознано'),'CON-5');
+});
+document.addEventListener('change', e=>{
+  if(e.target.id==='cliSel'){ S.cid=e.target.value; STATE.curClient=S.cid; saveState(); render(); return }
+  if(e.target.id==='progSel'){ S.pid=e.target.value; S.wk=Math.min(S.wk,program(S.pid).weeks);
+    S.day=null; S.editing=null; S.cid=program(S.pid).clients[0]||S.cid; STATE.curProg=S.pid; saveState(); boot() }
+});
+
+/* ═══════════ ЗАПУСК ═══════════ */
+function boot(){
+  const p = program(S.pid);
+  initShell({page:'constructor.html',
+    crumb:[{n:'Программы',h:'programs.html'},{n:p.title,h:'programs.html'},{n:'Неделя '+S.wk}],
+    actions:`
+      <div style="display:flex;align-items:center;gap:2px">
+        <button class="iact" id="wkPrev">${ICON.back}</button>
+        <button class="iact" id="wkNext">${ICON.arr}</button>
+      </div>
+      <span style="font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--tx4);font-weight:700">веса для</span>
+      <select class="inp" id="cliSel" style="width:auto;height:28px">${CLIENTS.map(c=>`<option value="${c.id}" ${c.id===S.cid?'selected':''}>${esc(c.n)}</option>`).join('')}</select>
+      <button class="btn pri" id="btnAssign">Назначить <span class="rid" style="color:#0A0C05;border-color:rgba(0,0,0,.25)">CON-9</span></button>
+      <button class="iact" id="btnSrc" title="Панель источников">${ICON.grip}</button>`});
+  render();
+}
+/* ─── витрина: открываемся на пустом понедельнике ───
+   Заказчик сразу видит, с чего начинается работа над днём: три пути
+   заполнения. Остальная неделя при этом заполнена — видно контекст. */
+(function demoStart(){
+  STATE.navc = false;                    /* меню страниц всегда развёрнуто */
+  document.body.classList.remove('navc');
+  S.wk = Math.floor(daysBetween(program(S.pid).start, TODAY)/7) + 1;
+  const mon = week().days[0];
+  mon.rest = true; mon.title = 'Отдых'; mon.blocks = [];
+  S.day = 0;
+})();
+boot();
+if(Q.get('tpl')){
+  const t = tplById(Q.get('tpl'));
+  if(t){ applyTpl(t); COMPOSED_WEEKS[S.pid]=Math.max(COMPOSED_WEEKS[S.pid],S.wk); touch(); render() }
+}
+</script>
+</body>
+</html>

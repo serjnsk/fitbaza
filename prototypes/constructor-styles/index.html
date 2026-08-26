@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Конструктор в пяти стилях — fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Onest:wght@400;600&family=Oswald:wght@700&family=Golos+Text:wght@400;600&family=Unbounded:wght@700&family=Manrope:wght@400;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0B0B0C;color:#EDEFF1;font-family:"Archivo",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.page{max-width:1180px;margin:0 auto;padding:56px 32px 100px}
+h1{font-size:30px;font-weight:800;font-variation-settings:"wdth" 118;text-transform:uppercase;letter-spacing:-.01em;margin-bottom:14px}
+.lead{font-size:14px;line-height:1.7;color:rgba(255,255,255,.55);max-width:720px}
+.lead b{color:rgba(255,255,255,.8);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:40px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{border-radius:16px;overflow:hidden;text-decoration:none;color:inherit;display:block;
+  border:1px solid rgba(255,255,255,.1);transition:.16s}
+.card:hover{border-color:rgba(255,255,255,.28);transform:translateY(-2px)}
+.top{padding:22px 24px 20px}
+.num{font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.14em;opacity:.5}
+.nm{font-size:24px;margin:9px 0 8px;line-height:1.1}
+.ds{font-size:12.5px;line-height:1.6;opacity:.6}
+.pal{display:flex;gap:0;height:6px}
+.pal i{flex:1}
+.meta{display:flex;gap:8px;padding:12px 24px;font-family:"JetBrains Mono",monospace;font-size:10px;
+  letter-spacing:.06em;opacity:.45;border-top:1px solid rgba(255,255,255,.08);flex-wrap:wrap}
+.foot{margin-top:44px;padding-top:22px;border-top:1px solid rgba(255,255,255,.09);
+  font-size:12.5px;line-height:1.7;color:rgba(255,255,255,.42)}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Конструктор тренировок · пять стилей</h1>
+  <p class="lead">Одна и та же страница, одни и те же данные и логика — меняется только визуальный язык.
+    Все пять работают: можно печатать в строку, вызывать подсказки, разложить неделю из шаблона.
+    <b>Внизу каждой страницы — переключатель</b>, чтобы сравнивать не выходя из экрана.</p>
+
+  <div class="grid">
+    <a class="card" href="01-acid-signal.html" style="background:#0B0D0F">
+      <div class="pal"><i style="background:#D7FF3F"></i><i style="background:#101215"></i><i style="background:#5A636B"></i><i style="background:#EDEFF1"></i></div>
+      <div class="top"><div class="num">01</div>
+        <div class="nm" style="font-weight:800;font-variation-settings:'wdth' 118;text-transform:uppercase">Acid Signal</div>
+        <div class="ds">Кислотный лайм на почти чёрном — и жёсткая дисциплина: акцент появляется только там, где система посчитала за тренера. Всё остальное монохромно.</div></div>
+      <div class="meta"><span>ARCHIVO</span><span>JETBRAINS MONO</span><span>ТЁМНАЯ</span></div>
+    </a>
+
+    <a class="card" href="02-performance.html" style="background:#0A0A0B;font-family:Onest">
+      <div class="pal"><i style="background:#C8A15A"></i><i style="background:#111214"></i><i style="background:#83868E"></i><i style="background:#FFFFFF"></i></div>
+      <div class="top"><div class="num">02</div>
+        <div class="nm" style="font-weight:600;letter-spacing:-.035em">Performance Lab</div>
+        <div class="ds">Дорогой терминал, а не трекер. Белый — цвет действия, шампань — только на достигнутом. Технологичность даёт плотность, лухари — воздух.</div></div>
+      <div class="meta"><span>ONEST</span><span>JETBRAINS MONO</span><span>ТЁМНАЯ</span></div>
+    </a>
+
+    <a class="card" href="03-brutal.html" style="background:#0A0A0A;font-family:'Golos Text'">
+      <div class="pal"><i style="background:#FF3B18"></i><i style="background:#FFFFFF"></i><i style="background:#141413"></i><i style="background:#8E8E88"></i></div>
+      <div class="top"><div class="num">03</div>
+        <div class="nm" style="font-family:Oswald;font-weight:700;text-transform:uppercase;letter-spacing:.015em">Brutal Sport</div>
+        <div class="ds">Прямой наследник HWPO: чёрно-белый плакат, прямые углы, один сигнальный красный. Самая громкая заявка на бренд.</div></div>
+      <div class="meta"><span>OSWALD</span><span>GOLOS TEXT</span><span>ТЁМНАЯ</span></div>
+    </a>
+
+    <a class="card" href="04-clinical.html" style="background:#FAFAF8;color:#0E1116;font-family:'Golos Text'">
+      <div class="pal"><i style="background:#2B50E8"></i><i style="background:#FFFFFF"></i><i style="background:#E4E6EA"></i><i style="background:#0E1116"></i></div>
+      <div class="top"><div class="num" style="opacity:.45">04</div>
+        <div class="nm" style="font-weight:600;letter-spacing:-.035em">Clinical Precision</div>
+        <div class="ds" style="opacity:.62">Не качалка, а доказательная методика: белая бумага, кобальт, одна гарнитура на весь продукт. Единственный светлый из тёмной пятёрки.</div></div>
+      <div class="meta" style="border-color:rgba(14,17,22,.1);opacity:.5"><span>GOLOS TEXT</span><span>ОДНА ГАРНИТУРА</span><span>СВЕТЛАЯ</span></div>
+    </a>
+
+    <a class="card" href="05-neon.html" style="background:#0B0718;font-family:'Inter Tight'">
+      <div class="pal"><i style="background:#7C5CFF"></i><i style="background:#3DF5C0"></i><i style="background:#160F32"></i><i style="background:#8B84B0"></i></div>
+      <div class="top"><div class="num">05</div>
+        <div class="nm" style="font-family:Unbounded;font-weight:700;letter-spacing:-.03em;font-size:21px">Neon Pulse</div>
+        <div class="ds">Вечерняя тренировка, наушники, ночной зал. Индиго с градиентом в электрик и мяту. Самое молодое и самое рискованное.</div></div>
+      <div class="meta"><span>UNBOUNDED</span><span>INTER TIGHT</span><span>ТЁМНАЯ</span></div>
+    </a>
+
+  </div>
+
+  <div class="foot">Кириллица проверена во всех пяти — гарнитуры без нарисованной кириллицы в набор не попали.
+    Данные, расчёт весов от процентов и разбор текста на лету одинаковы везде: сравнивается стилистика, а не функциональность.</div>
+</div>
+</body>
+</html>

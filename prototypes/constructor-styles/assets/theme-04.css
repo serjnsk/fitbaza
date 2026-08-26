@@ -1,0 +1,33 @@
+/* 04 · CLINICAL PRECISION — светлая бумага, кобальт, одна гарнитура на всё.
+   Доказательная методика, а не качалка. */
+:root{
+  --bg:#FAFAF8; --s0:#FFFFFF; --s1:#FFFFFF; --s2:#F2F4F7; --s3:#E9ECF1; --s4:#DFE3E9;
+  --line:#E4E6EA; --line2:#D3D7DE; --line3:#B4BAC4;
+  --tx:#0E1116; --tx2:#48505B; --tx3:#6B727E; --tx4:#9AA1AC;
+  --acid:#2B50E8; --acid2:#1F3BB0; --acid-a:#E8ECFD; --acid-h:#3A5CF0;
+  --on-acc:#FFFFFF;
+  --hov1:rgba(14,17,22,.022); --hov2:rgba(14,17,22,.04); --hov3:rgba(14,17,22,.055);
+  --ui:"Golos Text",system-ui,sans-serif; --mono:"Golos Text",system-ui,sans-serif;
+  --fdisp:"Golos Text",system-ui,sans-serif;
+  --disp:normal; --dcase:none; --dweight:600; --dtrack:-.035em; --dsize:26px;
+  --bcase:none; --btrack:0; --rad-s:8px; --rad:10px; --rad-l:14px;
+}
+body{background:var(--bg);color:var(--tx)}
+.nav,.rail{background:#FFFFFF}
+.canvas{background:var(--bg)}
+.card,.modal,.pctpop,.sugg,.toast{box-shadow:0 2px 18px rgba(14,17,22,.07)}
+.btn{border-color:var(--line2)}
+.btn:hover{background:rgba(14,17,22,.04)}
+.thumb{background:#EEF1F5;color:var(--tx3)}
+.av{background:#EEF1F5;color:var(--tx2);border-color:var(--line)}
+.nitem.on{background:var(--acid-a);color:var(--acid)}
+.tabs{background:#F2F4F7}
+.tabs button.on{background:#FFFFFF;box-shadow:0 1px 3px rgba(14,17,22,.1)}
+.filters button.on{background:var(--acid);color:#FFF}
+.wd.on{background:var(--acid-a);border-color:rgba(43,80,232,.35)}
+.wd.on .dw{color:var(--acid)}
+.cedit{border-bottom-color:var(--acid)}
+.aibar{border-color:rgba(43,80,232,.28);background:var(--acid-a);color:var(--acid2)}
+.scrim{background:rgba(14,17,22,.34)}
+::-webkit-scrollbar-thumb{background:rgba(14,17,22,.16);background-clip:content-box}
+::selection{background:var(--acid);color:#FFF}

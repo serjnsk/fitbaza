@@ -1,0 +1,25 @@
+/* 02 · PERFORMANCE LAB — дорогой терминал: почти чёрный, белый как цвет
+   действия, шампань только на достигнутом. Onest, строчные, много воздуха. */
+:root{
+  --bg:#0A0A0B; --s0:#0D0D0E; --s1:#111214; --s2:#141518; --s3:#1A1B1F; --s4:#212226;
+  --line:rgba(255,255,255,.075); --line2:rgba(255,255,255,.13); --line3:rgba(255,255,255,.22);
+  --tx:#F0F0F2; --tx2:#A8ABB2; --tx3:#83868E; --tx4:#5A5D65;
+  --acid:#C8A15A; --acid2:#8F7038; --acid-a:rgba(200,161,90,.13); --acid-h:#D9B573;
+  --on-acc:#0A0A0B;
+  --ui:"Onest",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  --fdisp:"Onest",system-ui,sans-serif;
+  --disp:normal; --dcase:none; --dweight:600; --dtrack:-.035em; --dsize:27px;
+  --bcase:none; --btrack:0; --rad-s:9px; --rad:11px; --rad-l:14px;
+}
+/* белый — цвет действия, шампань не трогаем */
+.btn.pri{background:#FFF;border-color:#FFF;color:#0A0A0B;font-weight:600}
+.btn.pri:hover{background:#FFF;border-color:#FFF;opacity:.88}
+.clirow.on .cb,.asrow.on .cb{background:#FFF;border-color:#FFF}
+.clirow.on .cb:after,.asrow.on .cb:after{border-color:#0A0A0B}
+.exc .add:hover{background:#FFF;border-color:#FFF;color:#0A0A0B}
+.filters button.on{background:var(--s4);border-color:var(--line2);color:#FFF}
+.tabs button.on{background:var(--s4);color:#FFF}
+.card,.modal,.rail,.pctpop,.sugg{border-radius:14px}
+.nav .mk{background:#C8A15A}
+.doctitle,.ptitle,.h2,.sechead .t{font-weight:600}
+.lab,.card .ch .t,.icard .ih .t,.cbt{font-family:"JetBrains Mono",monospace;font-weight:400;letter-spacing:.1em}
