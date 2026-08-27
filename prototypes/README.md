@@ -7,6 +7,7 @@
 | Прототип | | |
 |---|---|---|
 | **Конструктор тренировок** — экран CON в пяти визуальных направлениях | [описание](constructor-styles/) | [▶︎ открыть](https://raw.githack.com/serjnsk/fitbaza/prototype/constructor-styles/prototypes/constructor-styles/index.html) |
+| **Экраны в четырёх стилистиках** — конструктор тренера и тренировка клиента × 4 визуальные гипотезы | [описание](screens/) | [▶︎ открыть](https://raw.githack.com/serjnsk/fitbaza/prototype/screens-4-styles/prototypes/screens/index.html) |
 
 Каждый прототип — статические HTML, CSS и JS без сборки. Новые кладём соседними
 папками по тому же принципу.

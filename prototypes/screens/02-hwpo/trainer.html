@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Конструктор · HWPO · песок и терракота — fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Archivo:wdth,wght@62..125,400..700&family=Onest:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Структура одна на все стилистики, тема подключается следом и меняет
+     только цвет и типографику. Поведение живёт в общем скрипте. -->
+<link rel="stylesheet" href="../assets/base-trainer.css">
+<link rel="stylesheet" href="../assets/theme-02-hwpo.css">
+</head>
+<body>
+<div class="app">
+  <aside class="nav" id="nav"></aside>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <div class="page">
+      <div class="cons">
+        <main>
+          <section class="wk" id="wk"></section>
+          <section class="doc" id="doc"></section>
+        </main>
+        <aside class="rail">
+          <div class="railhead">
+            <div class="tabs" id="tabs">
+              <button data-tab="ex" class="on">Упражнения</button>
+              <button data-tab="blk">Блоки</button>
+              <button data-tab="wo">Тренировки</button>
+            </div>
+            <label class="search">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/></svg>
+              <input id="q" placeholder="Поиск…" autocomplete="off">
+            </label>
+          </div>
+          <div class="railbody" id="src"></div>
+          <div class="railfoot" id="railfoot"></div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ov" id="ov">
+  <div class="md">
+    <div class="mdh">
+      <span class="dot"></span>
+      <h2>Назначить тренировку</h2>
+      <button class="cls" id="md-x">✕</button>
+    </div>
+    <div class="mdb">
+      <div class="mdt"><b id="md-title"></b><s id="md-sub"></s></div>
+      <div class="lab">Кому назначить</div>
+      <div id="md-clients"></div>
+      <div class="carry">
+        <div class="go"><b>Поедет с тренировкой</b><s id="md-carry"></s></div>
+        <div class="stay"><b id="md-stayt"></b><s id="md-stay"></s></div>
+      </div>
+    </div>
+    <div class="mdf">
+      <button class="btn gh" id="md-all">Назначить всем</button>
+      <span class="sp"></span>
+      <button class="btn gh" id="md-cancel">Отмена</button>
+      <button class="btn" id="md-ok"></button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/data.js"></script>
+<script src="../assets/trainer.js"></script>
+</body>
+</html>

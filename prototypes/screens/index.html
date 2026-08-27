@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>fitbaza · четыре стилистики</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Onest:wght@400;500;600;700&family=Archivo:wdth,wght@62..125,400..700&family=Barlow+Condensed:wght@600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#141414;--tx2:#5E5E5E;--tx3:#8E8E8E;--tx4:#B8B8B8;
+  --bg:#fff;--s1:#F7F7F7;--line:#E7E7E7;
+  --ui:"Inter",-apple-system,system-ui,sans-serif}
+body{font-family:var(--ui);color:var(--ink);background:#EFEFEF;
+  -webkit-font-smoothing:antialiased;padding:44px 28px 90px}
+.wrap{max-width:1180px;margin:0 auto}
+
+header{margin-bottom:34px}
+h1{font-size:30px;font-weight:700;letter-spacing:-.035em;margin-bottom:9px}
+.lead{font-size:15px;line-height:1.6;color:var(--tx2);max-width:660px}
+.lead b{color:var(--ink);font-weight:600}
+.meta{display:flex;gap:20px;margin-top:16px;font-size:12.5px;color:var(--tx3)}
+.meta b{color:var(--ink);font-weight:600}
+
+.v{background:var(--bg);border-radius:20px;padding:22px 24px 24px;margin-bottom:16px}
+.vh{display:flex;align-items:baseline;gap:12px;margin-bottom:4px}
+.vh .num{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--tx4)}
+.vh h2{font-size:20px;font-weight:700;letter-spacing:-.03em}
+.vh .src{margin-left:auto;font-size:12.5px;color:var(--tx3)}
+.vh .src a{color:var(--tx3)}
+.vd{font-size:13.5px;line-height:1.6;color:var(--tx2);max-width:720px;margin-bottom:14px}
+
+.pal{display:flex;gap:6px;margin-bottom:16px}
+.pal i{width:34px;height:20px;border-radius:5px;border:1px solid rgba(0,0,0,.08)}
+.type{display:flex;align-items:baseline;gap:10px;margin:-6px 0 16px;font-size:12.5px;color:var(--tx3)}
+.type b{font-size:19px;font-weight:700;letter-spacing:-.02em;color:var(--ink)}
+.type s{text-decoration:none}
+
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:720px){ .pair{grid-template-columns:1fr} }
+.card{display:block;text-decoration:none;color:inherit;border:1.5px solid var(--line);
+  border-radius:14px;padding:14px 15px;transition:.14s}
+.card:hover{border-color:var(--ink);background:var(--s1)}
+.card b{display:block;font-size:14.5px;font-weight:600;letter-spacing:-.015em;margin-bottom:3px}
+.card s{display:block;text-decoration:none;font-size:12.5px;color:var(--tx3);line-height:1.45}
+.card .go{display:inline-flex;align-items:center;gap:5px;margin-top:9px;
+  font-size:12.5px;font-weight:600;color:var(--ink)}
+
+.note{background:var(--bg);border-radius:20px;padding:20px 24px;margin-top:22px}
+.note h3{font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--tx3);margin-bottom:10px}
+.note p{font-size:13.5px;line-height:1.65;color:var(--tx2);margin-bottom:9px;max-width:760px}
+.note p:last-child{margin-bottom:0}
+.note b{color:var(--ink);font-weight:600}
+code{font-family:"JetBrains Mono",monospace;font-size:12.5px;background:var(--s1);
+  padding:1px 6px;border-radius:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Конструктор тренера и экран клиента — четыре стилистики</h1>
+    <p class="lead">Одна и та же тренировка, одни и те же данные, одинаковое поведение.
+      Различается только цвет и типографика — так варианты можно сравнивать
+      по существу, а не по тому, что где успели доделать.</p>
+    <div class="meta">
+      <span><b>2</b> экрана</span>
+      <span><b>4</b> стилистики</span>
+      <span><b>8</b> страниц</span>
+    </div>
+  </header>
+
+  <section class="v">
+    <div class="vh"><span class="num">01</span><h2>Strava</h2>
+      <span class="src">белая база · оранжевый акцент</span></div>
+    <p class="vd">Акцент работает только на действии и на текущем шаге. Спокойная
+      серо-белая основа, вся яркость уходит на то, что нужно нажать.</p>
+    <div class="pal"><i style="background:#FC5200"></i><i style="background:#FFF1EA"></i>
+      <i style="background:#141414"></i><i style="background:#F7F7F7"></i><i style="background:#fff"></i></div>
+    <div class="type"><b style="font-family:'Inter',sans-serif">Аа Бб 132,5 кг</b><s>Inter</s><s style="color:var(--tx4)">нейтральный гротеск — не спорит с содержимым</s></div>
+    <div class="pair">
+      <a class="card" href="01-strava/trainer.html"><b>Конструктор тренера</b>
+        <s>Десктоп: неделя, документ дня, панель источников</s>
+        <span class="go">Открыть →</span></a>
+      <a class="card" href="01-strava/client.html"><b>Тренировка клиента</b>
+        <s>Мобильный экран: блоки, подходы, запись результата</s>
+        <span class="go">Открыть →</span></a>
+    </div>
+  </section>
+
+  <section class="v">
+    <div class="vh"><span class="num">02</span><h2>HWPO</h2>
+      <span class="src"><a href="https://www.hwpotraining.com" target="_blank">hwpotraining.com</a> · 1 в 1</span></div>
+    <p class="vd">Снято прямо с сайта: вопреки ожиданию это не чёрно-белое, а тёплая
+      песочная гамма с терракотой. Скруглений нет вовсе, заголовки капителью
+      с широкой разрядкой. Родной шрифт Industry платный — взят Archivo
+      с узкой шириной, тот же квадратный характер.</p>
+    <div class="pal"><i style="background:#935D38"></i><i style="background:#F0E7DC"></i>
+      <i style="background:#1C1C1C"></i><i style="background:#342421"></i><i style="background:#FAF5F0"></i></div>
+    <div class="type"><b style="font-family:'Archivo',sans-serif">Аа Бб 132,5 кг</b><s>Archivo</s><s style="color:var(--tx4)">узкая ширина, капитель с разрядкой · вместо платного Industry</s></div>
+    <div class="pair">
+      <a class="card" href="02-hwpo/trainer.html"><b>Конструктор тренера</b>
+        <s>Капитель, нулевые скругления, песочные панели</s>
+        <span class="go">Открыть →</span></a>
+      <a class="card" href="02-hwpo/client.html"><b>Тренировка клиента</b>
+        <s>Та же гамма на мобильном</s>
+        <span class="go">Открыть →</span></a>
+    </div>
+  </section>
+
+  <section class="v">
+    <div class="vh"><span class="num">03</span><h2>Nibble</h2>
+      <span class="src">фиолетовый акцент</span></div>
+    <p class="vd">Отличие от Strava не в одном цвете: крупные скругления, мягкие
+      лавандовые подложки под выбранным и больше воздуха. Акцент смелее —
+      им красится и выбранное состояние, не только действие.</p>
+    <div class="pal"><i style="background:#8B2CF5"></i><i style="background:#F3EAFE"></i>
+      <i style="background:#1B1230"></i><i style="background:#F7F5FC"></i><i style="background:#fff"></i></div>
+    <div class="type"><b style="font-family:'Onest',sans-serif">Аа Бб 132,5 кг</b><s>Onest · JetBrains Mono</s><s style="color:var(--tx4)">гротеск с характером; всё числовое — моноширинным</s></div>
+    <div class="pair">
+      <a class="card" href="03-nibble/trainer.html"><b>Конструктор тренера</b>
+        <s>Мягкие формы, лавандовые подложки</s>
+        <span class="go">Открыть →</span></a>
+      <a class="card" href="03-nibble/client.html"><b>Тренировка клиента</b>
+        <s>Тот же акцент на мобильном</s>
+        <span class="go">Открыть →</span></a>
+    </div>
+  </section>
+
+  <section class="v">
+    <div class="vh"><span class="num">04</span><h2>Ladder</h2>
+      <span class="src">лайм · тренеру светлая, клиенту тёмная</span></div>
+    <p class="vd">Единственный вариант, где экраны намеренно расходятся. У клиента —
+      чёрная база один в один: экран смотрят в зале, в руке, часто при плохом
+      свете, и на чёрном лайм наконец работает как цвет. У тренера светлая
+      адаптация: лайм только заливкой под чёрным текстом, потому что как
+      цвет текста на белом он даёт контраст 1,4 к 1 при норме 4,5.</p>
+    <div class="pal"><i style="background:#D6FF3E"></i><i style="background:#0C0C0C"></i>
+      <i style="background:#1D1D1D"></i><i style="background:#F5F5F3"></i><i style="background:#fff"></i></div>
+    <div class="type"><b style="font-family:'Barlow Condensed',sans-serif">Аа Бб 132,5 кг</b><s>Barlow Condensed · Barlow</s><s style="color:var(--tx4)">узкий тяжёлый для заголовков, обычный для текста</s></div>
+    <div class="pair">
+      <a class="card" href="04-ladder/trainer.html"><b>Конструктор тренера</b>
+        <s>Светлая адаптация: лайм заливкой, текст чёрный</s>
+        <span class="go">Открыть →</span></a>
+      <a class="card" href="04-ladder/client.html"><b>Тренировка клиента</b>
+        <s>Тёмная, один в один с референсом</s>
+        <span class="go">Открыть →</span></a>
+    </div>
+  </section>
+
+  <div class="note">
+    <h3>Как это устроено</h3>
+    <p>Восемь страниц собраны из общих частей: <code>base-trainer.css</code> и
+      <code>base-client.css</code> держат раскладку и не задают ни одного цвета
+      напрямую — только переменные. Тема подключается следом и переопределяет их.
+      Логика вынесена в <code>trainer.js</code> и <code>client.js</code>, одна на все варианты.</p>
+    <p>Поэтому <b>поведение во всех четырёх стилистиках одинаковое</b>: правка
+      в логике расходится на восемь страниц сразу, и сравнивать можно именно
+      оформление, а не разную степень готовности.</p>
+    <p>Данные общие с настоящим прототипом: та же программа «Сила + кроссфит»,
+      та же среда 26 августа, тот же клиент. Конструктор и экран клиента
+      показывают одну и ту же тренировку с двух сторон.</p>
+  </div>
+</div>
+</body>
+</html>

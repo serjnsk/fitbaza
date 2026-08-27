@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Тренировка · HWPO · песок и терракота — fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Archivo:wdth,wght@62..125,400..700&family=Onest:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Структура одна на все стилистики, тема подключается следом и меняет
+     только цвет и типографику. Поведение живёт в общем скрипте. -->
+<link rel="stylesheet" href="../assets/base-client.css">
+<link rel="stylesheet" href="../assets/theme-02-hwpo.css">
+</head>
+<body>
+
+<div class="phone">
+  <div class="screen">
+    <div class="statusbar">
+      <span class="num">9:41</span>
+      <span class="ic">
+        <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><path d="M8 9.5 5.8 7.3a3.1 3.1 0 0 1 4.4 0L8 9.5zM8 5.4c-1.6 0-3.1.6-4.2 1.7L2.4 5.7A8 8 0 0 1 8 3.4c2.1 0 4.1.8 5.6 2.3l-1.4 1.4A5.9 5.9 0 0 0 8 5.4z"/></svg>
+        <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x=".5" y=".5" width="21" height="11" rx="3" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="18" height="8" rx="1.8" fill="currentColor"/><path d="M23 4v4a2 2 0 0 0 0-4z" fill="currentColor" opacity=".4"/></svg>
+      </span>
+    </div>
+
+    <div class="top">
+      <div class="topbar">
+        <button class="iback"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 6 10l6 6"/></svg></button>
+        <span class="daylab" id="daylab"></span>
+        <button class="iback"><svg viewBox="0 0 20 20" fill="currentColor"><circle cx="4.5" cy="10" r="1.6"/><circle cx="10" cy="10" r="1.6"/><circle cx="15.5" cy="10" r="1.6"/></svg></button>
+      </div>
+      <div class="title" id="title"></div>
+      <div class="byline" id="byline"></div>
+      <div class="prog">
+        <div class="bar" id="progbar"></div>
+        <div class="lg"><span id="proglab"></span><span id="progvol"></span></div>
+      </div>
+    </div>
+
+    <div class="feed" id="feed"></div>
+
+    <div class="bottom">
+      <button class="cta" id="cta"></button>
+    </div>
+    <div class="homebar"></div>
+
+    <!-- таймер (TMR-1…TMR-4) вне MVP: разметка и логика живут за флагом TIMER -->
+    <div class="timer" id="timer">
+      <div class="th">
+        <button class="x" id="tm-close"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+        <span class="nm"><b id="tm-title"></b><s id="tm-sub"></s></span>
+        <button class="snd" id="tm-snd" title="Звук и вибрация"><svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 3 6 6.5H3v7h3L10 17V3z"/><path d="M13.5 7a4 4 0 0 1 0 6" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round"/></svg></button>
+      </div>
+      <div class="body">
+        <div class="phase" id="tm-phase"></div>
+        <div class="big" id="tm-big">00:00</div>
+        <div class="rnd" id="tm-rnd"></div>
+        <div class="ring"><i id="tm-ring" style="width:0%"></i></div>
+        <div class="dots" id="tm-dots"></div>
+        <div class="plan" id="tm-plan"></div>
+      </div>
+      <div class="tmnote">Звук и вибрация на каждом переходе · работает при заблокированном экране</div>
+      <div class="ctrls">
+        <button class="sec" id="tm-reset">Сброс</button>
+        <button class="go" id="tm-go">Старт</button>
+      </div>
+    </div>
+
+    <!-- обсуждение (COM-1, COM-2, COM-4): ветка при объекте, не переписка -->
+    <div class="sheet" id="talk">
+      <div class="sheetbox">
+        <div class="grab"></div>
+        <div class="sheeth"><b id="tk-title"></b><s id="tk-sub"></s></div>
+        <div class="thread" id="tk-thread"></div>
+        <textarea id="tk-text" class="tkin" rows="3"></textarea>
+        <button class="cta" id="tk-send">Отправить тренеру</button>
+      </div>
+    </div>
+
+    <!-- результат комплекса: поля зависят от формата, который задал тренер -->
+    <div class="sheet" id="res">
+      <div class="sheetbox">
+        <div class="grab"></div>
+        <div class="sheeth"><b>Результат</b><s id="rs-fmt"></s></div>
+        <div style="font-size:13px;color:var(--tx3)" id="rs-plan"></div>
+        <div class="fields" id="rs-fields">
+          <label class="field"><span class="k" id="rs-k1"></span>
+            <span class="v"><input id="rs-a" type="text" inputmode="numeric"><u id="rs-u1"></u></span></label>
+          <label class="field" id="rs-f2"><span class="k" id="rs-k2"></span>
+            <span class="v"><input id="rs-b" type="text" inputmode="numeric"><u id="rs-u2"></u></span></label>
+        </div>
+        <button class="cta" id="rs-save">Записать результат</button>
+      </div>
+    </div>
+
+    <!-- ввод результата подхода -->
+    <div class="sheet" id="sheet">
+      <div class="sheetbox">
+        <div class="grab"></div>
+        <div class="sheeth"><b id="sh-ex"></b><s id="sh-set"></s></div>
+        <div style="font-size:13px;color:var(--tx3)" id="sh-plan"></div>
+        <div class="fields">
+          <label class="field"><span class="k">Вес</span>
+            <span class="v"><input id="sh-kg" type="text" inputmode="decimal"><u>кг</u></span></label>
+          <label class="field"><span class="k">Повторы</span>
+            <span class="v"><input id="sh-rep" type="text" inputmode="numeric"><u>повт</u></span></label>
+        </div>
+        <div class="quick" id="sh-quick"></div>
+        <button class="cta" id="sh-save">Записать подход</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="side">
+  <h1>Тренировка на сегодня</h1>
+  <p>Экран клиента — зеркало конструктора тренера. Это та же среда из программы
+     «Сила + кроссфит», которую тренер собрал на своём экране.</p>
+  <p><b>Процентов здесь нет.</b> Тренер написал «70 % от ПМ» — клиент видит
+     132,5 кг. В этом весь смысл расчёта нагрузки: думает тренер, считает
+     система, поднимает атлет.</p>
+  <p>Подход отмечается одним касанием. Если поднял не то, что назначено —
+     касание по весу открывает ввод, и записывается фактический результат.</p>
+  <div class="req">
+    <div><code>CLI-1</code><span>Клиент видит тренировки, которые пишет тренер</span></div>
+    <div><code>CLI-2</code><span>Запись результатов: веса, повторения, комментарии</span></div>
+    <div><code>CON-16</code><span>Проценты от ПМ превращены в килограммы</span></div>
+    <div><code>EX-3</code><span>Гибкие показатели: кг, повторы, секунды, метры, калории</span></div>
+    <div><code>COM-1</code><span>Комментарий клиента к тренировке</span></div>
+    <div><code>COM-2</code><span>Комментарий клиента к упражнению</span></div>
+  </div>
+</div>
+
+<script src="../assets/data.js"></script>
+<script src="../assets/client.js"></script>
+</body>
+</html>

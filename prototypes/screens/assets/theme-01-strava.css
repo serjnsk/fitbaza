@@ -1,0 +1,16 @@
+/* ═══════════ 01 · STRAVA ═══════════
+   Белая база, чёрный текст, один яркий оранжевый. Акцент работает
+   только на действии и на текущем шаге — больше нигде. */
+:root{
+  --acc:#FC5200; --acc-d:#D94600; --acc-a:#FFF1EA; --acc-p:#FFE4D6; --on-acc:#FFFFFF;
+  --ink:#141414; --tx1:#141414; --tx2:#5E5E5E; --tx3:#8E8E8E; --tx4:#B8B8B8;
+  --bg:#FFFFFF; --s1:#F7F7F7; --s2:#EFEFEF; --line:#E7E7E7; --line2:#D8D8D8;
+  --page:#E9E9EA; --page-d:#D4D4D6; --frame:#101012;
+  --ok:#1A9E5C; --ok-a:#F2F9F5;
+  --rm:#C0392B; --rm-d:#A93226; --rm-a:#FFF0EE; --warn:#B8860B;
+  --rad-s:8px; --rad-m:11px; --rad-l:15px; --rad-xl:26px;
+  --ui:"Inter",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --disp:"Inter",-apple-system,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+  --tm-bg:#141414; --tm-ink:#FFFFFF; --tm-dim:rgba(255,255,255,.14);
+}

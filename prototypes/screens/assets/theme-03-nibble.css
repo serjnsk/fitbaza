@@ -1,0 +1,30 @@
+/* ═══════════ 03 · NIBBLE ═══════════
+   Белая база и насыщенный фиолетовый. Отличие от Strava не в одном цвете:
+   у Nibble крупные скругления, мягкие лавандовые подложки под выбранным
+   и заметно больше воздуха. Акцент здесь смелее — им красят и выбранное
+   состояние, не только действие. */
+:root{
+  --acc:#8B2CF5; --acc-d:#6F1FD0; --acc-a:#F3EAFE; --acc-p:#E4D3FC; --on-acc:#FFFFFF;
+  --ink:#1B1230; --tx1:#1B1230; --tx2:#5A5170; --tx3:#8D86A0; --tx4:#B9B3C6;
+  --bg:#FFFFFF; --s1:#F7F5FC; --s2:#EFEBF8; --line:#E9E4F4; --line2:#D6CEE9;
+  --page:#EFEBF8; --page-d:#DCD4EE; --frame:#171226;
+  --ok:#1FA463; --ok-a:#EDF9F2;
+  --rm:#D6335C; --rm-d:#B5254A; --rm-a:#FDECF1; --warn:#B07A12;
+  --rad-s:10px; --rad-m:14px; --rad-l:18px; --rad-xl:28px;
+  --ui:"Onest",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --disp:"Onest",-apple-system,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+  --tm-bg:#171226; --tm-ink:#FFFFFF; --tm-dim:rgba(255,255,255,.16);
+}
+/* Выбранное красится акцентом целиком — так у Nibble отмечены темы. */
+.day.on,.set.now,.ex.now .exin,.md .cl.on,.tplc:hover{background:var(--acc-a)}
+.exchk.part,.set.now{box-shadow:inset 0 0 0 1.5px var(--acc)}
+.btn,.cta{font-weight:700;letter-spacing:-.01em}
+
+/* Onest в паре с JetBrains Mono: моноширинный берёт на себя всё
+   числовое — веса, схемы, проценты, счётчики. Цифры выстраиваются
+   в колонку и перестают прыгать при пересчёте под другого атлета. */
+.exmeta,.set .f,.line .kg,.line .pct,.prev,.day .k,.doch .stat,.wkh s,
+.pm .v,.md .cl .pmv b,.exh .presc,.mrow .v,.tplc .chip,.crumb,.grpttl .n{
+  font-family:var(--mono);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.line .pct,.md .cl .pmv b{font-weight:500}

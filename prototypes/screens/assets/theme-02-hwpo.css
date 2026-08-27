@@ -1,0 +1,40 @@
+/* ═══════════ 02 · HWPO ═══════════
+   Снято с hwpotraining.com: не чёрно-белое, как можно подумать, а тёплая
+   песочная гамма с терракотой. Скруглений нет вовсе, заголовки капителью
+   с широкой разрядкой. Родной Industry платный — берём Archivo с узкой
+   шириной: тот же квадратный характер, свободная лицензия. */
+:root{
+  --acc:#935D38; --acc-d:#7A4C2D; --acc-a:#F0E7DC; --acc-p:#E5D8C8; --on-acc:#FAF5F0;
+  --ink:#1C1C1C; --tx1:#1C1C1C; --tx2:#4A443C; --tx3:#827B72; --tx4:#A79F94;
+  --bg:#FAF5F0; --s1:#F0E7DC; --s2:#E5D8C8; --line:#DDD2C4; --line2:#C4B6A2;
+  --page:#E5D8C8; --page-d:#D3C3AC; --frame:#342421;
+  --ok:#4F7A3F; --ok-a:#EDF2E8;
+  --rm:#8C3B2E; --rm-d:#732F24; --rm-a:#F5E6E1; --warn:#8A6A20;
+  /* На сайте скругления нулевые, но там это крупные блоки. В интерфейсе
+     из сотни мелких прямоугольников острые углы режут глаз — оставляем
+     2–4px: характер сохраняется, а смотреть можно долго. */
+  --rad-s:2px; --rad-m:3px; --rad-l:4px; --rad-xl:6px;
+  --ui:"Archivo",-apple-system,system-ui,sans-serif;
+  --disp:"Archivo",-apple-system,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+  --tm-bg:#342421; --tm-ink:#FAF5F0; --tm-dim:rgba(250,245,240,.16);
+}
+/* Капитель и разрядка — главная примета стиля. Оставляем её заголовкам
+   и кнопкам, но не тексту упражнений: там читаемость важнее характера. */
+body{font-variation-settings:"wdth" 96}
+.title,.doch input,.md h2,.mdh h2,.wkh b,.hd .logo,.blkh .bt,.exh .nm b{
+  text-transform:uppercase;letter-spacing:.055em;font-weight:700}
+.btn,.cta,.tosave,.cp,.way b{text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+/* Вкладки панели — три слова в 294px. Капитель их раздувает, поэтому
+   здесь разрядка минимальная и кегль на полпункта меньше: капитель
+   как примета стиля остаётся, а слова помещаются. */
+.tabs button{text-transform:uppercase;letter-spacing:.02em;font-weight:700;font-size:10.5px;padding:0 2px}
+.blkh .n,.blkh .lab,.ngrp,.card h3,.md .lab{letter-spacing:.13em}
+.nav a{text-transform:uppercase;letter-spacing:.05em;font-size:12.5px;font-weight:600}
+.exmeta,.prev,.set,.mrow{font-variation-settings:"wdth" 100}
+
+/* Разрядка съедает горизонталь — мелким подписям её убавляем, иначе
+   вспомогательные кнопки вытесняют главное. */
+.cp,.tosave{letter-spacing:.05em;font-size:11.5px}
+.wkh s,.doch .stat{letter-spacing:0;text-transform:none}
+.exc .en,.tplc .ls span,.railfoot,.orelse{letter-spacing:0}

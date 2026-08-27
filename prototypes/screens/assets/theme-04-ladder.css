@@ -1,0 +1,41 @@
+/* ═══════════ 04 · LADDER · тренер (светлая адаптация) ═══════════
+   Заказчик прав в опасении: салатовый на белом как ЦВЕТ ТЕКСТА нечитаем —
+   контраст лаймового к белому около 1.4:1 при норме 4.5:1. Поэтому здесь
+   он работает только заливкой под чёрным текстом: кнопка, выбранный день,
+   текущий шаг. Всё, что должно читаться буквами, — чёрное.
+   Так стиль узнаётся, а текст остаётся читабельным. */
+:root{
+  /* --acc-d в базе играет две роли: цвет акцентного ТЕКСТА и фон нажатого
+     состояния. Для лайма первая роль невозможна — оливковый рядом с чёрным
+     читается как выключенный. Поэтому здесь acc-d = чёрный (текст), а оба
+     места, где он был фоном, переопределены ниже. */
+  --acc:#D6FF3E; --acc-d:#0C0C0C; --acc-a:#F4FFD1; --acc-p:#E9FFA8; --on-acc:#0C0C0C;
+  --ink:#0C0C0C; --tx1:#0C0C0C; --tx2:#4A4A4A; --tx3:#7C7C7C; --tx4:#AEAEAE;
+  --bg:#FFFFFF; --s1:#F5F5F3; --s2:#EBEBE7; --line:#E4E4E0; --line2:#D2D2CC;
+  --page:#EBEBE7; --page-d:#D8D8D2; --frame:#0C0C0C;
+  --ok:#3E8E41; --ok-a:#EFF7EF;
+  --rm:#C0392B; --rm-d:#A93226; --rm-a:#FDEDEB; --warn:#8A6A20;
+  --rad-s:8px; --rad-m:12px; --rad-l:16px; --rad-xl:26px;
+  --ui:"Barlow",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --disp:"Barlow Condensed",-apple-system,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+  --tm-bg:#0C0C0C; --tm-ink:#D6FF3E; --tm-dim:rgba(214,255,62,.2);
+}
+/* Кнопка — чёрный текст на лайме, как у Ladder. Наведение уводит в чёрный
+   с лаймовыми буквами: там контраст уже достаточный. */
+.btn:hover,.cta:hover,.cta:active{background:var(--ink);color:var(--acc)}
+.btn.rm:hover{background:var(--rm-d);color:#fff}
+/* Тонкие акцентные подписи чёрные, а не лаймовые: лайм буквами не идёт. */
+/* Иконка на лаймовом кружке — чёрная, иначе теряется. */
+.way.ai .ic{background:var(--acc);color:var(--ink)}
+.way.ai s{color:var(--tx2)}
+.nav a.on{background:var(--acc);color:var(--ink)}
+.nav a.on .cnt{background:rgba(0,0,0,.12);color:var(--ink)}
+.day.on{border-color:var(--ink)}
+.day.on .d{color:var(--ink)}
+
+/* У Ladder дисплейный шрифт узкий и тяжёлый, заголовки капителью —
+   это половина узнаваемости стиля. Тексту оставляем обычный Barlow. */
+.title,.doch input,.mdh h2,.md h2,.wkh b,.blkh .n,.hd .logo{
+  text-transform:uppercase;letter-spacing:.01em;font-weight:700}
+.btn,.cta{font-family:var(--disp);text-transform:uppercase;letter-spacing:.04em;font-weight:700;font-size:15px}
