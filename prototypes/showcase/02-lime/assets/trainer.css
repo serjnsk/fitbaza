@@ -1,0 +1,289 @@
+/* ═══════════════════════════════════════════════════════════════
+   ЛАЙМ · конструктор тренера
+
+   Своя вёрстка. Значения — из хендоффа (reference/README-constructor.md),
+   раздел «Design Tokens»; там они объявлены финальными.
+
+   Каркас: 236px рельс + рабочая область, всё панелями-карточками 24px
+   на тёплом холсте #EFEFEA. Документ дня — не одна большая панель:
+   шапка дня, кнопка добавления и каждый блок — отдельные карточки.
+   Отсюда воздух между ними и отсюда же ощущение, что блок можно
+   взять и переставить.
+   ═══════════════════════════════════════════════════════════════ */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --lime:#D6F84C; --lime-tint:#F1F5DF; --lime-ink:#4E5C15; --lime-soft:#6A7C1E;
+  --lime-bd:#A9B87E; --lime-bd2:#B9C98A;
+  --app:#EFEFEA; --surface:#FFFFFF; --muted:#F9F9F6; --subtle:#F6F6F2; --subtle2:#F1F1EC;
+  --rest:#EDEDE7; --bd-soft:#E0E0D8; --bd:#D2D2C9; --bar:#E4E4DC;
+  --ink:#111110; --ink850:#2C2C29; --ink700:#4A4A43; --ink600:#5B5B53;
+  --ink500:#6C6C64; --ink400:#8A8A82; --ink300:#A5A59C; --ink200:#C9C9C0; --ink150:#B4B4AB;
+  --ui:"Instrument Sans",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+button,input,select{font:inherit;color:inherit;border:0;background:none}
+button{cursor:pointer}
+input:focus{outline:0}
+body{font-family:var(--ui);background:var(--app);color:var(--ink);font-size:14px;
+  -webkit-font-smoothing:antialiased}
+.app{display:grid;grid-template-columns:236px 1fr;gap:12px;padding:12px;min-height:100vh;
+  align-items:start}
+.mono{font-family:var(--mono)}
+
+/* ─── рельс ─── */
+.nav{background:var(--surface);border-radius:24px;padding:20px 14px;
+  display:grid;grid-template-rows:auto 1fr auto;gap:14px;
+  position:sticky;top:12px;height:calc(100vh - 24px)}
+.nav .lg{display:flex;align-items:center;gap:9px;padding:0 6px}
+.nav .lg i{width:30px;height:30px;border-radius:10px;background:var(--ink);color:var(--lime);
+  display:grid;place-items:center;font-size:14px;font-weight:700;letter-spacing:-.5px;
+  font-style:normal;flex:none}
+.nav .lg b{font-size:17px;font-weight:700;letter-spacing:-.02em}
+.nav .lg s{width:7px;height:7px;border-radius:999px;background:var(--lime);display:block}
+.nav .body{overflow-y:auto;margin:0 -4px;padding:0 4px}
+.nav .body::-webkit-scrollbar{display:none}
+.nav .grp{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink300);padding:16px 10px 6px}
+.nav .grp:first-child{padding-top:0}
+.nav a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:999px;
+  text-decoration:none;color:var(--ink600);font-size:14px}
+.nav a svg{width:17px;height:17px;flex:none;display:block}
+.nav a span{flex:1;min-width:0}
+.nav a em{font-family:var(--mono);font-size:10px;font-style:normal;color:var(--ink500);
+  background:var(--subtle2);border-radius:999px;padding:2px 8px}
+.nav a:hover{background:var(--subtle)}
+.nav a.on{background:var(--lime);color:var(--ink);font-weight:600;padding:11px 12px;
+  box-shadow:0 6px 18px -8px rgba(140,170,20,.7)}
+.nav a.on em{background:rgba(255,255,255,.55);color:var(--lime-ink)}
+.nav .me{display:flex;align-items:center;gap:9px;padding:10px;border-radius:18px;
+  background:var(--subtle)}
+.nav .me i{width:34px;height:34px;border-radius:999px;background:var(--ink);color:var(--lime);
+  display:grid;place-items:center;font-family:var(--mono);font-size:11px;font-weight:600;
+  font-style:normal;flex:none}
+.nav .me b{display:block;font-size:13px;font-weight:600}
+.nav .me s{display:block;text-decoration:none;font-family:var(--mono);font-size:10px;
+  color:var(--ink300)}
+
+.main{min-width:0;display:flex;flex-direction:column;gap:12px}
+
+/* ─── топбар-пилюля ─── */
+.top{height:60px;border-radius:999px;background:var(--surface);padding:0 12px 0 24px;
+  display:flex;align-items:center;gap:12px;position:sticky;top:12px;z-index:20}
+.crumb{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink400);min-width:0}
+.crumb s{text-decoration:none;color:var(--bd)}
+.crumb b{color:var(--ink);font-weight:600;white-space:nowrap}
+.crumb a{color:inherit;text-decoration:none;white-space:nowrap}
+.crumb a:hover{color:var(--ink)}
+.stt{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 10px;border-radius:999px;background:var(--subtle2);color:var(--ink500);flex:none}
+.stt.on{background:var(--lime);color:var(--lime-ink)}
+.top .sp{flex:1}
+.forw{display:flex;align-items:center;gap:10px;flex:none}
+.forw span{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink300)}
+.forw label{display:flex;align-items:center;gap:8px;background:var(--subtle);
+  border-radius:999px;padding:6px 14px 6px 6px}
+.forw label i{width:24px;height:24px;border-radius:999px;background:var(--bar);color:var(--ink500);
+  display:grid;place-items:center;font-family:var(--mono);font-size:9px;font-style:normal;flex:none}
+.forw select{font-size:13px;font-weight:500;cursor:pointer;appearance:none;-webkit-appearance:none;
+  padding-right:16px;background:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23A5A59C' stroke-width='1.7' stroke-linecap='round'%3E%3Cpath d='M4 6.5 8 10.5l4-4'/%3E%3C/svg%3E") no-repeat right center/12px}
+.ib{width:38px;height:38px;border-radius:999px;background:var(--subtle);color:var(--ink500);
+  display:grid;place-items:center;flex:none;font-size:15px}
+.ib:hover{background:var(--bar);color:var(--ink)}
+.go{padding:11px 22px;border-radius:999px;background:var(--ink);color:#fff;font-size:13px;
+  font-weight:600;display:inline-flex;align-items:center;gap:8px;flex:none}
+.go:hover{background:var(--ink850)}
+.go s{text-decoration:none;color:var(--lime)}
+
+/* ─── рабочая область ─── */
+.work{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px;align-items:start;
+  padding-bottom:40px}
+.canvas{min-width:0;display:flex;flex-direction:column;gap:12px}
+/* Документ дня — тоже колонка со своим зазором: шапка дня, кнопка
+   добавления и каждый блок стоят отдельными карточками, и воздух
+   между ними держит именно этот gap, а не отступы соседей. */
+.doc{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--surface);border-radius:24px}
+
+/* ─── дорожка недели ─── */
+.wk{padding:16px 18px 14px}
+.wkh{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.wkh .arr{display:flex;gap:6px;flex:none}
+.wkh .arr button{width:32px;height:32px;border-radius:999px;background:var(--subtle2);
+  display:grid;place-items:center;color:var(--ink500)}
+.wkh .arr button:hover:not(:disabled){background:var(--bar);color:var(--ink)}
+.wkh .arr button:disabled{color:var(--ink200);cursor:default}
+.wkh b{font-size:18px;font-weight:700;letter-spacing:-.02em;white-space:nowrap}
+.wkh s{text-decoration:none;font-family:var(--mono);font-size:11px;color:var(--ink300)}
+.wkh .sp{flex:1}
+.wkh .act{padding:8px 14px;border-radius:999px;background:var(--subtle);font-size:12px;
+  color:var(--ink600);white-space:nowrap}
+.wkh .act:hover{background:var(--subtle2);color:var(--ink)}
+/* Ширина дня пропорциональна объёму: неделя читается как график,
+   а не как календарь. Отдых сжат в вертикальную капсулу — пусто
+   значит узко, и это видно без чтения. */
+.track{display:flex;align-items:stretch;gap:4px;padding:8px;border-radius:26px;
+  background:var(--subtle)}
+.day{flex-grow:var(--w,6);flex-basis:0;min-width:0;border-radius:18px;background:var(--surface);
+  padding:12px 16px;display:flex;flex-direction:column;gap:7px;text-align:left;overflow:hidden}
+.day:hover{background:var(--subtle2)}
+.day .h{display:flex;align-items:baseline;gap:7px}
+.day .h b{font-size:15px;font-weight:700;letter-spacing:-.027em}
+.day .h s{text-decoration:none;font-family:var(--mono);font-size:9px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--ink300)}
+.day .t{font-size:12px;font-weight:500;line-height:1.3}
+.day .ld{display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:4px}
+.day .ld i,.day .ld u{height:4px;border-radius:999px;display:block;text-decoration:none}
+.day .ld i{background:var(--ink)}
+.day .ld u{background:var(--bar)}
+.day .ld em{font-family:var(--mono);font-size:9px;color:var(--ink300);font-style:normal;flex:none}
+.day.on{background:var(--lime);padding:14px 18px;
+  box-shadow:0 12px 26px -14px rgba(140,170,20,1)}
+.day.on .h b{font-size:19px}
+.day.on .h s{color:var(--lime-soft);font-weight:600}
+.day.on .t{font-size:13px;font-weight:600}
+.day.on .ld u{background:rgba(255,255,255,.5)}
+.day.on .ld em{color:var(--lime-ink)}
+.day.rest{flex:none;width:62px;background:var(--rest);align-items:center;justify-content:center;
+  padding:12px 6px;gap:9px}
+.day.rest .h{flex-direction:column;align-items:center}
+.day.rest .h b{font-size:14px;font-weight:600;color:var(--ink300)}
+.day.rest .h s,.day.rest .ld{display:none}
+.day.rest .t{writing-mode:vertical-rl;font-family:var(--mono);font-size:8px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink150);font-weight:400}
+.day.rest.on{background:var(--lime)}
+.day.rest.on .h b{color:var(--ink)}
+/* Легенда: объясняет приём один раз и больше не мешает */
+.legend{display:flex;align-items:center;gap:10px;padding:10px 6px 0;
+  font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink150)}
+.legend i{width:14px;height:4px;border-radius:999px;background:var(--ink);display:block;flex:none}
+.legend .ln{flex:1;height:1px;background:var(--rest)}
+
+/* ─── шапка дня ─── */
+.dayc{padding:20px 24px 22px}
+.dayh{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.dayh .ph{width:20px;height:20px;border-radius:7px;background:var(--subtle2);flex:none}
+.dayh input{flex:1;min-width:0;font-size:26px;font-weight:700;letter-spacing:-.035em;
+  border-radius:10px;padding:2px 6px;margin-left:-6px}
+.dayh input:focus{background:var(--subtle)}
+.dayh .n{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  padding:8px 14px;border-radius:999px;background:var(--subtle);color:var(--ink500);flex:none}
+.dayh .ib{width:32px;height:32px;font-size:13px}
+/* Сообщение клиенту: лейбл — лаймовая капсула, не подпись */
+.wmsg{display:flex;align-items:flex-start;gap:12px;padding:14px 18px;border-radius:18px;
+  background:var(--subtle)}
+.wmsg span{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--lime-soft);background:var(--lime);border-radius:999px;padding:5px 10px;flex:none;
+  margin-top:1px}
+.wmsg input{flex:1;min-width:0;font-size:14px;line-height:1.5;color:var(--ink700)}
+
+/* ─── добавление блока ─── */
+.addb{padding:14px;border-radius:999px;border:1.5px dashed var(--bd);
+  background:rgba(255,255,255,.4);color:var(--ink400);font-size:13px;width:100%}
+.addb:hover{border-color:var(--lime);background:var(--lime-tint);color:var(--lime-ink)}
+
+/* ─── блок ─── */
+.blk{padding:16px 18px 18px}
+.bh{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.bh .no{width:24px;height:24px;border-radius:999px;background:var(--subtle2);color:var(--ink400);
+  display:grid;place-items:center;font-family:var(--mono);font-size:10px;flex:none}
+.blk.pw .bh .no{background:var(--ink);color:var(--lime)}
+.bh input{flex:1;min-width:0;font-size:16px;font-weight:600;letter-spacing:-.019em;
+  border-radius:8px;padding:2px 5px;margin-left:-5px}
+.bh input:focus{background:var(--subtle)}
+.bh .tag{font-family:var(--mono);font-size:9px;letter-spacing:.1em;padding:4px 10px;
+  border-radius:999px;background:var(--subtle2);color:var(--ink500);flex:none}
+.blk.pw .bh .tag{background:var(--lime);color:var(--lime-ink)}
+.bh .rest{font-family:var(--mono);font-size:10px;color:var(--ink300);flex:none}
+.bh .ib{width:28px;height:28px;font-size:12px}
+.bnote{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:14px;
+  background:var(--muted);margin-bottom:8px}
+.bnote span{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink300);flex:none}
+.bnote input{flex:1;min-width:0;font-size:13px;color:var(--ink700)}
+.bnote:focus-within{box-shadow:inset 0 0 0 1.5px var(--lime)}
+
+/* ─── строка упражнения ─── */
+.line{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:14px;
+  background:var(--subtle);margin-bottom:6px}
+.line:hover{background:var(--subtle2)}
+.line .gr{color:var(--ink200);font-size:11px;cursor:grab;flex:none;line-height:1}
+.line .nm{flex:1;min-width:0;font-size:15px;font-weight:500;padding:2px 0}
+.line .nm:focus{outline:0}
+.line .en{font-family:var(--mono);font-size:10px;color:var(--ink300);flex:none}
+.line .val{font-family:var(--mono);font-size:12px;background:var(--surface);border-radius:999px;
+  padding:5px 12px;flex:none;color:var(--ink600)}
+.line .val.pct{color:var(--lime-ink);cursor:pointer}
+.line .x{color:var(--ink150);font-size:11px;flex:none;line-height:1}
+.line .x:hover{color:var(--ink)}
+/* Строка в фокусе: лаймовая обводка вместо смены фона — не сдвигает
+   ни одного пикселя, поэтому список не «дышит» при переходе. */
+.line.on{background:var(--lime-tint);box-shadow:inset 0 0 0 1.5px var(--lime)}
+.line.on .gr{color:var(--lime-bd2)}
+.line.on .x{color:var(--lime-bd)}
+.line.on .nm{font-weight:600}
+/* Нераспознанная строка — предусмотренное состояние, а не ошибка:
+   пунктир значит «здесь ещё текст», и рядом лежит ручной путь. */
+.line.raw{background:none;border:1.5px dashed var(--bd-soft)}
+.line.raw:hover{border-color:var(--lime);background:var(--lime-tint)}
+.line .pick{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  background:var(--surface);border-radius:999px;padding:5px 12px;color:var(--lime-ink);flex:none}
+.addl{width:100%;text-align:left;padding:11px 16px;border-radius:14px;
+  border:1.5px dashed var(--bd-soft);color:var(--ink300);font-size:13px}
+.addl:hover{border-color:var(--lime);background:var(--lime-tint);color:var(--lime-ink)}
+.addl:focus-within{border-style:solid;border-color:var(--lime)}
+.addl input{width:100%;font-size:13px}
+
+/* ─── библиотека ─── */
+.lib{padding:16px;position:sticky;top:84px;max-height:calc(100vh - 96px);
+  display:grid;grid-template-rows:auto auto minmax(0,1fr) auto}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;border-radius:999px;
+  background:var(--subtle2)}
+.tabs button{padding:9px 0;border-radius:999px;font-size:12px;color:var(--ink400)}
+.tabs button.on{background:var(--surface);color:var(--ink);font-weight:600}
+.search{display:flex;align-items:center;gap:9px;background:var(--subtle);border-radius:999px;
+  padding:11px 16px;margin:12px 0}
+.search:focus-within{box-shadow:inset 0 0 0 1.5px var(--lime)}
+.search i{font-style:normal;font-size:12px;color:var(--ink300)}
+.search input{flex:1;min-width:0;font-size:13px}
+.search input::placeholder{color:var(--ink300)}
+.libb{overflow-y:auto;margin:0 -4px;padding:0 4px}
+.libb::-webkit-scrollbar{display:none}
+.grp{display:flex;align-items:center;gap:8px;padding:14px 4px 8px}
+.grp:first-child{padding-top:0}
+.grp b{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink300);font-weight:400}
+.grp s{text-decoration:none;font-family:var(--mono);font-size:10px;color:var(--ink200);
+  margin-left:auto}
+.exc{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:14px;
+  background:var(--muted);margin-bottom:4px;width:100%;text-align:left}
+.exc:hover{background:var(--lime-tint)}
+.exc i{width:30px;height:30px;border-radius:999px;background:var(--subtle2);color:var(--ink500);
+  display:grid;place-items:center;font-family:var(--mono);font-size:9px;font-style:normal;flex:none}
+.exc .b{flex:1;min-width:0}
+.exc .nm{display:block;font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap}
+.exc .en{display:block;font-family:var(--mono);font-size:9px;color:var(--ink300);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Упражнение, уже стоящее в дне, помечено — чтобы не добавить дважды */
+.exc.in{background:var(--lime-tint)}
+.exc.in i{background:var(--lime);color:var(--lime-ink)}
+.exc.in .nm{font-weight:600}
+.exc .chip{font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--lime-ink);background:var(--surface);border-radius:999px;padding:4px 8px;flex:none}
+.tplc{width:100%;text-align:left;padding:10px 12px;border-radius:14px;background:var(--muted);
+  margin-bottom:4px}
+.tplc:hover{background:var(--lime-tint)}
+.tplc .h{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.tplc .nm{flex:1;min-width:0;font-size:13px;font-weight:500;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.tplc .chip{font-family:var(--mono);font-size:9px;color:var(--lime-ink);background:var(--surface);
+  border-radius:999px;padding:3px 8px;flex:none}
+.tplc s{display:block;text-decoration:none;font-family:var(--mono);font-size:10px;
+  color:var(--ink300);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.libf{margin-top:14px;padding:12px 16px;border-radius:18px;background:var(--subtle);
+  font-size:12px;line-height:1.5;color:var(--ink400)}
+.empty{padding:26px 8px;text-align:center;color:var(--ink300);font-size:12px}
+
+@media (max-width:1280px){ .work{grid-template-columns:minmax(0,1fr)} .lib{display:none} }

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Конструктор · HWPO — fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Четвёртый вариант живёт отдельно: своя вёрстка, свой CSS, свои
+     шаблоны и своя копия доменной модели. -->
+<link rel="stylesheet" href="assets/trainer.css">
+</head>
+<body>
+<div class="app">
+  <aside class="nav" id="nav"></aside>
+
+  <main class="main">
+    <header class="top" id="top"></header>
+    <div class="doc">
+      <section class="card" id="wk"></section>
+      <div id="doc"></div>
+    </div>
+  </main>
+
+  <aside class="lib">
+    <h3>База упражнений</h3>
+    <div class="tabs" id="tabs">
+      <button data-tab="ex" class="on">Упражнения</button>
+      <button data-tab="blk">Блоки</button>
+      <button data-tab="wo">Тренировки</button>
+    </div>
+    <label class="search"><i>⌕</i><input id="q" autocomplete="off"></label>
+    <div class="libb" id="libb"></div>
+  </aside>
+</div>
+<script src="assets/data.js"></script>
+<script src="assets/trainer.js"></script>
+</body>
+</html>

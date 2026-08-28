@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #F4F0FF; font-family: 'Manrope', sans-serif; }
+  a { color: #6D28D9; text-decoration: none; } a:hover { color: #4C1D95; }
+  ::selection { background: #7A3BFF; color: #fff; }
+</style>
+</helmet>
+
+<div style="display: flex; align-items: flex-start; gap: 40px; padding: 48px; background: #F4F0FF; font-family: 'Manrope', sans-serif; color: #1B1533;">
+
+  <div style="display: flex; flex-direction: column; gap: 14px;">
+    <div style="font-family: 'IBM Plex Mono'; font-size: 10px; letter-spacing: 1.5px; color: #8B83A8;">КЛИЕНТ · ПЛАН ТРЕНИРОВКИ</div>
+
+    <div style="width: 390px; height: 844px; background: #FFFFFF; border: 1px solid #D6CDEE; box-sizing: border-box; display: grid; grid-template-rows: auto 1fr auto; overflow: hidden;">
+
+      <!-- ===== EDITORIAL HEAD ===== -->
+      <div style="background: #FFFFFF; padding: 12px 20px 0 20px;">
+
+        <div style="display: flex; align-items: center; justify-content: space-between; font-family: 'IBM Plex Mono'; font-size: 11px; font-weight: 500; margin-bottom: 16px;">
+          <div>9:41</div>
+          <div style="display: flex; align-items: center; gap: 5px;">
+            <div style="width: 15px; height: 8px; background: #1B1533;"></div>
+            <div style="width: 18px; height: 9px; border: 1px solid #1B1533;"></div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 14px;">
+          <div style="font-size: 15px; color: #6E6590;">←</div>
+          <div style="display: flex; align-items: center; gap: 8px; font-family: 'IBM Plex Mono'; font-size: 10px; letter-spacing: 1px; color: #8B83A8;">
+            <span>W04</span>
+            <span style="display: flex; gap: 3px; align-items: center;">
+              <span style="width: 5px; height: 5px; background: #7A3BFF;"></span>
+              <span style="width: 5px; height: 5px; background: #7A3BFF;"></span>
+              <span style="width: 5px; height: 5px; background: #7A3BFF; outline: 2px solid #E0D0FF;"></span>
+              <span style="width: 5px; height: 5px; background: #E0DAF0;"></span>
+              <span style="width: 5px; height: 5px; background: #E0DAF0;"></span>
+            </span>
+            <span>3/5</span>
+          </div>
+          <div style="font-size: 15px; color: #6E6590;">⋯</div>
+        </div>
+
+        <div style="border-top: 1px solid #1B1533; padding-top: 16px;">
+          <div style="display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px;">
+            <div style="font-family: 'IBM Plex Mono'; font-size: 11px; letter-spacing: 1px; color: #1B1533;">СР · 26.08</div>
+            <div style="font-family: 'IBM Plex Mono'; font-size: 9px; letter-spacing: 1px; color: #6D28D9; padding: 2px 6px; background: #F2ECFF;">СЕГОДНЯ</div>
+          </div>
+          <div style="font-weight: 800; font-size: 32px; letter-spacing: -1.3px; line-height: 1.05;">Становая<br>+ гимнастика</div>
+          <div style="display: flex; align-items: baseline; gap: 8px; font-family: 'IBM Plex Mono'; font-size: 11px; color: #8B83A8; padding: 14px 0 16px 0;">
+            <span style="color: #1B1533;">5</span><span>блоков</span>
+            <span style="color: #CBC4DD;">/</span>
+            <span style="color: #1B1533;">12</span><span>упражнений</span>
+            <span style="color: #CBC4DD;">/</span>
+            <span style="color: #1B1533;">~72</span><span>мин</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SCROLL BODY ===== -->
+      <div style="overflow-y: auto; overflow-x: hidden; min-height: 0;">
+
+        <!-- coach note -->
+        <div style="display: flex; gap: 12px; padding: 16px 20px; background: #F6F2FF; border-bottom: 1px solid #E6E0F4;">
+          <div style="width: 30px; height: 30px; background: #7A3BFF; color: #FFFFFF; font-family: 'IBM Plex Mono'; font-size: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">СК</div>
+          <div>
+            <div style="font-family: 'IBM Plex Mono'; font-size: 10px; letter-spacing: 1px; color: #6D28D9; margin-bottom: 4px;">СЕРГЕЙ · ТРЕНЕР</div>
+            <div style="font-size: 13px; line-height: 1.5; color: #4B4468; text-wrap: pretty;">Становую сегодня не гони — работаем в технике. Если спина круглится, сбрось до 140 и добери объёмом.</div>
+          </div>
+        </div>
+
+        <div style="padding: 18px 20px 20px 20px;">
+          <div style="display: grid; grid-template-columns: 30px 1fr; border-top: 1px solid #D6CDEE;">
+
+            <div style="padding: 14px 0 0 0; font-family: 'IBM Plex Mono'; font-size: 11px; color: #B4ACCC;">01</div>
+            <div style="padding: 14px 0 16px 0; border-bottom: 1px solid #EDE9F7;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <div style="font-weight: 700; font-size: 17px; letter-spacing: -0.4px;">Разминка</div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 9px; color: #6E6590; padding: 2px 6px; border: 1px solid #E3DBF4;">РАЗОГРЕВ</div>
+                <div style="flex: 1;"></div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #A9A1C2;">10 мин</div>
+              </div>
+              <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #8B83A8; margin-bottom: 6px;">заметка: мобилити т/б сустава</div>
+              <div style="display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 12px; padding: 7px 0; border-top: 1px dashed #EDE9F7;">
+                <div style="font-size: 14px; font-weight: 500;">Суставная разминка</div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 12px; color: #6D28D9;">2 × 90 сек</div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 12px; padding: 7px 0; border-top: 1px dashed #EDE9F7;">
+                <div style="font-size: 14px; font-weight: 500;">Гребля</div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 12px; color: #6D28D9;">15 кал</div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 12px; padding: 7px 0; border-top: 1px dashed #EDE9F7;">
+                <div style="font-size: 14px; font-weight: 500;">Мобилити плеч с PVC</div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 12px; color: #6D28D9;">2 × 10</div>
+              </div>
+            </div>
+
+            <div style="padding: 14px 0 0 0; font-family: 'IBM Plex Mono'; font-size: 11px; color: #7A3BFF; font-weight: 600;">02</div>
+            <div style="padding: 14px 0 16px 0; border-bottom: 1px solid #EDE9F7;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <div style="font-weight: 700; font-size: 17px; letter-spacing: -0.4px;">Становая тяга</div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 9px; color: #6D28D9; padding: 2px 6px; border: 1px solid #CBB2FF; background: #F2ECFF;">СИЛА · 80% 1ПМ</div>
+                <div style="flex: 1;"></div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #A9A1C2;">отдых 3:00</div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 12px; padding: 9px 0; border-top: 1px dashed #EDE9F7;">
+                <div>
+                  <div style="font-size: 15px; font-weight: 600;">Становая тяга</div>
+                  <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #8B83A8; margin-top: 2px;">Deadlift · штанга · пауза 2 сек</div>
+                </div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 13px; font-weight: 500; text-align: right;">5 × 3<br><span style="color: #6D28D9;">152 кг</span></div>
+              </div>
+              <div style="display: flex; gap: 1px; margin: 8px 0 2px 0;">
+                <div style="flex: 1; padding: 7px 0; text-align: center; background: #F4F0FF;"><div style="font-family: 'IBM Plex Mono'; font-size: 9px; color: #A9A1C2;">1</div><div style="font-family: 'IBM Plex Mono'; font-size: 12px; color: #4B4468; margin-top: 2px;">140</div></div>
+                <div style="flex: 1; padding: 7px 0; text-align: center; background: #F4F0FF;"><div style="font-family: 'IBM Plex Mono'; font-size: 9px; color: #A9A1C2;">2</div><div style="font-family: 'IBM Plex Mono'; font-size: 12px; color: #4B4468; margin-top: 2px;">148</div></div>
+                <div style="flex: 1; padding: 7px 0; text-align: center; background: #7A3BFF;"><div style="font-family: 'IBM Plex Mono'; font-size: 9px; color: #D9C6FF;">3</div><div style="font-family: 'IBM Plex Mono'; font-size: 12px; color: #FFFFFF; margin-top: 2px;">152</div></div>
+                <div style="flex: 1; padding: 7px 0; text-align: center; background: #F4F0FF;"><div style="font-family: 'IBM Plex Mono'; font-size: 9px; color: #A9A1C2;">4</div><div style="font-family: 'IBM Plex Mono'; font-size: 12px; color: #4B4468; margin-top: 2px;">152</div></div>
+                <div style="flex: 1; padding: 7px 0; text-align: center; background: #F4F0FF;"><div style="font-family: 'IBM Plex Mono'; font-size: 9px; color: #A9A1C2;">5</div><div style="font-family: 'IBM Plex Mono'; font-size: 12px; color: #4B4468; margin-top: 2px;">152</div></div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 12px; padding: 7px 0; border-top: 1px dashed #EDE9F7;">
+                <div>
+                  <div style="font-size: 14px; font-weight: 500;">Румынская тяга</div>
+                  <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #8B83A8; margin-top: 2px;">RDL · штанга</div>
+                </div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 12px; color: #6D28D9;">3 × 8 · 60 кг</div>
+              </div>
+            </div>
+
+            <div style="padding: 14px 0 0 0; font-family: 'IBM Plex Mono'; font-size: 11px; color: #B4ACCC;">03</div>
+            <div style="padding: 14px 0 16px 0; border-bottom: 1px solid #EDE9F7;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <div style="font-weight: 700; font-size: 17px; letter-spacing: -0.4px;">Гимнастика</div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 9px; color: #6E6590; padding: 2px 6px; border: 1px solid #E3DBF4;">СУПЕРСЕТ ×3</div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 12px; padding: 7px 0; border-top: 1px dashed #EDE9F7;">
+                <div style="font-size: 14px; font-weight: 500;">Подтягивания</div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 12px; color: #6D28D9;">4 × 8</div>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 12px; padding: 7px 0; border-top: 1px dashed #EDE9F7;">
+                <div style="font-size: 14px; font-weight: 500;">Лазание по канату</div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 12px; color: #6D28D9;">3 × подъём</div>
+              </div>
+            </div>
+
+            <div style="padding: 14px 0 0 0; font-family: 'IBM Plex Mono'; font-size: 11px; color: #B4ACCC;">04</div>
+            <div style="padding: 14px 0 16px 0; border-bottom: 1px solid #EDE9F7;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="font-weight: 700; font-size: 17px; letter-spacing: -0.4px;">Метком</div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 9px; color: #6E6590; padding: 2px 6px; border: 1px solid #E3DBF4;">AMRAP 12</div>
+                <div style="flex: 1;"></div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #A9A1C2;">3 упр</div>
+              </div>
+            </div>
+
+            <div style="padding: 14px 0 0 0; font-family: 'IBM Plex Mono'; font-size: 11px; color: #B4ACCC;">05</div>
+            <div style="padding: 14px 0 16px 0;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="font-weight: 700; font-size: 17px; letter-spacing: -0.4px;">Заминка</div>
+                <div style="flex: 1;"></div>
+                <div style="font-family: 'IBM Plex Mono'; font-size: 10px; color: #A9A1C2;">2 упр</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== CTA ===== -->
+      <div style="border-top: 1px solid #E6E0F4; background: #FFFFFF; padding: 14px 20px 12px 20px;">
+        <div style="display: flex; gap: 1px;">
+          <div style="padding: 15px 16px; background: #F0E9FF; font-family: 'IBM Plex Mono'; font-size: 12px; color: #6D28D9;">⧉ ВИДЕО</div>
+          <div style="flex: 1; padding: 15px 0; text-align: center; background: #7A3BFF; font-family: 'IBM Plex Mono'; font-size: 12px; font-weight: 600; color: #FFFFFF; letter-spacing: 0.5px;">НАЧАТЬ ТРЕНИРОВКУ →</div>
+        </div>
+        <div style="width: 120px; height: 4px; background: #D6CDEE; margin: 12px auto 0 auto;"></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:490,&quot;height&quot;:960}}"></script>
+</body>
+</html>

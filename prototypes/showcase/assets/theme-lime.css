@@ -1,0 +1,329 @@
+/* ═══════════════════════════════════════════════════════════════
+   ЛАЙМ · живая версия
+
+   Собрано по спецификации из хендоффа (reference/README-*.md):
+   токены цвета, радиусы, кегли и отступы взяты оттуда как есть,
+   а не подобраны на глаз. Разница со статичным макетом в том,
+   что здесь всё работает: дни переключаются, упражнения печатаются
+   и разбираются, подходы отмечаются, проценты считаются в килограммы.
+
+   Язык: пилюли на тёплом холсте. Ни одной рамки и почти ни одной
+   линии — уровни разделяет тон: холст #EFEFEA → белая панель →
+   светлая подложка #F6F6F2 внутри. Лайм стоит ровно там, где
+   сейчас работа, и больше нигде.
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  --acc:#D6F84C; --acc-d:#4E5C15; --acc-a:#F1F5DF; --acc-p:#E4F79A; --on-acc:#111110;
+  --ink:#111110; --tx1:#111110; --tx2:#4A4A43; --tx3:#8A8A82; --tx4:#A5A59C;
+  --bg:#FFFFFF; --s1:#F6F6F2; --s2:#EFEFEA; --line:#E0E0D8; --line2:#D2D2C9;
+  --page:#F6F6F2; --page-d:#EDEDE7; --frame:#111110;
+  --ok:#4E5C15; --ok-a:#F1F5DF;
+  --rm:#B44B36; --rm-d:#963C2A; --rm-a:#F7EBE7; --warn:#8A7A2E;
+  /* Радиусы из хендоффа: пилюли — 999, карточки — 22–24,
+     строки — 14–16, компактное — 10–12. */
+  --rad-s:12px; --rad-m:16px; --rad-l:22px; --rad-xl:26px;
+  --pill:999px;
+  --ui:"Instrument Sans",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --disp:"Instrument Sans",-apple-system,system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  --tm-bg:#111110; --tm-ink:#D6F84C; --tm-dim:rgba(214,248,76,.2);
+  /* Собственные оттенки лайма, которых нет в общем наборе токенов */
+  --lime-soft:#6A7C1E; --sub2:#F1F1EC; --muted:#F9F9F6; --bar:#E4E4DC;
+  --ink6:#5B5B53; --ink2:#C9C9C0;
+}
+/* Вся мета — моноширинным в верхнем регистре с разрядкой: это
+   опознавательный знак системы, по нему её узнают с одного взгляда. */
+.ngrp,.blkh .n,.note .k,.thread .who,.day .d,.forw span,.fld .k,
+.grpttl .lab,.grpttl .n,.md .lab,.audit b,.propose .t b,.field .k,
+.doch .stat,.wkh s,.exh .th,.prog .lg,.exmeta,.set .f,.line .kg,
+.line .pct,.tplc .chip,.tplc .ls span,.exc .en,.sug .row s,.sug .cap,
+.day .k,.day .e,.railfoot,.railbody .hint,.mres .k{
+  font-family:var(--mono)}
+.ngrp,.note .k,.thread .who,.day .d,.forw span,.fld .k,.grpttl .lab,
+.md .lab,.audit b,.propose .t b,.field .k{
+  text-transform:uppercase;letter-spacing:.12em;font-size:9px;font-weight:500}
+
+/* ═══════════ КЛИЕНТ ═══════════ */
+/* Экран: шапка и нижняя панель белые и скруглены внутрь, между ними
+   лента цвета #F6F6F2. Приём из хендоффа — контент как будто
+   вложен между двумя пилюлями. */
+.screen{background:var(--page)}
+.screen .statusbar{background:var(--bg)}
+.screen .top{background:var(--bg);border-radius:0 0 var(--rad-xl) var(--rad-xl);
+  padding:4px 20px 18px}
+.screen .daylab{flex-direction:row;align-items:baseline;justify-content:center;gap:7px}
+.screen .daylab b{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--tx4);
+  font-weight:500}
+.screen .daylab s{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--tx4);
+  text-transform:uppercase}
+.screen .daylab s::before{content:"· "}
+.screen .iback{background:var(--sub2);color:var(--tx3);width:36px;height:36px}
+.screen .title{font-size:27px;letter-spacing:-.033em;line-height:1.15;margin-top:14px}
+.screen .byline{margin-top:12px}
+/* Сообщение тренера — тёмная карточка: единственное тёмное пятно
+   на экране, и оно же единственное, что клиент читает до старта. */
+.screen .coach .msg{background:var(--ink);color:var(--page);border-radius:var(--rad-l);
+  padding:16px 18px}
+.screen .coach .msg i{color:var(--page)}
+.screen .coach .msg em{color:var(--acc);
+  background:linear-gradient(90deg,rgba(17,17,16,0) 0,var(--ink) 22px)}
+.screen .byline .av{background:var(--acc);color:var(--ink);font-family:var(--mono);
+  width:28px;height:28px;font-size:9px}
+.screen .prog{margin:16px 0 2px}
+.screen .prog .bar i{border-radius:var(--pill);background:var(--bar)}
+.screen .prog .bar i.on{background:var(--ink)}
+.screen .prog .lg{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--tx4)}
+.screen .prog .lg b{color:var(--ink)}
+
+.screen .feed{background:var(--page);padding:12px 12px 130px}
+/* Блок — белая карточка со скруглением 22, а не панель во всю
+   ширину: на этом экране всё живёт карточками. */
+.screen .blk{background:var(--bg);border-radius:var(--rad-l);padding:14px 16px 16px;
+  margin-top:10px}
+.screen .blkh{gap:9px;margin-bottom:10px}
+.screen .blkh .n{font-size:15px;font-weight:600;letter-spacing:-.02em;text-transform:none;
+  font-family:var(--ui);color:var(--ink)}
+.screen .blkh .ln{display:none}
+.screen .note{background:var(--muted);border-radius:14px;padding:11px 14px}
+.screen .note .k{color:var(--tx4)}
+.screen .note.from-trainer{background:var(--muted)}
+/* Упражнение — светлая пилюля-строка внутри белой карточки */
+.screen .ex{background:var(--s1);border-radius:var(--rad-m);margin-bottom:6px}
+.screen .exin{padding:11px 14px 12px}
+.screen .exh{gap:11px}
+.screen .exh .th{width:34px;height:34px;border-radius:var(--pill);background:var(--sub2);
+  color:var(--tx3);font-size:9px}
+.screen .exh .nm b{font-size:14px;font-weight:500;letter-spacing:-.01em}
+.screen .exmeta{font-size:11px;color:var(--tx4);margin-top:8px;letter-spacing:.02em}
+/* Чекбоксы круглые: в этой системе всё, что можно нажать, — капсула */
+.screen .exchk,.screen .set .chk{border-radius:var(--pill);border-width:1.5px;
+  border-color:var(--ink2);background:var(--bg)}
+.screen .exchk{width:26px;height:26px}
+.screen .sets{gap:5px;margin-top:10px}
+.screen .set{background:var(--bg);border-radius:var(--rad-s);padding:10px 12px}
+.screen .set .f{font-size:11px;color:var(--ink6)}
+.screen .set.done{background:var(--acc-a)}
+.screen .set.done .chk{border-color:#A9B87E}
+.screen .set.now{background:var(--acc);box-shadow:none}
+.screen .set.now .chk{border-color:var(--acc-d)}
+.screen .ex.now{background:var(--acc-a);box-shadow:inset 0 0 0 1.5px var(--acc)}
+.screen .ex.now .exin{background:none}
+/* Строка-действие: капсула, как и всё остальное */
+.screen .addc{width:100%;height:42px;margin:10px 0 0;padding:0 16px;justify-content:center;
+  background:var(--sub2);border:0;border-radius:var(--pill);color:var(--tx3);gap:9px}
+.screen .addc svg{width:14px;height:14px}
+.screen .addc .cnt{font-size:12px}
+.screen .addc.has{background:var(--acc-a);color:var(--acc-d)}
+.screen .mres{border-radius:var(--rad-l);border:0;background:var(--acc-a)}
+/* Нижняя панель — белая пилюля, главная кнопка чёрная с лаймовым глифом */
+.screen .bottom{background:var(--bg);border-radius:var(--rad-xl) var(--rad-xl) 0 0;
+  padding:14px 16px 26px}
+.screen .cta{height:52px;border-radius:var(--pill);background:var(--ink);color:#FFFFFF;
+  font-size:15px;font-weight:600}
+.screen .cta:active{background:#2C2C29}
+.screen .cta .c{color:var(--acc);opacity:1}
+.screen .cta.ghost{background:var(--sub2);color:var(--ink)}
+.screen .homebar{background:var(--bg)}
+.screen .field{background:var(--s1);border-radius:18px}
+.screen .field:focus-within{background:var(--acc-a);box-shadow:inset 0 0 0 1.5px var(--acc)}
+.screen .quick button{border-radius:var(--pill);background:var(--sub2)}
+.screen .sheetbox{border-radius:var(--rad-xl) var(--rad-xl) 0 0}
+.screen .thread .msg{border-radius:18px;background:var(--s1)}
+.screen .thread .msg.trainer{background:var(--acc-a)}
+
+/* ═══════════ ТРЕНЕР ═══════════ */
+body{background:var(--s2)}
+.app .page{background:var(--s2)}
+.app .cons{gap:12px;padding:12px 12px 60px}
+/* Все панели — белые карточки со скруглением 24 */
+.app .nav,.app .topbar,.app .wk,.app .doc,.app .rail{background:var(--bg);
+  border:0;border-radius:24px}
+.app{grid-template-columns:236px 1fr;gap:12px;padding:12px 0 12px 12px}
+.app .nav{position:sticky;top:12px;height:calc(100vh - 24px);padding:20px 14px}
+.app .nh{height:auto;border-bottom:0;padding:0 6px 18px}
+.app .nh .logo{height:19px}
+.app .nbody{padding:0;overflow-x:hidden}
+.app .ngrp{padding:16px 10px 6px;color:var(--tx4)}
+.app .ngrp:first-child{padding-top:0}
+.app .nav a{border-radius:var(--pill);padding:9px 12px;font-size:14px;color:var(--ink6)}
+.app .nav a:hover{background:var(--s1);color:var(--ink)}
+.app .nav a.on{background:var(--acc);color:var(--ink);font-weight:600;padding:11px 12px;
+  box-shadow:0 6px 18px -8px rgba(140,170,20,.7)}
+.app .nav a .cnt{border-radius:var(--pill);background:var(--sub2);color:var(--tx3);
+  font-family:var(--mono);font-size:10px;padding:2px 8px}
+.app .nav a.on .cnt{background:rgba(255,255,255,.55);color:var(--acc-d)}
+.app .nfoot{border-top:0;background:var(--s1);border-radius:18px;padding:10px}
+.app .nfoot .av{background:var(--ink);color:var(--acc);font-family:var(--mono);
+  font-size:11px;width:34px;height:34px}
+.app .nfoot s{font-family:var(--mono);font-size:10px}
+
+/* Топбар — пилюля высотой 60 */
+.app .topbar{height:60px;border-radius:var(--pill);padding:0 12px 0 24px;position:sticky;top:12px;
+  margin:0 12px 12px 0}
+.app .crumb{font-size:14px;color:var(--tx3)}
+.app .crumb .sep{color:var(--line2)}
+.app .crumb .cur{color:var(--ink);font-weight:600}
+.app .forw{background:none;border-radius:var(--pill);padding:0 0 0 4px;gap:10px}
+.app .forw span{color:var(--tx4)}
+.app .forw select{background-color:var(--s1);border-radius:var(--pill);height:36px;
+  padding:0 32px 0 14px;font-size:13px;font-weight:500}
+.app .iact{border-radius:var(--pill);background:var(--s1);width:38px;height:38px}
+.app .iact:hover{background:var(--bar)}
+.app .btn{border-radius:var(--pill);height:auto;padding:11px 22px;background:var(--ink);
+  color:#FFFFFF;font-size:13px;font-weight:600}
+.app .btn:hover{background:#2C2C29}
+.app .btn svg{color:var(--acc)}
+.app .btn.gh{background:var(--s1);color:var(--ink)}
+.app .btn.gh svg{color:var(--tx3)}
+
+/* ─── дорожка недели: ширина дня = объём ───
+   Главная примета этой стилистики. Неделя перестаёт быть сеткой
+   из семи равных ячеек и становится графиком: тяжёлый день шире
+   лёгкого, отдых сжат в узкую капсулу. Вес приходит из разметки
+   переменной --load — это число упражнений в дне. */
+.app .wk{padding:16px 18px 14px;margin-bottom:12px}
+.app .wkh{align-items:center;margin-bottom:12px}
+.app .wkh b{font-size:18px;font-weight:700;letter-spacing:-.02em}
+.app .wkh s{font-size:11px;color:var(--tx4);letter-spacing:.02em}
+.app .wkh .wkn button{border-radius:var(--pill);background:var(--sub2);width:32px;height:32px}
+.app .wkh .wkn button:hover:not(:disabled){background:var(--bar)}
+.app .wkh .cp{border-radius:var(--pill);background:var(--s1);padding:8px 14px;font-size:12px;
+  color:var(--ink6);font-weight:500}
+.app .wkh .cp:hover{background:var(--sub2);color:var(--ink)}
+.app .days{display:flex;align-items:stretch;gap:4px;padding:8px;border-radius:var(--rad-xl);
+  background:var(--s1)}
+.app .day{flex-grow:calc(4 + var(--load,1));flex-basis:0;flex-shrink:1;min-width:0;
+  background:var(--bg);border:0;border-radius:18px;padding:12px 16px;gap:7px;min-height:0;
+  overflow:hidden}
+.app .day:hover{background:var(--sub2)}
+.app .day .d{font-size:9px;letter-spacing:.11em;color:var(--tx4);order:1}
+.app .day .t{font-size:12px;font-weight:500;line-height:1.3;order:2}
+.app .day .k{display:none}
+/* Микро-бар нагрузки: заполненная часть — упражнения, остаток — фон */
+.app .day .ld{display:flex;align-items:center;gap:8px;order:3;margin-top:auto;padding-top:4px}
+.app .day .ld i,.app .day .ld u{height:4px;border-radius:var(--pill);display:block;
+  text-decoration:none}
+.app .day .ld i{background:var(--ink)}
+.app .day .ld u{background:var(--bar)}
+.app .day .ld s{text-decoration:none;font-family:var(--mono);font-size:9px;color:var(--tx4);
+  flex:none}
+.app .day.on{background:var(--acc);padding:14px 18px;
+  box-shadow:0 12px 26px -14px rgba(140,170,20,1)}
+.app .day.on .d{color:var(--acc-d);font-weight:600}
+.app .day.on .t{font-size:13px;font-weight:600;color:var(--ink)}
+.app .day.on .ld u{background:rgba(255,255,255,.5)}
+.app .day.on .ld s{color:var(--acc-d)}
+/* День отдыха сжат в вертикальную капсулу: пусто — значит узко */
+.app .day.rest{flex:none;width:62px;background:var(--page-d);align-items:center;
+  justify-content:center;padding:12px 6px}
+.app .day.rest .d{font-size:14px;font-weight:600;color:var(--tx4);letter-spacing:0;
+  font-family:var(--ui)}
+.app .day.rest .ld{display:none}
+.app .day.rest .t,.app .day.rest .e{writing-mode:vertical-rl;font-size:8px;letter-spacing:.12em;
+  text-transform:uppercase;color:#B4B4AB;font-weight:500;font-family:var(--mono)}
+.app .day.rest.on{background:var(--acc)}
+
+/* ─── документ дня ─── */
+.app .doc{padding:20px 24px 22px}
+.app .doch{gap:12px;margin-bottom:12px}
+.app .doch input{font-size:24px;font-weight:700;letter-spacing:-.035em;border-radius:12px}
+.app .doch input:focus{background:var(--s1)}
+.app .doch .stat{border-radius:var(--pill);background:var(--s1);padding:8px 14px;font-size:10px;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--ink6)}
+.app .doch .x{border-radius:var(--pill);background:var(--s1);width:32px;height:32px}
+.app .doch .x:hover{background:var(--bar);color:var(--ink)}
+/* Сообщение клиенту: лейбл — лаймовая капсула, а не подпись */
+.app .wmsg{background:var(--s1);border:0;border-radius:18px;padding:14px 18px;gap:12px}
+.app .wmsg:focus-within{box-shadow:inset 0 0 0 1.5px var(--acc)}
+.app .wmsg .k{background:var(--acc);color:var(--lime-soft);border-radius:var(--pill);
+  padding:5px 10px;width:auto;flex:none}
+.app .wmsg input{font-size:14px;color:var(--tx2)}
+
+.app .addb{border-radius:var(--pill);border:1.5px dashed var(--line2);padding:14px;
+  background:rgba(255,255,255,.4);font-size:13px;color:var(--tx3);margin-top:12px}
+.app .addb:hover{border-color:var(--acc);background:var(--acc-a);color:var(--acc-d)}
+
+/* ─── блок ─── */
+.app .blk{background:var(--bg);border-radius:24px;padding:16px 18px 18px;margin-top:10px;
+  box-shadow:inset 0 0 0 1px var(--sub2)}
+.app .blk.over{box-shadow:inset 0 0 0 1.5px var(--acc)}
+.app .blkh{gap:10px;margin-bottom:10px}
+.app .blkh .bt{font-size:16px;font-weight:600;letter-spacing:-.02em;border-radius:10px}
+.app .blkh .bt:focus{background:var(--s1)}
+.app .blkh .x{border-radius:var(--pill);background:var(--s1);width:28px;height:28px}
+.app .blkh .x:hover{background:var(--bar);color:var(--ink)}
+.app .bmeta{margin-bottom:8px}
+.app .fld{background:var(--muted);border:0;border-radius:14px;padding:10px 16px;gap:10px}
+.app .fld:focus-within{box-shadow:inset 0 0 0 1.5px var(--acc)}
+.app .fld .k{color:var(--tx4);width:auto;flex:none}
+.app .fld input{font-size:13px;color:var(--tx2)}
+/* ─── строка упражнения ─── */
+.app .line{background:var(--s1);border:0;border-radius:14px;padding:12px 16px;gap:12px;
+  margin-bottom:6px}
+.app .line:hover{background:var(--sub2)}
+.app .line.edit{background:var(--acc-a);box-shadow:inset 0 0 0 1.5px var(--acc)}
+.app .line .txt{font-size:15px}
+.app .line .nm{font-weight:500}
+.app .line .sc{color:var(--tx3);font-family:var(--mono);font-size:12px}
+/* Значение — белая пилюля: число всегда на своём носителе */
+.app .line .pct{border-radius:var(--pill);background:var(--bg);color:var(--acc-d);
+  font-size:11px;font-weight:500;height:auto;padding:5px 12px}
+.app .line .pct.none{background:var(--bg);color:var(--tx4)}
+.app .line .kg{border-radius:var(--pill);background:var(--bg);font-size:11px;color:var(--ink6);
+  padding:5px 12px;min-width:0}
+.app .line .kg:empty{display:none}
+.app .line .x{border-radius:var(--pill);color:var(--ink2)}
+.app .line .x:hover{background:var(--bg);color:var(--ink)}
+.app .line.raw{background:none;border:1.5px dashed var(--line);border-radius:14px}
+.app .line.raw:hover{border-color:var(--acc);background:var(--acc-a)}
+.app .line .pick{border-radius:var(--pill);background:var(--bg);color:var(--acc-d);
+  font-size:11px;height:auto;padding:5px 12px}
+.app .addl{border-radius:14px;border:1.5px dashed var(--line);padding:11px 16px;font-size:13px;
+  color:var(--tx4);margin-top:2px}
+.app .addl:hover{border-color:var(--acc);background:var(--acc-a);color:var(--acc-d)}
+
+/* ─── библиотека ─── */
+.app .rail{padding:16px;top:84px;max-height:calc(100vh - 96px)}
+.app .railhead{padding:0;border-bottom:0}
+.app .tabs{background:var(--sub2);border-radius:var(--pill);padding:4px;gap:4px}
+.app .tabs button{border-radius:var(--pill);height:34px;font-size:12px;color:var(--tx3);
+  box-shadow:none}
+.app .tabs button.on{background:var(--bg);color:var(--ink);font-weight:600;box-shadow:none}
+.app .search{background:var(--s1);border:0;border-radius:var(--pill);height:40px;
+  padding:0 16px;margin:12px 0 0}
+.app .search:focus-within{box-shadow:inset 0 0 0 1.5px var(--acc)}
+.app .search input{font-size:13px}
+.app .railbody{padding:8px 0 12px}
+.app .grpttl{padding:14px 4px 8px}
+.app .grpttl .lab{color:var(--tx4)}
+.app .grpttl .ln{display:none}
+.app .grpttl .n{color:var(--ink2);font-size:10px;margin-left:auto}
+.app .exc{background:var(--muted);border-radius:14px;padding:9px 12px;margin-bottom:4px;gap:10px}
+.app .exc:hover{background:var(--acc-a)}
+.app .exc .thumb{width:30px;height:30px;border-radius:var(--pill);background:var(--sub2);
+  color:var(--tx3);font-family:var(--mono);font-size:9px}
+.app .exc:hover .thumb{background:var(--acc);color:var(--acc-d)}
+.app .exc .nm{font-size:13px;font-weight:500}
+.app .exc .en{font-size:9px;color:var(--tx4)}
+.app .exc .add{border-radius:var(--pill)}
+.app .tplc{background:var(--muted);border-radius:14px;padding:10px 12px;margin-bottom:4px}
+.app .tplc:hover{background:var(--acc-a)}
+.app .tplc .chip{border-radius:var(--pill);background:var(--bg);font-size:9px;letter-spacing:.06em}
+.app .tplc .ls span{font-size:10px}
+.app .railfoot{border-top:0;background:var(--s1);border-radius:18px;padding:12px 16px;
+  margin-top:14px;font-size:12px;line-height:1.5;color:var(--tx3);font-family:var(--ui)}
+.app .railbody .hint{font-family:var(--ui);font-size:12px}
+
+/* ─── всё остальное на тех же правилах ─── */
+.app .sug{border-radius:18px;box-shadow:0 14px 40px rgba(17,17,16,.16),0 0 0 1px var(--sub2)}
+.app .sug .row{border-radius:12px}
+.app .sug .row:hover,.app .sug .row.on{background:var(--acc-a)}
+.app .md,.app .sheetbox{border-radius:24px}
+.app .way{border-radius:18px;border-color:var(--line)}
+.app .way:hover{border-color:var(--acc);background:var(--acc-a)}
+.app .way .ic{border-radius:var(--pill);background:var(--sub2)}
+.app .way.ai .ic{background:var(--acc);color:var(--acc-d)}
+.app .audit,.app .carry .go,.app .carry .stay{border-radius:18px}
+.app .wd,.app .tosave,.app .cp,.app .propose,.app .paste{border-radius:18px}
+.app .wd.on{background:var(--acc);color:var(--ink);border-color:transparent}
+.app .quick button{border-radius:var(--pill)}

@@ -1,0 +1,131 @@
+/* ═══════════════════════════════════════════════════════════════
+   ФИОЛЕТОВЫЙ · клиент, «План тренировки»
+
+   Пятый остров: своя вёрстка, свой CSS, свои шаблоны, своя копия
+   доменной модели. Правка здесь не может задеть ни один другой
+   вариант — в этом весь смысл раздельных баз.
+
+   Язык: документ. Ни карточек, ни теней — белый лист на сиреневом,
+   разделяют пунктирные линейки и поля. Все числа моноширинным
+   и акцентом, прижаты к правому краю: работа читается столбцом
+   сверху вниз, а не выискивается в тексте.
+   ═══════════════════════════════════════════════════════════════ */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --page:#EDE9F7; --surface:#FFFFFF; --tint:#F0E9FF; --tint2:#E6E0F4;
+  --line:#E3DBF4; --line2:#D6CDEE;
+  --ink:#1B1533; --ink2:#3B3358; --ink3:#6E6590; --muted:#8B83A8; --muted2:#A9A1C2;
+  --acc:#6D28D9; --acc2:#7A3BFF; --acc-soft:#B4ACCC;
+  --ui:"Instrument Sans",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+body{font-family:var(--ui);background:var(--page);color:var(--ink);
+  -webkit-font-smoothing:antialiased;display:flex;align-items:flex-start;justify-content:center;
+  gap:44px;padding:40px 24px 80px;min-height:100vh;flex-wrap:wrap}
+.bare body{padding:0;gap:0;display:block}
+.bare .side{display:none}
+.bare .phone{padding:0;box-shadow:none;background:none}
+
+.phone{width:390px;flex:none;background:var(--page);padding:10px;
+  box-shadow:0 24px 60px -30px rgba(27,21,51,.35)}
+.screen{width:100%;height:844px;overflow:clip;background:var(--surface);
+  display:grid;grid-template-rows:auto auto 1fr auto;position:relative}
+
+.sb{display:flex;align-items:flex-end;justify-content:space-between;height:44px;
+  padding:0 22px 4px;font-family:var(--mono);font-size:12px;font-weight:600}
+.sb .ind{display:flex;gap:5px;align-items:center}
+.sb .ind i{display:block;height:11px;background:var(--ink)}
+.sb .ind i:first-child{width:18px}
+.sb .ind i:last-child{width:26px;background:none;box-shadow:inset 0 0 0 1.5px var(--ink)}
+
+/* ─── шапка ─── */
+.hd{padding:6px 22px 16px}
+.hd .nrow{display:flex;align-items:center;gap:12px;padding-bottom:12px;
+  border-bottom:1px solid var(--ink)}
+.hd .ic{color:var(--ink2);font-size:15px;flex:none}
+/* Прогресс недели точками: сколько тренировок закрыто из назначенных.
+   Ряд из пяти квадратов читается быстрее дроби, дробь рядом уточняет. */
+.hd .wk{flex:1;display:flex;align-items:center;justify-content:center;gap:9px;
+  font-family:var(--mono);font-size:11px;color:var(--muted)}
+.hd .wk .dots{display:flex;gap:3px}
+.hd .wk i{width:9px;height:9px;background:var(--line2);display:block}
+.hd .wk i.on{background:var(--acc2)}
+.hd .day{font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--ink2);
+  margin-top:16px;display:flex;align-items:center;gap:10px}
+.hd .day .now{background:var(--tint);color:var(--acc);padding:3px 9px;font-size:10px;
+  letter-spacing:.1em;text-transform:uppercase}
+.hd h1{font-size:31px;font-weight:700;letter-spacing:-.028em;line-height:1.07;margin-top:10px}
+.hd .sub{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:12px;
+  display:flex;gap:9px}
+.hd .sub s{text-decoration:none;color:var(--line2)}
+
+/* ─── лента ─── */
+.feed{overflow-y:auto;padding:0 22px 20px}
+.feed::-webkit-scrollbar{display:none}
+
+/* Реплика тренера — врезка на поле, а не карточка: это чужой голос
+   внутри документа, и набран он соответственно. */
+.note{display:flex;gap:12px;padding:16px 0;border-bottom:1px solid var(--line)}
+.note i{width:34px;height:34px;background:var(--acc2);color:#fff;display:grid;place-items:center;
+  font-family:var(--mono);font-size:11px;font-weight:600;font-style:normal;flex:none}
+.note .k{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--acc);margin-bottom:5px}
+.note p{font-size:14px;line-height:1.5;color:var(--ink2)}
+
+/* ─── блок = раздел документа ─── */
+.blk{padding:20px 0 6px;position:relative;padding-left:34px}
+.blk::before{content:attr(data-n);position:absolute;left:0;top:23px;font-family:var(--mono);
+  font-size:11px;color:var(--muted2)}
+.blk.on::before{color:var(--acc2)}
+.bh{display:flex;align-items:center;gap:9px;margin-bottom:4px}
+.bh b{font-size:17px;font-weight:700;letter-spacing:-.02em}
+.bh .tag{font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+  padding:3px 8px;box-shadow:inset 0 0 0 1px var(--line2);color:var(--muted)}
+.blk.on .bh .tag{box-shadow:inset 0 0 0 1px var(--acc2);color:var(--acc);background:var(--tint)}
+.bh .m{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted2);flex:none}
+.bnote{font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:6px}
+
+/* Строка упражнения: название слева, вся цифровая часть — справа
+   акцентом. Разделяет пунктир: он легче сплошной линии и не спорит
+   с границей блока. */
+.row{width:100%;text-align:left;display:flex;align-items:flex-start;gap:12px;padding:11px 0;
+  border-bottom:1px dashed var(--line2)}
+.row:last-child{border-bottom:0}
+.row .b{flex:1;min-width:0}
+.row .nm{display:block;font-size:15px;font-weight:500;line-height:1.3}
+.row .en{display:block;font-family:var(--mono);font-size:10.5px;color:var(--muted2);margin-top:3px}
+.row .v{font-family:var(--mono);font-size:13px;color:var(--acc);flex:none;text-align:right;
+  white-space:nowrap;line-height:1.3}
+.row .v em{display:block;font-style:normal;font-weight:500}
+.row.done .nm{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line2)}
+.row.done .v{color:var(--muted2)}
+/* Отметка — не галочка сбоку, а состояние всей строки: тонкая
+   акцентная планка на поле. Ничего не сдвигается при нажатии. */
+.row.now{box-shadow:inset 2px 0 0 0 var(--acc2);padding-left:11px;margin-left:-11px}
+.sets{display:flex;gap:4px;padding:2px 0 10px}
+.sets button{flex:1;padding:7px 2px;font-family:var(--mono);font-size:11px;color:var(--muted);
+  box-shadow:inset 0 0 0 1px var(--line2);text-align:center}
+.sets button.done{background:var(--acc2);color:#fff;box-shadow:none}
+.sets button.now{box-shadow:inset 0 0 0 1.5px var(--acc2);color:var(--acc)}
+
+/* ─── низ ─── */
+.ft{padding:12px 22px 14px;border-top:1px solid var(--ink)}
+.cta{width:100%;height:52px;background:var(--acc2);color:#fff;font-size:15px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;gap:10px}
+.cta:active{background:var(--acc)}
+.cta s{text-decoration:none;font-family:var(--mono);font-size:11px;opacity:.75}
+.cta.done{background:var(--ink)}
+.home{padding:0 0 10px}
+.home i{display:block;width:120px;height:4px;background:var(--line2);margin:0 auto}
+
+.side{width:340px;padding-top:28px}
+.side h2{font-size:21px;font-weight:700;letter-spacing:-.02em;margin-bottom:14px}
+.side p{font-size:14px;line-height:1.55;color:var(--ink2);margin-bottom:11px}
+.side p b{color:var(--ink);font-weight:600}
+.side .req{border-top:1px solid var(--line2);margin-top:20px;padding-top:16px;
+  display:flex;flex-direction:column;gap:9px}
+.side .req div{display:flex;gap:12px;font-size:13px;color:var(--ink3);line-height:1.45}
+.side .req b{font-family:var(--mono);font-size:11px;color:var(--muted2);flex:none;width:56px;
+  font-weight:400}
+@media (max-width:820px){ body{padding:20px 12px 60px;gap:24px} .side{max-width:390px} }

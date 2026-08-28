@@ -1,0 +1,203 @@
+/* ═══════════════════════════════════════════════════════════════
+   ТЁПЛЫЙ · конструктор тренера
+
+   Своя вёрстка. Значения — из шапки reference/board-trainer.html,
+   раздел DESIGN TOKENS, там они объявлены эталонными.
+
+   Каркас: 76px тихий рельс | рабочая область | 340px библиотека.
+   Рельс без подписей — конструктор это режим работы, а не место,
+   откуда ходят по меню; навигация не должна отвлекать от документа.
+   ═══════════════════════════════════════════════════════════════ */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --paper:#FBF7F1; --paper-warm:#F4EEE5; --surface:#FFFFFF;
+  --ink:#1E1B18; --ink2:#45403A; --ink3:#6F675C; --muted:#82796D; --muted2:#A29B90;
+  --line:#E3DACE; --line2:#DCD3C6;
+  --acc:#F5511E; --acc-dark:#C43F12; --acc-soft:#FBD7C6; --acc-bg:#FFF1E9;
+  --ui:"Instrument Sans",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+button,input,select{font:inherit;color:inherit;border:0;background:none}
+button{cursor:pointer}
+input:focus{outline:0}
+body{font-family:var(--ui);background:var(--paper);color:var(--ink);font-size:14px;
+  -webkit-font-smoothing:antialiased}
+.app{display:grid;grid-template-columns:76px minmax(0,1fr) 340px;min-height:100vh}
+
+/* ─── тихий рельс ─── */
+.rail{background:var(--paper);display:flex;flex-direction:column;align-items:center;
+  gap:6px;padding:16px 0;position:sticky;top:0;height:100vh}
+.rail .lg{width:40px;height:40px;border-radius:999px;background:var(--acc);color:#fff;
+  display:grid;place-items:center;font-size:17px;font-weight:700;margin-bottom:18px;flex:none}
+/* Рельс без подписей: у каждой иконки только подсказка при наведении.
+   Конструктор — режим работы, и навигация здесь не должна отвлекать. */
+.rail a{width:40px;height:40px;border-radius:999px;display:grid;place-items:center;
+  color:var(--ink3);text-decoration:none}
+.rail a svg{width:19px;height:19px;display:block}
+.rail a:hover{background:var(--paper-warm);color:var(--ink)}
+.rail a.on{background:var(--surface);color:var(--acc);
+  box-shadow:0 2px 10px -4px rgba(30,27,24,.18)}
+.rail .me{margin-top:auto;width:36px;height:36px;border-radius:999px;background:var(--acc-soft);
+  color:var(--acc-dark);display:grid;place-items:center;font-family:var(--mono);
+  font-size:11px;font-weight:600}
+
+/* ─── центр ─── */
+.center{min-width:0;display:flex;flex-direction:column;padding:16px 28px 40px}
+.top{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.top .back{width:36px;height:36px;border-radius:999px;background:var(--paper-warm);
+  display:grid;place-items:center;color:var(--ink2);flex:none;font-size:14px}
+.top .crumb{font-family:var(--mono);font-size:12px;color:var(--muted);min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top .sp{flex:1}
+.who{display:flex;align-items:center;gap:9px;padding:5px 16px 5px 5px;border-radius:999px;
+  background:var(--surface);flex:none}
+.who i{width:28px;height:28px;border-radius:999px;background:var(--acc-soft);color:var(--acc-dark);
+  display:grid;place-items:center;font-family:var(--mono);font-size:10px;font-weight:600;
+  font-style:normal;flex:none}
+.who select{font-size:14px;cursor:pointer;appearance:none;-webkit-appearance:none;
+  padding-right:16px;background:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2382796D' stroke-width='1.7' stroke-linecap='round'%3E%3Cpath d='M4 6.5 8 10.5l4-4'/%3E%3C/svg%3E") no-repeat right center/12px}
+.btn{padding:12px 24px;border-radius:999px;font-size:14px;font-weight:500;flex:none;
+  background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
+.btn:hover{background:var(--paper-warm)}
+.btn.acc{background:var(--acc);color:#fff;font-weight:600;box-shadow:none}
+.btn.acc:hover{background:var(--acc-dark)}
+
+h1{font-size:44px;font-weight:700;letter-spacing:-.028em;line-height:1.02}
+h1 input{width:100%;font:inherit;letter-spacing:inherit;padding:2px 6px;margin-left:-6px;
+  border-radius:10px}
+h1 input:focus{background:var(--paper-warm)}
+.sub{font-family:var(--mono);font-size:13px;color:var(--muted);margin-top:12px;
+  display:flex;gap:14px;flex-wrap:wrap}
+.sub s{text-decoration:none;color:var(--line2)}
+
+/* ─── неделя карточками ───
+   Семь равных карточек: число и день недели сверху, короткое название
+   под ними, ряд точек по числу блоков и линейка снизу. Точки дают
+   объём с одного взгляда — считать их не нужно, достаточно увидеть,
+   что в среду их пять, а в субботу одна. */
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin:22px 0 24px}
+.day{background:var(--surface);border-radius:16px;padding:14px 16px 12px;text-align:left;
+  display:flex;flex-direction:column;gap:7px;min-width:0}
+.day:hover{background:var(--paper-warm)}
+.day .h{display:flex;align-items:baseline;gap:7px}
+.day .h b{font-size:17px;font-weight:700;letter-spacing:-.02em}
+.day .h s{text-decoration:none;font-size:12.5px;color:var(--muted);white-space:nowrap}
+.day .t{font-size:13.5px;font-weight:600;line-height:1.3;color:var(--ink2);
+  overflow-wrap:anywhere;min-height:35px}
+.day .dots{display:flex;gap:5px;margin-top:auto;padding-top:4px}
+.day .dots i{width:5px;height:5px;border-radius:999px;background:var(--line2);display:block}
+.day .ln{height:2px;border-radius:999px;background:var(--line);margin-top:8px}
+/* Сегодняшний день — единственный акцентный: и число, и точки,
+   и линейка. Искать, где ты в неделе, не приходится. */
+.day.on{background:var(--acc-bg)}
+.day.on .h b,.day.on .h s{color:var(--acc)}
+.day.on .h s{font-weight:600}
+.day.on .t{color:var(--ink)}
+.day.on .dots i{background:var(--acc)}
+.day.on .ln{background:var(--acc)}
+.day.rest{background:var(--paper-warm)}
+.day.rest .h b,.day.rest .t{color:var(--muted2)}
+.day.rest .t{font-weight:400}
+.day.rest .ln{background:var(--line2);opacity:.5}
+
+/* ─── сообщение клиенту ─── */
+.wmsg{display:flex;gap:14px;background:var(--acc-bg);border-radius:20px;padding:16px 20px;
+  margin-bottom:18px}
+.wmsg i{width:30px;height:30px;border-radius:999px;background:var(--acc);color:#fff;
+  display:grid;place-items:center;font-size:15px;font-style:normal;flex:none}
+.wmsg .b{flex:1;min-width:0}
+.wmsg .k{display:block;font-size:13px;font-weight:600;color:var(--acc-dark);margin-bottom:3px}
+.wmsg input{width:100%;font-size:15px;line-height:1.45;color:var(--ink2)}
+
+/* ─── блок ─── */
+.blk{background:var(--surface);border-radius:26px;padding:18px 20px 20px;margin-bottom:10px}
+.bh{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.bh input.nm{font-size:20px;font-weight:700;letter-spacing:-.02em;padding:2px 6px;
+  margin-left:-6px;border-radius:8px;min-width:0;flex:0 1 auto;width:auto;field-sizing:content}
+.bh input.nm:focus{background:var(--paper-warm)}
+.bh .chip{font-family:var(--mono);font-size:11px;padding:6px 12px;border-radius:999px;
+  background:var(--paper-warm);color:var(--muted);flex:none}
+.bh .chip.acc{background:var(--acc-bg);color:var(--acc-dark)}
+.bh .sp{flex:1}
+.bh .dup{padding:9px 16px;border-radius:999px;background:var(--paper-warm);font-size:13px;
+  color:var(--ink2);flex:none}
+.bh .dup:hover{background:var(--line)}
+.bh .x{width:34px;height:34px;border-radius:999px;background:var(--paper-warm);color:var(--ink3);
+  display:grid;place-items:center;flex:none;font-size:13px}
+.bh .x:hover{background:var(--acc-soft);color:var(--acc-dark)}
+.bnote{display:flex;align-items:center;gap:12px;padding:11px 16px;border-radius:16px;
+  background:var(--paper);margin-bottom:8px}
+.bnote span{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted2);flex:none}
+.bnote input{flex:1;min-width:0;font-size:14px;color:var(--ink2)}
+.bnote:focus-within{box-shadow:inset 0 0 0 1.5px var(--acc)}
+
+/* ─── строка упражнения ─── */
+.line{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:16px;
+  background:var(--paper);margin-bottom:6px}
+.line:hover{background:var(--paper-warm)}
+.line .b{flex:1;min-width:0}
+.line .nm{display:block;font-size:15px;font-weight:500;padding:1px 0}
+.line .nm:focus{outline:0}
+.line .en{display:block;font-family:var(--mono);font-size:11px;color:var(--muted2);margin-top:2px}
+.line .v{font-family:var(--mono);font-size:13px;color:var(--ink2);flex:none;white-space:nowrap}
+.line .kg{font-family:var(--mono);font-size:13px;padding:6px 12px;border-radius:999px;
+  background:var(--acc-bg);color:var(--acc-dark);flex:none}
+.line .x{color:var(--muted2);flex:none;font-size:12px}
+.line .x:hover{color:var(--acc)}
+.line.on{background:var(--acc-bg);box-shadow:inset 0 0 0 1.5px var(--acc-soft)}
+.line.raw{background:none;box-shadow:inset 0 0 0 1.5px var(--line);border-style:none}
+.line.raw:hover{box-shadow:inset 0 0 0 1.5px var(--acc)}
+.line .pick{font-family:var(--mono);font-size:11px;padding:6px 12px;border-radius:999px;
+  background:var(--surface);color:var(--acc-dark);flex:none}
+/* Подходы карточками: их видно и пересчитать можно глазами, не читая
+   схему. Выполненный — светло-акцентный, текущий — залитый, дальше — фон. */
+.sets{display:flex;gap:8px;margin:2px 0 8px}
+.sets .s{flex:1;border-radius:16px;background:var(--paper-warm);padding:10px 6px;text-align:center}
+.sets .s s{display:block;text-decoration:none;font-family:var(--mono);font-size:10px;
+  color:var(--muted2);margin-bottom:3px}
+.sets .s em{font-family:var(--mono);font-size:14px;font-style:normal;color:var(--ink2)}
+.sets .s.past{background:var(--acc-bg)} .sets .s.past em{color:var(--acc-dark)}
+.sets .s.now{background:var(--acc)} .sets .s.now s,.sets .s.now em{color:#fff}
+.sets .add{flex:1;border-radius:16px;box-shadow:inset 0 0 0 1.5px var(--line2);
+  font-size:13px;color:var(--muted2);background:none}
+.sets .add:hover{box-shadow:inset 0 0 0 1.5px var(--acc);color:var(--acc-dark)}
+.addl{width:100%;text-align:left;padding:13px 18px;border-radius:16px;
+  box-shadow:inset 0 0 0 1.5px var(--line);color:var(--muted2);font-size:14px;margin-top:2px}
+.addl:hover{box-shadow:inset 0 0 0 1.5px var(--acc);color:var(--acc-dark)}
+.addl:focus-within{box-shadow:inset 0 0 0 1.5px var(--acc)}
+.addl input{width:100%;font-size:14px}
+.addb{width:100%;padding:16px;border-radius:999px;box-shadow:inset 0 0 0 1.5px var(--line2);
+  color:var(--muted);font-size:14px;margin-top:6px}
+.addb:hover{box-shadow:inset 0 0 0 1.5px var(--acc);color:var(--acc-dark)}
+
+/* ─── библиотека ─── */
+.lib{background:var(--surface);border-radius:30px 0 0 30px;padding:22px;position:sticky;top:0;
+  height:100vh;display:grid;grid-template-rows:auto auto auto minmax(0,1fr)}
+.lib h2{font-size:20px;font-weight:700;letter-spacing:-.02em;margin-bottom:14px}
+.tabs{display:flex;gap:6px;margin-bottom:12px}
+.tabs button{padding:9px 16px;border-radius:999px;font-size:13px;background:var(--paper-warm);
+  color:var(--ink2)}
+.tabs button.on{background:var(--ink);color:var(--paper)}
+.search{display:flex;align-items:center;gap:9px;background:var(--paper);border-radius:999px;
+  padding:12px 18px;margin-bottom:8px}
+.search:focus-within{box-shadow:inset 0 0 0 1.5px var(--acc)}
+.search i{font-style:normal;font-size:12px;color:var(--muted2)}
+.search input{flex:1;min-width:0;font-size:14px}
+.search input::placeholder{color:var(--muted2)}
+.libb{overflow-y:auto;margin:0 -6px;padding:0 6px}
+.libb::-webkit-scrollbar{display:none}
+.grp{font-size:14px;font-weight:600;color:var(--ink2);padding:16px 4px 8px}
+.exc{width:100%;text-align:left;padding:12px 16px;border-radius:18px;margin-bottom:4px;
+  background:none}
+.exc:hover{background:var(--paper)}
+.exc .nm{display:block;font-size:15px;font-weight:500}
+.exc .en{display:block;font-family:var(--mono);font-size:11px;color:var(--muted2);margin-top:3px}
+/* Уже добавленное подсвечено и подписано, каким блоком занято —
+   чтобы не поставить одно и то же дважды. */
+.exc.in{background:var(--acc-bg)}
+.exc.in .nm{color:var(--acc-dark);font-weight:600}
+.exc.in .en{color:var(--acc-dark);opacity:.75}
+.empty{padding:26px 8px;text-align:center;color:var(--muted2);font-size:13px}
+
+@media (max-width:1360px){ .app{grid-template-columns:76px minmax(0,1fr)} .lib{display:none} }

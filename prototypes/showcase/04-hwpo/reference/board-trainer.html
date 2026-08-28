@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #F9F1EB; font-family: 'Space Grotesk', sans-serif; }
+  a { color: #A9713F; text-decoration: none; } a:hover { color: #7E5228; }
+  ::selection { background: #E8CDB4; color: #14110F; }
+  *::-webkit-scrollbar { width: 8px; }
+  *::-webkit-scrollbar-thumb { background: #E4D8CD; border-radius: 99px; }
+</style>
+</helmet>
+<div style="width: 1680px; height: 1050px; background: #F9F1EB; color: #14110F; font-family: 'Space Grotesk', sans-serif; display: grid; grid-template-columns: 250px 1fr 372px; overflow: hidden; box-sizing: border-box;">
+
+  <!-- ── SIDEBAR ── -->
+  <div style="display: flex; flex-direction: column; padding: 26px 18px 22px 22px; box-sizing: border-box; border-right: 1px solid #EEE3DA; min-height: 0;">
+    <div style="display: flex; align-items: baseline; gap: 3px; padding: 0 8px 26px 8px;">
+      <div style="font-size: 26px; font-weight: 700; letter-spacing: -0.6px;">FITBAZA</div>
+      <div style="width: 8px; height: 8px; background: #A9713F;"></div>
+    </div>
+
+    <div style="font-size: 10px; font-weight: 600; letter-spacing: 1.4px; color: #A79C91; padding: 0 8px 10px 8px;">РАБОТА</div>
+    <div style="display: flex; flex-direction: column; gap: 2px; margin-bottom: 22px;">
+      <div style="display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 12px; font-size: 14px; font-weight: 500; color: #4A4239; cursor: pointer;" style-hover="background: #FFFFFF;">
+        <div style="width: 16px; height: 16px; border: 1.6px solid #A79C91; border-radius: 3px;"></div>Дашборд</div>
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 11px 12px; border-radius: 12px; font-size: 14px; font-weight: 500; color: #4A4239; cursor: pointer;" style-hover="background: #FFFFFF;">
+        <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 16px; height: 16px; border: 1.6px solid #A79C91; border-radius: 99px;"></div>Клиенты</div>
+        <div style="font-size: 12px; color: #A79C91;">6</div></div>
+      <div style="display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 12px; font-size: 14px; font-weight: 500; color: #4A4239; cursor: pointer;" style-hover="background: #FFFFFF;">
+        <div style="width: 16px; height: 16px; border: 1.6px solid #A79C91; border-radius: 3px; border-top-width: 4px;"></div>Календарь</div>
+    </div>
+
+    <div style="font-size: 10px; font-weight: 600; letter-spacing: 1.4px; color: #A79C91; padding: 0 8px 10px 8px;">ПРОГРАММЫ</div>
+    <div style="display: flex; flex-direction: column; gap: 2px; margin-bottom: 22px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 11px 12px; border-radius: 12px; font-size: 14px; font-weight: 500; color: #4A4239; cursor: pointer;" style-hover="background: #FFFFFF;">
+        <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 16px; height: 16px; border: 1.6px solid #A79C91; border-radius: 3px;"></div>Программы</div>
+        <div style="font-size: 12px; color: #A79C91;">3</div></div>
+      <div style="display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 12px; background: #14110F; color: #FFFFFF; font-size: 14px; font-weight: 600; cursor: pointer;">
+        <div style="width: 16px; height: 16px; border: 1.6px solid #C79A6E; border-radius: 3px; background: #A9713F;"></div>Конструктор</div>
+    </div>
+
+    <div style="font-size: 10px; font-weight: 600; letter-spacing: 1.4px; color: #A79C91; padding: 0 8px 10px 8px;">БИБЛИОТЕКИ</div>
+    <div style="display: flex; flex-direction: column; gap: 2px; margin-bottom: 22px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 11px 12px; border-radius: 12px; font-size: 14px; font-weight: 500; color: #4A4239; cursor: pointer;" style-hover="background: #FFFFFF;">
+        <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 16px; height: 16px; border: 1.6px solid #A79C91;"></div>База упражнений</div>
+        <div style="font-size: 12px; color: #A79C91;">31</div></div>
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 11px 12px; border-radius: 12px; font-size: 14px; font-weight: 500; color: #4A4239; cursor: pointer;" style-hover="background: #FFFFFF;">
+        <div style="display: flex; align-items: center; gap: 12px;"><div style="width: 16px; height: 16px; border: 1.6px solid #A79C91; border-radius: 3px 3px 0 0;"></div>Шаблоны</div>
+        <div style="font-size: 12px; color: #A79C91;">21</div></div>
+    </div>
+
+    <div style="font-size: 10px; font-weight: 600; letter-spacing: 1.4px; color: #A79C91; padding: 0 8px 10px 8px;">НАСТРОЙКИ</div>
+    <div style="display: flex; flex-direction: column; gap: 2px;">
+      <div style="display: flex; align-items: center; gap: 12px; padding: 11px 12px; border-radius: 12px; font-size: 14px; font-weight: 500; color: #4A4239; cursor: pointer;" style-hover="background: #FFFFFF;">
+        <div style="width: 16px; height: 16px; border: 1.6px solid #A79C91; border-radius: 99px;"></div>Бренд и профиль</div>
+    </div>
+
+    <div style="flex: 1;"></div>
+    <div style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; background: #FFFFFF;">
+      <div style="width: 34px; height: 34px; border-radius: 99px; background: #EFE1D4; color: #8A6242; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center;">СК</div>
+      <div><div style="font-size: 13px; font-weight: 600;">Сергей Ковальчук</div><div style="font-size: 11px; color: #A79C91; margin-top: 1px;">CrossFit Ладья</div></div>
+    </div>
+  </div>
+
+  <!-- ── CENTER ── -->
+  <div style="min-width: 0; min-height: 0; display: flex; flex-direction: column; box-sizing: border-box;">
+
+    <!-- topbar -->
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px 30px; border-bottom: 1px solid #EEE3DA; flex-shrink: 0;">
+      <div style="display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: 600; letter-spacing: 1.2px;">
+        <span style="color: #A79C91;">ПРОГРАММЫ</span><span style="color: #DCCFC3;">/</span>
+        <span style="color: #A79C91;">СИЛА + КРОССФИТ</span><span style="color: #DCCFC3;">/</span>
+        <span>НЕДЕЛЯ 4</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="font-size: 11px; font-weight: 600; letter-spacing: 1.2px; color: #A79C91;">ВЕСА ДЛЯ</div>
+        <div style="display: flex; align-items: center; gap: 12px; padding: 9px 14px; border-radius: 10px; background: #FFFFFF; border: 1px solid #EADFD5; cursor: pointer;">
+          <div style="font-size: 14px; font-weight: 600;">Артём Ковалёв</div>
+          <div style="font-size: 9px; color: #A79C91;">▼</div>
+        </div>
+        <div style="padding: 12px 24px; border-radius: 10px; background: #A9713F; color: #FFFFFF; font-size: 12px; font-weight: 700; letter-spacing: 1.4px; cursor: pointer;" style-hover="background: #8A5A2F;">НАЗНАЧИТЬ</div>
+      </div>
+    </div>
+
+    <!-- scroll -->
+    <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 22px 30px 30px 30px; display: flex; flex-direction: column; gap: 16px;">
+
+      <!-- week card -->
+      <div style="background: #FFFFFF; border-radius: 18px; padding: 20px 22px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="display: flex; gap: 6px;">
+              <div style="width: 34px; height: 34px; border-radius: 9px; background: #F6EFE9; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #6E6459; cursor: pointer;" style-hover="background: #EFE4DA;">←</div>
+              <div style="width: 34px; height: 34px; border-radius: 9px; background: #F6EFE9; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #6E6459; cursor: pointer;" style-hover="background: #EFE4DA;">→</div>
+            </div>
+            <div style="font-size: 20px; font-weight: 700; letter-spacing: -0.4px;">Неделя 4 из 8</div>
+            <div style="font-size: 13px; color: #A79C91;">5 дней · 32 упражнения</div>
+          </div>
+          <div style="display: flex; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: 1.1px; color: #6E6459;">
+            <div style="padding: 9px 14px; border-radius: 8px; background: #F6EFE9; cursor: pointer;" style-hover="background: #EFE4DA;">ИЗ ШАБЛОНОВ</div>
+            <div style="padding: 9px 14px; border-radius: 8px; background: #F6EFE9; cursor: pointer;" style-hover="background: #EFE4DA;">КОПИЯ ПРОШЛОЙ НЕДЕЛИ</div>
+            <div style="padding: 9px 14px; border-radius: 8px; background: #F6EFE9; cursor: pointer;" style-hover="background: #EFE4DA;">СОХРАНИТЬ</div>
+          </div>
+        </div>
+
+        <!-- week rail: undivided strip, load bars, underline for the active day -->
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); align-items: end; gap: 0; padding: 2px 0 0 0;">
+
+          <div style="padding: 0 16px 0 0; cursor: pointer;">
+            <div style="display: flex; align-items: baseline; gap: 7px;">
+              <div style="font-size: 15px; font-weight: 700;">24</div>
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.2px; color: #A79C91;">ПН</div>
+            </div>
+            <div style="font-size: 13px; font-weight: 500; color: #4A4239; line-height: 1.3; margin-top: 6px; min-height: 34px;">Сила · присед + жим</div>
+            <div style="display: flex; align-items: flex-end; gap: 3px; height: 26px; margin-bottom: 8px;">
+              <div style="width: 6px; height: 14px; background: #E4D8CD;"></div><div style="width: 6px; height: 20px; background: #E4D8CD;"></div><div style="width: 6px; height: 11px; background: #E4D8CD;"></div><div style="width: 6px; height: 17px; background: #E4D8CD;"></div>
+            </div>
+            <div style="height: 2px; background: #EEE3DA; margin-right: 6px;"></div>
+            <div style="font-size: 11px; color: #BFB4A8; padding-top: 8px;">8 упр · 62 мин</div>
+          </div>
+
+          <div style="padding: 0 16px 0 0; cursor: pointer;">
+            <div style="display: flex; align-items: baseline; gap: 7px;">
+              <div style="font-size: 15px; font-weight: 700;">25</div>
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.2px; color: #A79C91;">ВТ</div>
+            </div>
+            <div style="font-size: 13px; font-weight: 500; color: #4A4239; line-height: 1.3; margin-top: 6px; min-height: 34px;">Комплекс «Fran»</div>
+            <div style="display: flex; align-items: flex-end; gap: 3px; height: 26px; margin-bottom: 8px;">
+              <div style="width: 6px; height: 22px; background: #E4D8CD;"></div><div style="width: 6px; height: 9px; background: #E4D8CD;"></div>
+            </div>
+            <div style="height: 2px; background: #EEE3DA; margin-right: 6px;"></div>
+            <div style="font-size: 11px; color: #BFB4A8; padding-top: 8px;">4 упр · 18 мин</div>
+          </div>
+
+          <div style="padding: 0 16px 0 0; cursor: pointer;">
+            <div style="display: flex; align-items: baseline; gap: 7px;">
+              <div style="font-size: 15px; font-weight: 700;">26</div>
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.2px; color: #A9713F;">СР · СЕГОДНЯ</div>
+            </div>
+            <div style="font-size: 13px; font-weight: 700; color: #14110F; line-height: 1.3; margin-top: 6px; min-height: 34px;">Сила · становая + гимнастика</div>
+            <div style="display: flex; align-items: flex-end; gap: 3px; height: 26px; margin-bottom: 8px;">
+              <div style="width: 6px; height: 12px; background: #A9713F;"></div><div style="width: 6px; height: 26px; background: #A9713F;"></div><div style="width: 6px; height: 19px; background: #A9713F;"></div><div style="width: 6px; height: 15px; background: #A9713F;"></div><div style="width: 6px; height: 10px; background: #A9713F;"></div>
+            </div>
+            <div style="height: 4px; background: #14110F; margin-right: 6px;"></div>
+            <div style="font-size: 11px; font-weight: 600; color: #14110F; padding-top: 8px;">12 упр · 75 мин</div>
+          </div>
+
+          <div style="padding: 0 16px 0 0; cursor: pointer;">
+            <div style="display: flex; align-items: baseline; gap: 7px;">
+              <div style="font-size: 15px; font-weight: 700; color: #CFC4B8;">27</div>
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.2px; color: #CFC4B8;">ЧТ</div>
+            </div>
+            <div style="font-size: 13px; color: #CFC4B8; line-height: 1.3; margin-top: 6px; min-height: 34px;">Отдых</div>
+            <div style="height: 26px; margin-bottom: 8px;"></div>
+            <div style="height: 2px; background: #F3ECE5; margin-right: 6px;"></div>
+            <div style="font-size: 11px; color: #D6CBBF; padding-top: 8px;">— · ☾</div>
+          </div>
+
+          <div style="padding: 0 16px 0 0; cursor: pointer;">
+            <div style="display: flex; align-items: baseline; gap: 7px;">
+              <div style="font-size: 15px; font-weight: 700;">28</div>
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.2px; color: #A79C91;">ПТ</div>
+            </div>
+            <div style="font-size: 13px; font-weight: 500; color: #4A4239; line-height: 1.3; margin-top: 6px; min-height: 34px;">ТА + метком</div>
+            <div style="display: flex; align-items: flex-end; gap: 3px; height: 26px; margin-bottom: 8px;">
+              <div style="width: 6px; height: 18px; background: #E4D8CD;"></div><div style="width: 6px; height: 13px; background: #E4D8CD;"></div><div style="width: 6px; height: 21px; background: #E4D8CD;"></div>
+            </div>
+            <div style="height: 2px; background: #EEE3DA; margin-right: 6px;"></div>
+            <div style="font-size: 11px; color: #BFB4A8; padding-top: 8px;">6 упр · 55 мин</div>
+          </div>
+
+          <div style="padding: 0 16px 0 0; cursor: pointer;">
+            <div style="display: flex; align-items: baseline; gap: 7px;">
+              <div style="font-size: 15px; font-weight: 700;">29</div>
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.2px; color: #A79C91;">СБ</div>
+            </div>
+            <div style="font-size: 13px; font-weight: 500; color: #4A4239; line-height: 1.3; margin-top: 6px; min-height: 34px;">Длинное кардио</div>
+            <div style="display: flex; align-items: flex-end; gap: 3px; height: 26px; margin-bottom: 8px;">
+              <div style="width: 6px; height: 24px; background: #E4D8CD;"></div>
+            </div>
+            <div style="height: 2px; background: #EEE3DA; margin-right: 6px;"></div>
+            <div style="font-size: 11px; color: #BFB4A8; padding-top: 8px;">2 упр · 70 мин</div>
+          </div>
+
+          <div style="cursor: pointer;">
+            <div style="display: flex; align-items: baseline; gap: 7px;">
+              <div style="font-size: 15px; font-weight: 700; color: #CFC4B8;">30</div>
+              <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.2px; color: #CFC4B8;">ВС</div>
+            </div>
+            <div style="font-size: 13px; color: #CFC4B8; line-height: 1.3; margin-top: 6px; min-height: 34px;">Отдых</div>
+            <div style="height: 26px; margin-bottom: 8px;"></div>
+            <div style="height: 2px; background: #F3ECE5;"></div>
+            <div style="font-size: 11px; color: #D6CBBF; padding-top: 8px;">— · ☾</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- workout header -->
+      <div style="display: flex; align-items: flex-end; justify-content: space-between; padding: 6px 4px 0 4px;">
+        <div>
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 1.4px; color: #A79C91; margin-bottom: 8px;">СРЕДА, 26 АВГУСТА · ТРЕНИРОВКА 3 ИЗ 5</div>
+          <div style="font-size: 34px; font-weight: 700; letter-spacing: -1px; line-height: 1.05;">СИЛА · СТАНОВАЯ + ГИМНАСТИКА</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding-bottom: 4px;">
+          <div style="padding: 9px 14px; border-radius: 8px; background: #FFFFFF; border: 1px solid #EADFD5; font-size: 11px; font-weight: 600; letter-spacing: 1.1px; color: #6E6459; cursor: pointer;" style-hover="background: #F6EFE9;">В ШАБЛОНЫ</div>
+          <div style="padding: 9px 14px; border-radius: 8px; background: #FFFFFF; border: 1px solid #EADFD5; font-size: 11px; font-weight: 600; letter-spacing: 1.1px; color: #6E6459; cursor: pointer;" style-hover="background: #F6EFE9;">ОЧИСТИТЬ</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 22px; font-size: 13px; color: #6E6459; padding: 0 4px;">
+        <span>5 блоков</span><span style="color: #DCCFC3;">·</span><span>12 упражнений</span><span style="color: #DCCFC3;">·</span><span>~75 минут</span><span style="color: #DCCFC3;">·</span><span>тоннаж 8 240 кг</span>
+      </div>
+
+      <!-- coach note -->
+      <sc-if value="{{ showNote }}" hint-placeholder-val="{{ true }}">
+      <div style="background: #FFFFFF; border-radius: 16px; border-left: 3px solid #A9713F; padding: 16px 20px;">
+        <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.4px; color: #A9713F; margin-bottom: 6px;">ЗАМЕТКА КЛИЕНТУ</div>
+        <div style="font-size: 15px; line-height: 1.5; color: #4A4239;">Становую сегодня не гони — работаем в технике. Если спина круглится, сбрось до 140 и добери объёмом.</div>
+      </div>
+      </sc-if>
+
+      <!-- BLOCK 1 -->
+      <div style="background: #FFFFFF; border-radius: 18px; flex-shrink: 0;">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 14px 22px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="font-size: 13px; color: #CFC4B8; cursor: grab;">⠿</div>
+            <div style="font-size: 19px; font-weight: 700; letter-spacing: -0.3px;">Разминка</div>
+            <div style="padding: 5px 10px; border-radius: 6px; background: #F3ECE5; font-size: 10px; font-weight: 700; letter-spacing: 1.1px; color: #8A8177;">3 ПОДХОДА</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 11px; font-weight: 600; letter-spacing: 1.1px; color: #A79C91;">
+            <div style="cursor: pointer;" style-hover="color: #14110F;">СВЕРНУТЬ</div>
+            <div style="cursor: pointer;" style-hover="color: #14110F;">ДУБЛИРОВАТЬ</div>
+            <div style="width: 26px; height: 26px; border-radius: 7px; background: #F6EFE9; display: flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer;" style-hover="background: #EFE4DA; color: #14110F;">×</div>
+          </div>
+        </div>
+        <div style="border-top: 1px solid #F1E9E1; padding: 4px 22px 16px 22px;">
+          <div style="display: flex; align-items: center; gap: 16px; padding: 13px 0; border-bottom: 1px solid #F6F0EA;">
+            <div style="font-size: 12px; color: #CFC4B8; cursor: grab;">⠿</div>
+            <div style="flex: 1; font-size: 16px; font-weight: 500;">0:20/0:20 Растяжка бедро → широчайшие</div>
+            <div style="font-size: 12px; color: #A79C91; letter-spacing: 0.6px;">МОБИЛИТИ</div>
+            <div style="width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #CFC4B8; cursor: pointer;" style-hover="background: #F6EFE9; color: #14110F;">×</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 16px; padding: 13px 0; border-bottom: 1px solid #F6F0EA;">
+            <div style="font-size: 12px; color: #CFC4B8; cursor: grab;">⠿</div>
+            <div style="flex: 1; font-size: 16px; font-weight: 500;">15 кал Гребля</div>
+            <div style="font-size: 12px; color: #A79C91; letter-spacing: 0.6px;">ТЕМП 24</div>
+            <div style="width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #CFC4B8; cursor: pointer;" style-hover="background: #F6EFE9; color: #14110F;">×</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 16px; padding: 13px 0; border-bottom: 1px solid #F6F0EA;">
+            <div style="font-size: 12px; color: #CFC4B8; cursor: grab;">⠿</div>
+            <div style="flex: 1; font-size: 16px; font-weight: 500;">2×10 Мобилити плеч с PVC</div>
+            <div style="font-size: 12px; color: #A79C91; letter-spacing: 0.6px;">МЕДЛЕННО</div>
+            <div style="width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #CFC4B8; cursor: pointer;" style-hover="background: #F6EFE9; color: #14110F;">×</div>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 0 4px 0;">
+            <div style="font-size: 14px; color: #A79C91; cursor: text;">+ Упражнение — печатайте как в тетради: «Присед 5×3 80%»</div>
+            <div style="font-size: 11px; font-weight: 600; letter-spacing: 1.1px; color: #A9713F; cursor: pointer;">ОТДЫХ 1:00 МЕЖДУ ПОДХОДАМИ ›</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOCK 2 -->
+      <div style="background: #FFFFFF; border-radius: 18px; flex-shrink: 0;">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 14px 22px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="font-size: 13px; color: #CFC4B8; cursor: grab;">⠿</div>
+            <div style="font-size: 19px; font-weight: 700; letter-spacing: -0.3px;">Становая тяга</div>
+            <div style="padding: 5px 10px; border-radius: 6px; background: #F2E4D6; font-size: 10px; font-weight: 700; letter-spacing: 1.1px; color: #8A5A2F;">СИЛА · 5 ПОДХОДОВ</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 11px; font-weight: 600; letter-spacing: 1.1px; color: #A79C91;">
+            <div style="cursor: pointer;" style-hover="color: #14110F;">СВЕРНУТЬ</div>
+            <div style="cursor: pointer;" style-hover="color: #14110F;">ДУБЛИРОВАТЬ</div>
+            <div style="width: 26px; height: 26px; border-radius: 7px; background: #F6EFE9; display: flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer;" style-hover="background: #EFE4DA; color: #14110F;">×</div>
+          </div>
+        </div>
+        <div style="border-top: 1px solid #F1E9E1; padding: 16px 22px;">
+          <div style="display: flex; align-items: flex-start; gap: 16px; padding-bottom: 14px;">
+            <div style="font-size: 12px; color: #CFC4B8; cursor: grab; padding-top: 5px;">⠿</div>
+            <div style="flex: 1;">
+              <div style="font-size: 17px; font-weight: 600;">5×3 Становая тяга @ 80%</div>
+              <div style="font-size: 13px; color: #A79C91; margin-top: 3px;">Deadlift · штанга · пауза 2 сек внизу · 1ПМ 190 кг</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="padding: 7px 12px; border-radius: 7px; background: #F2E4D6; font-size: 13px; font-weight: 600; color: #8A5A2F;">152 кг</div>
+              <div style="padding: 7px 12px; border-radius: 7px; background: #F6EFE9; font-size: 11px; font-weight: 600; letter-spacing: 1px; color: #6E6459; cursor: pointer;" style-hover="background: #EFE4DA;">ИЗМЕНИТЬ ›</div>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; padding-bottom: 16px; border-bottom: 1px solid #F1E9E1;">
+            <div style="border-radius: 10px; background: #F6EFE9; padding: 11px 0; text-align: center;"><div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #BFB4A8;">ПОДХОД 1</div><div style="font-size: 15px; font-weight: 600; margin-top: 4px;">3 × 140</div></div>
+            <div style="border-radius: 10px; background: #F6EFE9; padding: 11px 0; text-align: center;"><div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #BFB4A8;">ПОДХОД 2</div><div style="font-size: 15px; font-weight: 600; margin-top: 4px;">3 × 148</div></div>
+            <div style="border-radius: 10px; background: #A9713F; padding: 11px 0; text-align: center;"><div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #E8CDB4;">ПОДХОД 3</div><div style="font-size: 15px; font-weight: 600; margin-top: 4px; color: #FFFFFF;">3 × 152</div></div>
+            <div style="border-radius: 10px; background: #F6EFE9; padding: 11px 0; text-align: center;"><div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #BFB4A8;">ПОДХОД 4</div><div style="font-size: 15px; font-weight: 600; margin-top: 4px;">3 × 152</div></div>
+            <div style="border-radius: 10px; background: #F6EFE9; padding: 11px 0; text-align: center;"><div style="font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #BFB4A8;">ПОДХОД 5</div><div style="font-size: 15px; font-weight: 600; margin-top: 4px;">3 × 152</div></div>
+            <div style="border-radius: 10px; border: 1.5px dashed #E4D8CD; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; letter-spacing: 1px; color: #A79C91; cursor: pointer;" style-hover="border-color: #A9713F; color: #A9713F;">+ ПОДХОД</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 16px; padding: 14px 0 0 0;">
+            <div style="font-size: 12px; color: #CFC4B8; cursor: grab;">⠿</div>
+            <div style="flex: 1;">
+              <div style="font-size: 16px; font-weight: 500;">3×8 Тяга штанги в наклоне</div>
+              <div style="font-size: 13px; color: #A79C91; margin-top: 2px;">Barbell Row · штанга</div>
+            </div>
+            <div style="padding: 7px 12px; border-radius: 7px; background: #F6EFE9; font-size: 13px; font-weight: 600; color: #4A4239;">75 кг</div>
+            <div style="width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #CFC4B8; cursor: pointer;" style-hover="background: #F6EFE9; color: #14110F;">×</div>
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 16px;">
+            <div style="font-size: 14px; color: #A79C91; cursor: text;">+ Упражнение</div>
+            <div style="display: flex; gap: 16px; font-size: 11px; font-weight: 600; letter-spacing: 1.1px; color: #A79C91;">
+              <div style="cursor: pointer;" style-hover="color: #14110F;">ЗАМЕТКА ТРЕНЕРА ›</div>
+              <div style="cursor: pointer;" style-hover="color: #14110F;">ВИДЕО ТЕХНИКИ ›</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOCK 3 -->
+      <div style="background: #FFFFFF; border-radius: 18px; flex-shrink: 0;">
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 14px 22px;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="font-size: 13px; color: #CFC4B8; cursor: grab;">⠿</div>
+            <div style="font-size: 19px; font-weight: 700; letter-spacing: -0.3px;">Гимнастика</div>
+            <div style="padding: 5px 10px; border-radius: 6px; background: #F3ECE5; font-size: 10px; font-weight: 700; letter-spacing: 1.1px; color: #8A8177;">СУПЕРСЕТ · 4 КРУГА</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 11px; font-weight: 600; letter-spacing: 1.1px; color: #A79C91;">
+            <div style="cursor: pointer;" style-hover="color: #14110F;">СВЕРНУТЬ</div>
+            <div style="cursor: pointer;" style-hover="color: #14110F;">ДУБЛИРОВАТЬ</div>
+            <div style="width: 26px; height: 26px; border-radius: 7px; background: #F6EFE9; display: flex; align-items: center; justify-content: center; font-size: 13px; cursor: pointer;" style-hover="background: #EFE4DA; color: #14110F;">×</div>
+          </div>
+        </div>
+        <div style="border-top: 1px solid #F1E9E1; padding: 4px 22px 16px 22px;">
+          <div style="display: flex; align-items: center; gap: 16px; padding: 13px 0; border-bottom: 1px solid #F6F0EA;">
+            <div style="font-size: 12px; color: #CFC4B8; cursor: grab;">⠿</div>
+            <div style="flex: 1; font-size: 16px; font-weight: 500;">4×8 Подтягивания</div>
+            <div style="font-size: 12px; color: #A79C91; letter-spacing: 0.6px;">СВОЙ ВЕС</div>
+            <div style="width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #CFC4B8; cursor: pointer;" style-hover="background: #F6EFE9; color: #14110F;">×</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 16px; padding: 13px 0; border-bottom: 1px solid #F6F0EA;">
+            <div style="font-size: 12px; color: #CFC4B8; cursor: grab;">⠿</div>
+            <div style="flex: 1; font-size: 16px; font-weight: 500;">4×10 Отжимания на кольцах</div>
+            <div style="font-size: 12px; color: #A79C91; letter-spacing: 0.6px;">ТЕМПО 2-1-1</div>
+            <div style="width: 24px; height: 24px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #CFC4B8; cursor: pointer;" style-hover="background: #F6EFE9; color: #14110F;">×</div>
+          </div>
+          <div style="font-size: 14px; color: #A79C91; padding: 14px 0 4px 0; cursor: text;">+ Упражнение</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px;">
+        <div style="flex: 1; border-radius: 14px; border: 1.5px dashed #E4D8CD; padding: 17px 0; text-align: center; font-size: 12px; font-weight: 700; letter-spacing: 1.4px; color: #8A8177; cursor: pointer;" style-hover="border-color: #A9713F; color: #A9713F;">+ ДОБАВИТЬ БЛОК</div>
+        <div style="flex: 1; border-radius: 14px; border: 1.5px dashed #E4D8CD; padding: 17px 0; text-align: center; font-size: 12px; font-weight: 700; letter-spacing: 1.4px; color: #8A8177; cursor: pointer;" style-hover="border-color: #A9713F; color: #A9713F;">+ БЛОК ИЗ ШАБЛОНА</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LIBRARY ── -->
+  <sc-if value="{{ showLibrary }}" hint-placeholder-val="{{ true }}">
+  <div style="min-height: 0; border-left: 1px solid #EEE3DA; background: #FFFFFF; display: flex; flex-direction: column; box-sizing: border-box; padding: 22px 22px 0 22px;">
+    <div style="display: flex; gap: 6px; padding: 4px; background: #F6EFE9; border-radius: 10px;">
+      <div style="flex: 1; text-align: center; padding: 9px 0; border-radius: 7px; background: #14110F; color: #FFFFFF; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; cursor: pointer;">УПРАЖНЕНИЯ</div>
+      <div style="flex: 1; text-align: center; padding: 9px 0; border-radius: 7px; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; color: #8A8177; cursor: pointer;">БЛОКИ</div>
+      <div style="flex: 1; text-align: center; padding: 9px 0; border-radius: 7px; font-size: 11px; font-weight: 700; letter-spacing: 1.2px; color: #8A8177; cursor: pointer;">ТРЕНИРОВКИ</div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 12px 14px; border-radius: 10px; border: 1px solid #EADFD5; font-size: 14px; color: #A79C91;">
+      <div style="width: 12px; height: 12px; border: 1.6px solid #BFB4A8; border-radius: 99px;"></div>Поиск среди 31
+    </div>
+
+    <div style="display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap;">
+      <div style="padding: 6px 11px; border-radius: 6px; background: #F3ECE5; font-size: 10px; font-weight: 700; letter-spacing: 1.1px; color: #8A8177; cursor: pointer;">ШТАНГА</div>
+      <div style="padding: 6px 11px; border-radius: 6px; background: #F3ECE5; font-size: 10px; font-weight: 700; letter-spacing: 1.1px; color: #8A8177; cursor: pointer;">ГИМНАСТИКА</div>
+      <div style="padding: 6px 11px; border-radius: 6px; background: #F3ECE5; font-size: 10px; font-weight: 700; letter-spacing: 1.1px; color: #8A8177; cursor: pointer;">КАРДИО</div>
+      <div style="padding: 6px 11px; border-radius: 6px; background: #F3ECE5; font-size: 10px; font-weight: 700; letter-spacing: 1.1px; color: #8A8177; cursor: pointer;">МОБИЛИТИ</div>
+    </div>
+
+    <div style="flex: 1; min-height: 0; overflow-y: auto; margin-top: 16px; padding-right: 2px;">
+      <div style="display: flex; align-items: center; gap: 10px; padding: 0 0 10px 0;">
+        <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.4px; color: #A79C91;">НОГИ</div>
+        <div style="flex: 1; height: 1px; background: #F1E9E1;"></div>
+        <div style="font-size: 11px; color: #BFB4A8;">5</div>
+      </div>
+      <div style="display: flex; flex-direction: column;">
+        <div style="display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid #F6F0EA; cursor: pointer;">
+          <div style="width: 34px; height: 34px; border-radius: 8px; background: #F6EFE9; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #8A8177;">BS</div>
+          <div style="flex: 1;"><div style="font-size: 14px; font-weight: 600;">Приседания со штангой</div><div style="font-size: 11px; color: #A79C91; margin-top: 2px;">Back Squat · 1ПМ 165 кг</div></div>
+          <div style="font-size: 16px; color: #CFC4B8;">+</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid #F6F0EA; cursor: pointer;">
+          <div style="width: 34px; height: 34px; border-radius: 8px; background: #F6EFE9; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #8A8177;">FS</div>
+          <div style="flex: 1;"><div style="font-size: 14px; font-weight: 600;">Фронтальный присед</div><div style="font-size: 11px; color: #A79C91; margin-top: 2px;">Front Squat · 1ПМ 130 кг</div></div>
+          <div style="font-size: 16px; color: #CFC4B8;">+</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid #F6F0EA; cursor: pointer;">
+          <div style="width: 34px; height: 34px; border-radius: 8px; background: #F6EFE9; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #8A8177;">BJ</div>
+          <div style="flex: 1;"><div style="font-size: 14px; font-weight: 600;">Запрыгивания на тумбу</div><div style="font-size: 11px; color: #A79C91; margin-top: 2px;">Box Jump · тумба 60 см</div></div>
+          <div style="font-size: 16px; color: #CFC4B8;">+</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid #F6F0EA; cursor: pointer;">
+          <div style="width: 34px; height: 34px; border-radius: 8px; background: #F6EFE9; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #8A8177;">DW</div>
+          <div style="flex: 1;"><div style="font-size: 14px; font-weight: 600;">Выпады с гантелями</div><div style="font-size: 11px; color: #A79C91; margin-top: 2px;">DB Walking Lunge · 2×22.5 кг</div></div>
+          <div style="font-size: 16px; color: #CFC4B8;">+</div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px; padding: 18px 0 10px 0;">
+        <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.4px; color: #A79C91;">СПИНА</div>
+        <div style="flex: 1; height: 1px; background: #F1E9E1;"></div>
+        <div style="font-size: 11px; color: #BFB4A8;">3</div>
+      </div>
+      <div style="display: flex; flex-direction: column;">
+        <div style="display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid #F6F0EA; cursor: pointer;">
+          <div style="width: 34px; height: 34px; border-radius: 8px; background: #F2E4D6; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #8A5A2F;">DL</div>
+          <div style="flex: 1;"><div style="font-size: 14px; font-weight: 600;">Становая тяга</div><div style="font-size: 11px; color: #A9713F; margin-top: 2px;">Уже в блоке «Становая тяга»</div></div>
+          <div style="font-size: 13px; color: #A9713F;">✓</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid #F6F0EA; cursor: pointer;">
+          <div style="width: 34px; height: 34px; border-radius: 8px; background: #F6EFE9; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #8A8177;">PU</div>
+          <div style="flex: 1;"><div style="font-size: 14px; font-weight: 600;">Подтягивания</div><div style="font-size: 11px; color: #A79C91; margin-top: 2px;">Pull-up · турник</div></div>
+          <div style="font-size: 16px; color: #CFC4B8;">+</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid #F6F0EA; cursor: pointer;">
+          <div style="width: 34px; height: 34px; border-radius: 8px; background: #F6EFE9; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #8A8177;">RC</div>
+          <div style="flex: 1;"><div style="font-size: 14px; font-weight: 600;">Лазание по канату</div><div style="font-size: 11px; color: #A79C91; margin-top: 2px;">Rope Climb · 4 м</div></div>
+          <div style="font-size: 16px; color: #CFC4B8;">+</div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px; padding: 18px 0 10px 0;">
+        <div style="font-size: 10px; font-weight: 700; letter-spacing: 1.4px; color: #A79C91;">ГРУДЬ</div>
+        <div style="flex: 1; height: 1px; background: #F1E9E1;"></div>
+        <div style="font-size: 11px; color: #BFB4A8;">2</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px solid #F6F0EA; cursor: pointer;">
+        <div style="width: 34px; height: 34px; border-radius: 8px; background: #F6EFE9; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #8A8177;">BP</div>
+        <div style="flex: 1;"><div style="font-size: 14px; font-weight: 600;">Жим лёжа</div><div style="font-size: 11px; color: #A79C91; margin-top: 2px;">Bench Press · 1ПМ 115 кг</div></div>
+        <div style="font-size: 16px; color: #CFC4B8;">+</div>
+      </div>
+    </div>
+
+    <div style="padding: 14px 0 18px 0; font-size: 12px; line-height: 1.5; color: #BFB4A8; border-top: 1px solid #F1E9E1; margin-top: 8px;">Всё это можно просто напечатать в строке — панель нужна, когда хочется посмотреть, что есть.</div>
+  </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showLibrary&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Layout&quot;},&quot;showNote&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Layout&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      showLibrary: this.props.showLibrary ?? true,
+      showNote: this.props.showNote ?? true,
+    };
+  }
+}
+</script>
+</body>
+</html>

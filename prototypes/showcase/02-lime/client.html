@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Тренировка · Лайм — fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Вариант самостоятельный: своя вёрстка, свой CSS, свои шаблоны.
+     Ничего общего с остальными вариантами, кроме доменной модели —
+     и та лежит здесь отдельной копией. -->
+<link rel="stylesheet" href="assets/client.css">
+</head>
+<body>
+
+<div class="phone">
+  <div class="screen">
+
+    <div class="sb">
+      <span>9:41</span>
+      <span class="ind"><i></i><i></i></span>
+    </div>
+
+    <header class="hd">
+      <div class="nrow">
+        <button class="ic" title="Назад">‹</button>
+        <span class="meta" id="meta"></span>
+        <button class="ic" title="Действия">⋯</button>
+      </div>
+      <h1 id="title"></h1>
+      <div class="chips" id="chips"></div>
+    </header>
+
+    <div class="feed" id="feed"></div>
+
+    <footer class="ft">
+      <!-- В макете здесь «⌕ — поиск/видео». Глобального поиска на экране
+           тренировки у нас нет, а видео привязано к упражнению, не к дню.
+           Место отдано тому, что в требованиях есть: COM-1, реплика
+           клиента ко всей тренировке. -->
+      <button class="ic2" id="say" title="Комментарий тренеру">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 9.5a6.5 6.5 0 0 1-9.3 5.9L3 16.5l1.2-4.5A6.5 6.5 0 1 1 17 9.5z"/></svg>
+      </button>
+      <button class="cta" id="cta"></button>
+    </footer>
+    <div class="home"><i></i></div>
+
+  </div>
+</div>
+
+<aside class="side">
+  <h2>Тренировка на сегодня</h2>
+  <p>Экран клиента — зеркало конструктора тренера. Та же среда из программы
+     «Сила + кроссфит», которую тренер собрал на своём экране.</p>
+  <p><b>Процентов здесь нет.</b> Тренер написал «70 % от ПМ» — клиент видит
+     килограммы. В этом весь смысл расчёта нагрузки: думает тренер, считает
+     система, поднимает атлет.</p>
+  <p>Отмечать можно как удобно: нажать строку целиком или отдельную пилюлю
+     подхода. Кнопка внизу ведёт по работе шаг за шагом.</p>
+  <div class="req">
+    <div><b>CLI-1</b><span>Клиент видит тренировки, которые пишет тренер</span></div>
+    <div><b>CLI-2</b><span>Запись результатов: веса, повторения, комментарии</span></div>
+    <div><b>CON-16</b><span>Проценты от ПМ превращены в килограммы</span></div>
+    <div><b>EX-3</b><span>Гибкие показатели: кг, повторы, секунды, метры, калории</span></div>
+  </div>
+</aside>
+
+<script src="assets/data.js"></script>
+<script src="assets/client.js"></script>
+</body>
+</html>

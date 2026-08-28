@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fitbaza — Конструктор тренировки (десктоп, тренер)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; background: #FBF7F1; font-family: 'Instrument Sans', sans-serif; }
+  a { color: #F5511E; text-decoration: none; } a:hover { color: #C43F12; }
+  ::selection { background: #FBD7C6; color: #1E1B18; }
+</style>
+</head>
+<!--
+  ============================================================
+  FITBAZA — DESIGN HANDOFF (Конструктор тренировки (десктоп, тренер))
+  Static reference markup. Open in a browser to see the target UI.
+  Pure HTML + inline styles, no build step, no JS.
+
+  DESIGN TOKENS
+  ---------------------------------------------------------
+  Fonts:      'Instrument Sans' (UI, 400/500/600/700)
+              'IBM Plex Mono'   (numbers, labels, meta, 400/500/600)
+  Colors:
+    --paper        #FBF7F1   основной фон приложения
+    --paper-warm   #F4EEE5   фон-подложка / неактивное
+    --surface      #FFFFFF   карточки, блоки
+    --ink          #1E1B18   основной текст / тёмные панели
+    --ink-2        #45403A   вторичный текст
+    --ink-3        #6F675C   иконки, третичный текст
+    --muted        #82796D   подписи
+    --muted-2      #A29B90   плейсхолдеры, мета
+    --line         #E3DACE   границы, разделители
+    --line-2       #DCD3C6   тонкие разделители
+    --accent       #F5511E   акцент (CTA, активное состояние)
+    --accent-dark  #C43F12   акцент на светлом фоне (текст)
+    --accent-soft  #FBD7C6   акцентная плашка
+    --accent-bg    #FFF1E9   акцентный фон карточки
+    --accent-light #FF8A5C   акцент на тёмном фоне
+    --on-dark      #FBF7F1 / #CFC8BC / #8E877C  (текст на --ink)
+    --dark-2       #262220   поверхность на тёмном
+    --dark-line    #37322C / #3A342F
+
+  Radii:      999px pills/кнопки/аватары · 14–18px строки · 20–26px карточки
+              30px панель библиотеки · 44px корпус телефона
+  Spacing:    шаг 4px; отступы карточек 16–20px; gap между блоками 8–10px
+  Shadows:    0 34px 70px -34px rgba(30,27,24,.4)  — телефон
+              0 2px 10px -4px rgba(30,27,24,.18)   — активный элемент рейла
+  Layout:     desktop 1600×1000, grid 76px рейл | 1fr рабочая область | 340px библиотека; скроллится только тело блоков
+  ============================================================
+-->
+<body>
+<div style="width: 1600px; height: 1000px; background: #FBF7F1; color: #1E1B18; font-family: 'Instrument Sans', sans-serif; display: grid; grid-template-columns: 76px 1fr 340px; overflow: hidden;">
+
+  <!-- QUIET RAIL -->
+  <div style="display: flex; flex-direction: column; align-items: center; padding: 26px 0 22px 0; gap: 30px;">
+    <div style="width: 38px; height: 38px; border-radius: 999px; background: #F5511E; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700;">f</div>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+      <div style="width: 44px; height: 44px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #A29B90;">◻</div>
+      <div style="width: 44px; height: 44px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #A29B90;">◯</div>
+      <div style="width: 44px; height: 44px; border-radius: 999px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #F5511E; box-shadow: 0 2px 10px -4px rgba(30,27,24,0.18);">◈</div>
+      <div style="width: 44px; height: 44px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #A29B90;">☰</div>
+      <div style="width: 44px; height: 44px; border-radius: 999px; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #A29B90;">⧉</div>
+    </div>
+    <div style="flex: 1;"></div>
+    <div style="width: 38px; height: 38px; border-radius: 999px; background: #EFE8DE; display: flex; align-items: center; justify-content: center; font-family: 'IBM Plex Mono'; font-size: 11px; color: #6F675C;">СК</div>
+  </div>
+
+  <!-- CENTER -->
+  <div style="min-width: 0; min-height: 0; display: flex; flex-direction: column; padding: 26px 30px 0 8px; box-sizing: border-box; overflow: hidden;">
+
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <div style="width: 34px; height: 34px; border-radius: 999px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #6F675C;">←</div>
+        <div style="font-family: 'IBM Plex Mono'; font-size: 12px; color: #A29B90;">Сила + кроссфит · неделя 4 из 8</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 9px; padding: 8px 16px 8px 8px; border-radius: 999px; background: #FFFFFF;">
+          <div style="width: 26px; height: 26px; border-radius: 999px; background: #FBD7C6; color: #C43F12; font-family: 'IBM Plex Mono'; font-size: 10px; display: flex; align-items: center; justify-content: center;">АК</div>
+          <div style="font-size: 13px; font-weight: 500;">Артём Ковалёв</div>
+          <div style="font-size: 10px; color: #A29B90;">▾</div>
+        </div>
+        <div style="padding: 12px 20px; border-radius: 999px; border: 1.5px solid #E3DACE; font-size: 13px; font-weight: 600; color: #45403A;">Сохранить</div>
+        <div style="padding: 13px 30px; border-radius: 999px; background: #F5511E; color: #FFFFFF; font-size: 13px; font-weight: 600;">Назначить</div>
+      </div>
+    </div>
+
+    <div style="font-size: 40px; font-weight: 700; letter-spacing: -1.2px; line-height: 1.1; white-space: nowrap;">Сила · становая + гимнастика</div>
+    <div style="display: flex; align-items: center; gap: 20px; margin-top: 9px; font-size: 14px; color: #82796D;">
+      <span>Среда, 26 августа</span><span style="color: #DCD3C6;">·</span><span>5 блоков</span><span style="color: #DCD3C6;">·</span><span>12 упражнений</span><span style="color: #DCD3C6;">·</span><span>~75 минут</span>
+    </div>
+
+    <!-- DAY PILLS -->
+    <div style="display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap;">
+      <div style="padding: 8px 16px; border-radius: 999px; background: #FFFFFF; font-size: 13px; color: #6F675C;">пн · присед + жим</div>
+      <div style="padding: 8px 16px; border-radius: 999px; background: #FFFFFF; font-size: 13px; color: #6F675C;">вт · «Fran»</div>
+      <div style="padding: 8px 16px; border-radius: 999px; background: #F5511E; color: #FFFFFF; font-size: 13px; font-weight: 600;">ср · становая</div>
+      <div style="padding: 8px 16px; border-radius: 999px; background: #F4EEE5; font-size: 13px; color: #A29B90;">чт · отдых</div>
+      <div style="padding: 8px 16px; border-radius: 999px; background: #FFFFFF; font-size: 13px; color: #6F675C;">пт · ТА + метком</div>
+      <div style="padding: 8px 16px; border-radius: 999px; background: #FFFFFF; font-size: 13px; color: #6F675C;">сб · кардио</div>
+      <div style="padding: 8px 16px; border-radius: 999px; background: #F4EEE5; font-size: 13px; color: #A29B90;">вс · отдых</div>
+    </div>
+
+    <!-- SCROLL BODY -->
+    <div style="flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; margin-top: 20px; padding-right: 4px; display: flex; flex-direction: column; gap: 10px;">
+
+      <div style="background: #FFF1E9; border-radius: 20px; padding: 12px 20px; display: flex; gap: 14px; align-items: flex-start;">
+        <div style="width: 30px; height: 30px; border-radius: 999px; background: #F5511E; color: #FFFFFF; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">”</div>
+        <div>
+          <div style="font-size: 12px; font-weight: 600; color: #C43F12; margin-bottom: 4px;">Сообщение Артёму</div>
+          <div style="font-size: 15px; line-height: 1.45; color: #45403A;">Становую сегодня не гони — работаем в технике. Если спина круглится, сбрось до 140 и добери объёмом.</div>
+        </div>
+      </div>
+
+      <!-- BLOCK A -->
+      <div style="background: #FFFFFF; border-radius: 24px; padding: 17px 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="font-size: 18px; font-weight: 700; letter-spacing: -0.3px;">Разминка</div>
+            <div style="padding: 4px 11px; border-radius: 999px; background: #F4EEE5; font-family: 'IBM Plex Mono'; font-size: 10px; color: #82796D;">3 упр · 10 мин</div>
+          </div>
+          <div style="display: flex; gap: 8px; font-size: 12px; color: #A29B90;">
+            <div style="padding: 7px 14px; border-radius: 999px; background: #FBF7F1;">Дублировать</div>
+            <div style="width: 30px; height: 30px; border-radius: 999px; background: #FBF7F1; display: flex; align-items: center; justify-content: center;">×</div>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 16px; background: #FBF7F1; border-radius: 14px; padding: 11px 16px;">
+            <div style="font-size: 15px; font-weight: 500; flex: 1;">Суставная разминка</div>
+            <div style="font-family: 'IBM Plex Mono'; font-size: 13px; color: #45403A;">2 × 90 сек</div>
+            <div style="font-size: 13px; color: #A29B90; width: 120px; text-align: right;">по кругу</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 16px; background: #FBF7F1; border-radius: 14px; padding: 11px 16px;">
+            <div style="font-size: 15px; font-weight: 500; flex: 1;">Гребля</div>
+            <div style="font-family: 'IBM Plex Mono'; font-size: 13px; color: #45403A;">15 кал</div>
+            <div style="font-size: 13px; color: #A29B90; width: 120px; text-align: right;">темп 24</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 16px; background: #FBF7F1; border-radius: 14px; padding: 11px 16px;">
+            <div style="font-size: 15px; font-weight: 500; flex: 1;">Мобилити плеч с PVC</div>
+            <div style="font-family: 'IBM Plex Mono'; font-size: 13px; color: #45403A;">2 × 10</div>
+            <div style="font-size: 13px; color: #A29B90; width: 120px; text-align: right;">медленно</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOCK B -->
+      <div style="background: #FFFFFF; border-radius: 24px; padding: 17px 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="font-size: 18px; font-weight: 700; letter-spacing: -0.3px;">Становая тяга</div>
+            <div style="padding: 4px 11px; border-radius: 999px; background: #FFF1E9; font-family: 'IBM Plex Mono'; font-size: 10px; color: #C43F12;">сила · 5 подходов</div>
+          </div>
+          <div style="display: flex; gap: 8px; font-size: 12px; color: #A29B90;">
+            <div style="padding: 7px 14px; border-radius: 999px; background: #FBF7F1;">Дублировать</div>
+            <div style="width: 30px; height: 30px; border-radius: 999px; background: #FBF7F1; display: flex; align-items: center; justify-content: center;">×</div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 16px; background: #FBF7F1; border-radius: 14px; padding: 11px 16px; margin-bottom: 8px;">
+          <div style="flex: 1;">
+            <div style="font-size: 15px; font-weight: 600;">Становая тяга</div>
+            <div style="font-size: 12px; color: #A29B90; margin-top: 2px;">Deadlift · штанга · пауза 2 сек внизу</div>
+          </div>
+          <div style="font-family: 'IBM Plex Mono'; font-size: 13px; color: #45403A;">5 × 3 @ 80%</div>
+          <div style="padding: 5px 13px; border-radius: 999px; background: #FBD7C6; font-family: 'IBM Plex Mono'; font-size: 12px; color: #C43F12;">152 кг</div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+          <div style="flex: 1; background: #FFF1E9; border-radius: 14px; padding: 10px 0; text-align: center;"><div style="font-family: 'IBM Plex Mono'; font-size: 9px; color: #C99C84; letter-spacing: 0.8px;">1</div><div style="font-family: 'IBM Plex Mono'; font-size: 14px; color: #C43F12; margin-top: 3px;">3 × 140</div></div>
+          <div style="flex: 1; background: #FFF1E9; border-radius: 14px; padding: 10px 0; text-align: center;"><div style="font-family: 'IBM Plex Mono'; font-size: 9px; color: #C99C84; letter-spacing: 0.8px;">2</div><div style="font-family: 'IBM Plex Mono'; font-size: 14px; color: #C43F12; margin-top: 3px;">3 × 148</div></div>
+          <div style="flex: 1; background: #F5511E; border-radius: 14px; padding: 10px 0; text-align: center;"><div style="font-family: 'IBM Plex Mono'; font-size: 9px; color: #FFD5C2; letter-spacing: 0.8px;">3</div><div style="font-family: 'IBM Plex Mono'; font-size: 14px; color: #FFFFFF; margin-top: 3px;">3 × 152</div></div>
+          <div style="flex: 1; background: #F4EEE5; border-radius: 14px; padding: 10px 0; text-align: center;"><div style="font-family: 'IBM Plex Mono'; font-size: 9px; color: #A29B90; letter-spacing: 0.8px;">4</div><div style="font-family: 'IBM Plex Mono'; font-size: 14px; color: #6F675C; margin-top: 3px;">3 × 152</div></div>
+          <div style="flex: 1; background: #F4EEE5; border-radius: 14px; padding: 10px 0; text-align: center;"><div style="font-family: 'IBM Plex Mono'; font-size: 9px; color: #A29B90; letter-spacing: 0.8px;">5</div><div style="font-family: 'IBM Plex Mono'; font-size: 14px; color: #6F675C; margin-top: 3px;">3 × 152</div></div>
+          <div style="flex: 1; border-radius: 14px; padding: 10px 0; text-align: center; border: 1.5px dashed #E3DACE; font-size: 12px; color: #A29B90; display: flex; align-items: center; justify-content: center;">+ подход</div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 16px; background: #FBF7F1; border-radius: 14px; padding: 11px 16px;">
+          <div style="flex: 1;">
+            <div style="font-size: 15px; font-weight: 500;">Тяга в наклоне</div>
+            <div style="font-size: 12px; color: #A29B90; margin-top: 2px;">Barbell Row · штанга</div>
+          </div>
+          <div style="font-family: 'IBM Plex Mono'; font-size: 13px; color: #45403A;">3 × 8</div>
+          <div style="padding: 5px 13px; border-radius: 999px; background: #EFE8DE; font-family: 'IBM Plex Mono'; font-size: 12px; color: #6F675C;">75 кг</div>
+        </div>
+      </div>
+
+      <!-- BLOCK C -->
+      <div style="background: #FFFFFF; border-radius: 24px; padding: 17px 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="font-size: 18px; font-weight: 700; letter-spacing: -0.3px;">Гимнастика</div>
+            <div style="padding: 4px 11px; border-radius: 999px; background: #F4EEE5; font-family: 'IBM Plex Mono'; font-size: 10px; color: #82796D;">суперсет · 4 круга</div>
+          </div>
+          <div style="display: flex; gap: 8px; font-size: 12px; color: #A29B90;">
+            <div style="padding: 7px 14px; border-radius: 999px; background: #FBF7F1;">Дублировать</div>
+            <div style="width: 30px; height: 30px; border-radius: 999px; background: #FBF7F1; display: flex; align-items: center; justify-content: center;">×</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <div style="flex: 1; display: flex; align-items: center; gap: 14px; background: #FBF7F1; border-radius: 14px; padding: 11px 16px;">
+            <div style="font-size: 15px; font-weight: 500; flex: 1;">Подтягивания</div>
+            <div style="font-family: 'IBM Plex Mono'; font-size: 13px;">4 × 8</div>
+          </div>
+          <div style="flex: 1; display: flex; align-items: center; gap: 14px; background: #FBF7F1; border-radius: 14px; padding: 11px 16px;">
+            <div style="font-size: 15px; font-weight: 500; flex: 1;">Отжимания на кольцах</div>
+            <div style="font-family: 'IBM Plex Mono'; font-size: 13px;">4 × 10</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div style="display: flex; gap: 10px; padding: 12px 0 22px 0; flex-shrink: 0;">
+      <div style="flex: 1; border-radius: 999px; border: 1.5px dashed #E3DACE; padding: 14px 0; text-align: center; font-size: 14px; color: #82796D;">+ Блок</div>
+      <div style="flex: 2; border-radius: 999px; background: #FFFFFF; padding: 14px 24px; font-size: 14px; color: #A29B90;">Напечатайте как в тетради: «Присед 5×3 80%»</div>
+    </div>
+  </div>
+
+  <!-- LIBRARY -->
+  <div style="min-height: 0; padding: 26px 26px 26px 0; box-sizing: border-box;">
+    <div style="height: 100%; background: #FFFFFF; border-radius: 30px; padding: 24px 22px; box-sizing: border-box; display: flex; flex-direction: column; min-height: 0;">
+      <div style="font-size: 19px; font-weight: 700; letter-spacing: -0.3px;">База упражнений</div>
+      <div style="display: flex; gap: 6px; margin: 16px 0 14px 0;">
+        <div style="padding: 7px 15px; border-radius: 999px; background: #1E1B18; color: #FFFFFF; font-size: 12px; font-weight: 600;">Упражнения</div>
+        <div style="padding: 7px 15px; border-radius: 999px; background: #FBF7F1; color: #82796D; font-size: 12px;">Блоки</div>
+        <div style="padding: 7px 15px; border-radius: 999px; background: #FBF7F1; color: #82796D; font-size: 12px;">Тренировки</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px; background: #FBF7F1; border-radius: 999px; padding: 13px 18px; font-size: 13px; color: #A29B90;">
+        <span style="font-size: 12px;">⌕</span>Поиск среди 31
+      </div>
+
+      <div style="flex: 1; min-height: 0; overflow: hidden; margin-top: 18px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 600; color: #A29B90; padding: 0 4px;"><span>Ноги</span><span style="font-family: 'IBM Plex Mono';">5</span></div>
+        <div style="display: flex; align-items: center; gap: 12px; background: #FBF7F1; border-radius: 18px; padding: 13px 16px;">
+          <div style="flex: 1;"><div style="font-size: 14px; font-weight: 500;">Приседания со штангой</div><div style="font-size: 11px; color: #A29B90; margin-top: 2px;">Штанга · 1ПМ 165</div></div>
+          <div style="width: 26px; height: 26px; border-radius: 999px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #F5511E;">+</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; background: #FBF7F1; border-radius: 18px; padding: 13px 16px;">
+          <div style="flex: 1;"><div style="font-size: 14px; font-weight: 500;">Фронтальный присед</div><div style="font-size: 11px; color: #A29B90; margin-top: 2px;">Штанга · 1ПМ 130</div></div>
+          <div style="width: 26px; height: 26px; border-radius: 999px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #F5511E;">+</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; background: #FBF7F1; border-radius: 18px; padding: 13px 16px;">
+          <div style="flex: 1;"><div style="font-size: 14px; font-weight: 500;">Запрыгивания на тумбу</div><div style="font-size: 11px; color: #A29B90; margin-top: 2px;">Тумба 60 см</div></div>
+          <div style="width: 26px; height: 26px; border-radius: 999px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #F5511E;">+</div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 600; color: #A29B90; padding: 10px 4px 0 4px;"><span>Спина</span><span style="font-family: 'IBM Plex Mono';">3</span></div>
+        <div style="display: flex; align-items: center; gap: 12px; background: #FFF1E9; border-radius: 18px; padding: 13px 16px;">
+          <div style="flex: 1;"><div style="font-size: 14px; font-weight: 600;">Становая тяга</div><div style="font-size: 11px; color: #C43F12; margin-top: 2px;">Уже в блоке «Становая тяга»</div></div>
+          <div style="width: 26px; height: 26px; border-radius: 999px; background: #F5511E; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #FFFFFF;">✓</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; background: #FBF7F1; border-radius: 18px; padding: 13px 16px;">
+          <div style="flex: 1;"><div style="font-size: 14px; font-weight: 500;">Подтягивания</div><div style="font-size: 11px; color: #A29B90; margin-top: 2px;">Турник · свой вес</div></div>
+          <div style="width: 26px; height: 26px; border-radius: 999px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #F5511E;">+</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px; background: #FBF7F1; border-radius: 18px; padding: 13px 16px;">
+          <div style="flex: 1;"><div style="font-size: 14px; font-weight: 500;">Лазание по канату</div><div style="font-size: 11px; color: #A29B90; margin-top: 2px;">Канат · 4 м</div></div>
+          <div style="width: 26px; height: 26px; border-radius: 999px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #F5511E;">+</div>
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 600; color: #A29B90; padding: 10px 4px 0 4px;"><span>Грудь</span><span style="font-family: 'IBM Plex Mono';">2</span></div>
+        <div style="display: flex; align-items: center; gap: 12px; background: #FBF7F1; border-radius: 18px; padding: 13px 16px;">
+          <div style="flex: 1;"><div style="font-size: 14px; font-weight: 500;">Жим лёжа</div><div style="font-size: 11px; color: #A29B90; margin-top: 2px;">Штанга · 1ПМ 115</div></div>
+          <div style="width: 26px; height: 26px; border-radius: 999px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #F5511E;">+</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 16px; font-size: 12px; line-height: 1.5; color: #A29B90;">Панель нужна, только если хочется посмотреть, что есть — упражнение можно просто напечатать в строке.</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

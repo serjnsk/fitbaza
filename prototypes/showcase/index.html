@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>fitbaza · пять стилистик</title>
+<!-- Сводная страница нарочно нейтральна: серый холст, один шрифт,
+     никакого цвета кроме чёрного. Она показывает варианты, а не
+     соревнуется с ними — любая её собственная стилистика мешала бы
+     сравнивать. -->
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#111114; --tx2:#55555C; --tx3:#8A8A93; --tx4:#B4B4BC;
+  --bg:#FFFFFF; --page:#F1F1F3; --line:#E3E3E7; --line2:#D2D2D8;
+  --ui:-apple-system,BlinkMacSystemFont,"Segoe UI","Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+body{background:var(--page);color:var(--ink);font-family:var(--ui);
+  -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:52px 28px 120px}
+
+/* ─── шапка ─── */
+.hd{margin-bottom:44px}
+.hd h1{font-size:30px;font-weight:700;letter-spacing:-.025em;margin-bottom:12px}
+.hd p{max-width:660px;color:var(--tx2);font-size:15px}
+.hd p+p{margin-top:9px}
+.hd .meta{margin-top:18px;font-family:var(--mono);font-size:12px;color:var(--tx3);
+  display:flex;gap:18px;flex-wrap:wrap}
+
+/* ─── карточка варианта ─── */
+.v{background:var(--bg);border:1px solid var(--line);border-radius:12px;
+  padding:26px 26px 26px;margin-bottom:22px}
+.vh{display:flex;align-items:flex-start;gap:16px;margin-bottom:6px}
+.vh .no{font-family:var(--mono);font-size:12px;color:var(--tx4);padding-top:7px;flex:none}
+.vh h2{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.vh .sp{flex:1}
+.vh .open{display:flex;gap:8px;flex:none;padding-top:3px}
+.open a{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px;
+  border:1px solid var(--line2);border-radius:7px;text-decoration:none;color:var(--ink);
+  font-size:12.5px;font-weight:500;white-space:nowrap}
+.open a:hover{border-color:var(--ink)}
+.open a svg{width:12px;height:12px;color:var(--tx3)}
+.open a:hover svg{color:var(--ink)}
+
+.vb{padding-left:34px}
+.vb .lead{max-width:640px;color:var(--tx2);margin-bottom:16px}
+.vb .lead b{color:var(--ink);font-weight:600}
+
+/* характеристики: палитра, шрифты, приём */
+.spec{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;
+  padding:16px 0 20px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  margin-bottom:20px}
+.spec .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--tx4);margin-bottom:9px}
+.sw{display:flex;gap:6px;flex-wrap:wrap}
+.sw i{width:26px;height:26px;border-radius:5px;display:block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.07)}
+.fn{font-size:13px;color:var(--tx2)}
+.fn b{display:block;color:var(--ink);font-weight:600;font-size:14px;letter-spacing:-.01em}
+.fn s{text-decoration:none;display:block;font-family:var(--mono);font-size:11px;color:var(--tx4)}
+.fn div+div{margin-top:7px}
+.note{font-size:13px;color:var(--tx2);line-height:1.5}
+
+/* ─── превью ─── */
+.pv{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:18px;align-items:start}
+.scr{display:block;text-decoration:none}
+.fr{position:relative;border:1px solid var(--line);border-radius:9px;overflow:hidden;
+  background:var(--page);display:block}
+/* Кадр держит aspect-ratio, а страница внутри лежит абсолютно и
+   обрезается им: иначе её натуральные 1280×840 задавали бы высоту
+   блока и превью распирало карточку. */
+.fr iframe{position:absolute;top:0;left:0;border:0;transform-origin:0 0;
+  display:block;pointer-events:none}
+/* Прозрачный слой поверх кадра: клик по превью открывает страницу
+   целиком, а не проваливается внутрь чужого интерфейса. */
+.fr .hit{position:absolute;inset:0}
+.scr:hover .fr{border-color:var(--ink)}
+/* Подпись под кадром, а не поверх него: наложенная плашка закрывала
+   нижнюю строку интерфейса — ровно ту часть, ради которой смотрят. */
+.scr .cap{display:block;padding:9px 2px 0;
+  font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--tx3)}
+.scr:hover .cap{color:var(--ink)}
+/* Натуральный размер страницы живёт в data-w / data-h рядом с
+   aspect-ratio: варианты приходят разными холстами — 1280×840,
+   390×760, доска 1600×1000 — и зашитая в скрипт таблица размеров
+   ломалась бы на каждом новом. */
+.pv.stack{grid-template-columns:minmax(0,1fr);gap:22px}
+
+/* ─── пустой слот ─── */
+/* Служебная строка под превью: откуда взялась стилистика. Мелким
+   и моноширинным — это сноска, а не часть рассказа о варианте. */
+.src{margin-top:16px;font-family:var(--mono);font-size:11px;color:var(--tx4)}
+.src a{color:var(--tx3)}
+.src a:hover{color:var(--ink)}
+
+.v.wait{border-style:dashed;background:none}
+.v.wait .vh h2{color:var(--tx4)}
+.v.wait .vb{color:var(--tx3);font-size:14px}
+.v.wait .drop{margin-top:12px;font-family:var(--mono);font-size:12px;color:var(--tx4)}
+
+@media (max-width:900px){
+  .pv{grid-template-columns:minmax(0,1fr)}
+  .fr[data-w="390"]{max-width:250px}
+  .spec{grid-template-columns:minmax(0,1fr)}
+  .vb{padding-left:0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hd">
+    <h1>fitbaza · пять стилистик</h1>
+    <p>Один и тот же продукт в разных визуальных языках. Экраны везде одинаковые
+       и данные одни и те же — среда 26 августа программы «Сила + кроссфит»,
+       атлет Артём Ковалёв. Отличается только то, как это выглядит.</p>
+    <p>Каждый вариант — пара: конструктор тренировки у тренера на десктопе
+       и экран тренировки у клиента на телефоне. Превью живые: нажмите,
+       чтобы открыть экран целиком и потыкать.</p>
+    <div class="meta">
+      <span>5 стилистик</span>
+      <span>2 экрана в каждой</span>
+      <span>все живые · можно нажимать</span>
+      <span>прототип · не финальная вёрстка</span>
+    </div>
+  </header>
+
+  <!-- ─── 01 ─────────────────────────────────────────────── -->
+  <section class="v">
+    <div class="vh">
+      <span class="no">01</span>
+      <h2>Список</h2>
+      <span class="sp"></span>
+      <span class="open">
+        <a href="01-strava/trainer.html" target="_blank">Конструктор
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h7v7M13 3 4 12"/></svg></a>
+        <a href="01-strava/client.html" target="_blank">Мобилка
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h7v7M13 3 4 12"/></svg></a>
+      </span>
+    </div>
+    <div class="vb">
+      <p class="lead"><b>Плоскость.</b> Ни карточек, ни теней, ни вложенных подложек:
+        содержимое разделяют тонкие линии и воздух. Самая плотная из пяти —
+        на экран влезает больше всего, потому что каждая вложенность стоит
+        отступов, а их здесь нет. Акцент работает ровно на одном: на том,
+        что нужно нажать.</p>
+
+      <div class="spec">
+        <div>
+          <div class="k">Палитра</div>
+          <div class="sw">
+            <i style="background:#FC5200"></i>
+            <i style="background:#141414"></i>
+            <i style="background:#5E5E5E"></i>
+            <i style="background:#ECECEC"></i>
+            <i style="background:#F7F7F7"></i>
+            <i style="background:#FFFFFF"></i>
+          </div>
+        </div>
+        <div>
+          <div class="k">Шрифты</div>
+          <div class="fn">
+            <div><b>Inter</b><s>заголовки и текст</s></div>
+            <div><b>JetBrains&nbsp;Mono</b><s>только числа</s></div>
+          </div>
+        </div>
+        <div>
+          <div class="k">Чем держится</div>
+          <div class="note">Линия и зазор фона. Скругления 6–10px,
+            типографический контраст небольшой: смысл несёт вес и цвет,
+            а не размер.</div>
+        </div>
+      </div>
+
+      <div class="pv">
+        <a class="scr" href="01-strava/trainer.html" target="_blank">
+          <span class="fr" data-w="1280" data-h="840" style="aspect-ratio:1280/840">
+            <iframe src="01-strava/trainer.html" scrolling="no" title="Конструктор — 01"></iframe>
+            <span class="hit"></span>
+          </span>
+          <span class="cap">Конструктор · десктоп</span>
+        </a>
+        <a class="scr" href="01-strava/client.html" target="_blank">
+          <span class="fr" data-w="390"  data-h="760" style="aspect-ratio:390/760">
+            <iframe src="01-strava/client.html?bare" scrolling="no" title="Мобилка — 01"></iframe>
+            <span class="hit"></span>
+          </span>
+          <span class="cap">Клиент · телефон</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 02…05 — слоты под новые файлы ──────────────────── -->
+  <!-- ─── 02 ─────────────────────────────────────────────── -->
+  <section class="v">
+    <div class="vh">
+      <span class="no">02</span>
+      <h2>Лайм</h2>
+      <span class="sp"></span>
+      <span class="open">
+        <a href="02-lime/trainer.html" target="_blank">Конструктор
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h7v7M13 3 4 12"/></svg></a>
+        <a href="02-lime/client.html" target="_blank">Мобилка
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h7v7M13 3 4 12"/></svg></a>
+      </span>
+    </div>
+    <div class="vb">
+      <p class="lead"><b>Пилюли на тёплом холсте.</b> Всё скруглено до предела:
+        панели 24px, кнопки и чипы — полные капсулы. Фон не белый, а тёплый серый,
+        поэтому белые карточки на нём читаются сами по себе, без теней и рамок.
+        Кислотный лайм — единственный цвет на экране и стоит ровно там,
+        где сейчас работа: активный пункт меню, сегодняшний день, текущий подход.</p>
+      <p class="lead">Отдельно стоит посмотреть <b>дорожку недели</b>: вместо семи
+        одинаковых ячеек — непрерывная полоса, где ширина дня пропорциональна
+        объёму нагрузки, а дни отдыха сжаты в узкие капсулы. Неделя читается
+        как график, а не как календарь.</p>
+
+      <div class="spec">
+        <div>
+          <div class="k">Палитра</div>
+          <div class="sw">
+            <i style="background:#D6F84C"></i>
+            <i style="background:#111110"></i>
+            <i style="background:#6C6C64"></i>
+            <i style="background:#EFEFEA"></i>
+            <i style="background:#F6F6F2"></i>
+            <i style="background:#FFFFFF"></i>
+          </div>
+        </div>
+        <div>
+          <div class="k">Шрифты</div>
+          <div class="fn">
+            <div><b>Instrument&nbsp;Sans</b><s>заголовки и текст</s></div>
+            <div><b>IBM&nbsp;Plex&nbsp;Mono</b><s>подписи и все числа</s></div>
+          </div>
+        </div>
+        <div>
+          <div class="k">Чем держится</div>
+          <div class="note">Скругление и заливка. Ни одной рамки и почти ни одной
+            линии: уровни разделяет тон — тёплый серый холст, белая панель,
+            светлая подложка внутри.</div>
+        </div>
+      </div>
+
+      <div class="pv">
+        <a class="scr" href="02-lime/trainer.html" target="_blank">
+          <span class="fr" data-w="1280" data-h="840" style="aspect-ratio:1280/840">
+            <iframe src="02-lime/trainer.html" scrolling="no" title="Конструктор — 02"></iframe>
+            <span class="hit"></span>
+          </span>
+          <span class="cap">Конструктор · десктоп</span>
+        </a>
+        <a class="scr" href="02-lime/client.html" target="_blank">
+          <span class="fr" data-w="390" data-h="760" style="aspect-ratio:390/760">
+            <iframe src="02-lime/client.html?bare" scrolling="no" title="Мобилка — 02"></iframe>
+            <span class="hit"></span>
+          </span>
+          <span class="cap">Клиент · телефон</span>
+        </a>
+      </div>
+      <p class="src">Исходные макеты, с которых собрана стилистика:
+        <a href="02-lime/reference/board-trainer.html" target="_blank">доска конструктора</a> ·
+        <a href="02-lime/reference/board-client.html" target="_blank">доска клиента, 3 экрана</a></p>
+    </div>
+  </section>
+
+  <!-- ─── 03 ─────────────────────────────────────────────── -->
+  <section class="v">
+    <div class="vh">
+      <span class="no">03</span>
+      <h2>Тёплый</h2>
+      <span class="sp"></span>
+      <span class="open">
+        <a href="03-warm/trainer.html" target="_blank">Конструктор
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h7v7M13 3 4 12"/></svg></a>
+        <a href="03-warm/client.html" target="_blank">Мобилка
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h7v7M13 3 4 12"/></svg></a>
+      </span>
+    </div>
+    <div class="vb">
+      <p class="lead"><b>Бумага и одно тёмное пятно.</b> Тёплый небелёный фон,
+        белые карточки, единственный акцент — оранжевый. Заголовки крупные
+        и плотные, вся числовая работа набрана моноширинным. Ни одной жирной
+        линии: уровни разделяет тон бумаги.</p>
+      <p class="lead">Тёмная панель здесь работает как указатель: она отдана
+        только тому, что происходит <b>здесь и сейчас</b>. На телефоне
+        план — это список блоков, развёрнут ровно один, текущий, и он
+        единственный тёмный. Искать, где ты находишься, не нужно.</p>
+
+      <div class="spec">
+        <div>
+          <div class="k">Палитра</div>
+          <div class="sw">
+            <i style="background:#F5511E"></i>
+            <i style="background:#1E1B18"></i>
+            <i style="background:#82796D"></i>
+            <i style="background:#F4EEE5"></i>
+            <i style="background:#FBF7F1"></i>
+            <i style="background:#FFFFFF"></i>
+          </div>
+        </div>
+        <div>
+          <div class="k">Шрифты</div>
+          <div class="fn">
+            <div><b>Instrument&nbsp;Sans</b><s>заголовки и текст</s></div>
+            <div><b>IBM&nbsp;Plex&nbsp;Mono</b><s>подписи и все числа</s></div>
+          </div>
+        </div>
+        <div>
+          <div class="k">Чем держится</div>
+          <div class="note">Тон бумаги и один акцент. Пилюли везде, где можно
+            нажать; тёмная панель — только под текущим шагом, поэтому её
+            нельзя не заметить.</div>
+        </div>
+      </div>
+
+      <div class="pv">
+        <a class="scr" href="03-warm/trainer.html" target="_blank">
+          <span class="fr" data-w="1440" data-h="940" style="aspect-ratio:1440/940">
+            <iframe src="03-warm/trainer.html" scrolling="no" title="Конструктор — 03"></iframe>
+            <span class="hit"></span>
+          </span>
+          <span class="cap">Конструктор · десктоп</span>
+        </a>
+        <a class="scr" href="03-warm/client.html" target="_blank">
+          <span class="fr" data-w="390" data-h="760" style="aspect-ratio:390/760">
+            <iframe src="03-warm/client.html?bare" scrolling="no" title="Мобилка — 03"></iframe>
+            <span class="hit"></span>
+          </span>
+          <span class="cap">Клиент · телефон</span>
+        </a>
+      </div>
+      <p class="src">Исходные макеты, с которых собрана стилистика:
+        <a href="03-warm/reference/board-trainer.html" target="_blank">конструктор</a> ·
+        <a href="03-warm/reference/board-client.html" target="_blank">клиент, 3 экрана</a></p>
+    </div>
+  </section>
+
+  <!-- ─── 04 ─────────────────────────────────────────────── -->
+  <section class="v">
+    <div class="vh">
+      <span class="no">04</span>
+      <h2>Доска</h2>
+      <span class="sp"></span>
+      <span class="open">
+        <a href="04-hwpo/trainer.html" target="_blank">Конструктор
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h7v7M13 3 4 12"/></svg></a>
+        <a href="04-hwpo/client.html" target="_blank">Мобилка
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h7v7M13 3 4 12"/></svg></a>
+      </span>
+    </div>
+    <div class="vb">
+      <p class="lead"><b>Доска в зале.</b> Кремовая бумага, белые панели,
+        единственный акцент — бронза. Заголовки капителью и очень плотные,
+        всё служебное моноширинным в разрядку. Ни одной круглой кнопки:
+        действия набраны текстом, как надписи мелом.</p>
+      <p class="lead">Две вещи здесь устроены не как у соседей. В полосе недели
+        у каждого дня <b>столбчатая диаграмма нагрузки</b> — видно не только
+        сколько работы, но и как она распределена. А в строке упражнения
+        <b>назначение стоит перед названием</b>: «15 кал Гребля», «5×3 Становая
+        тяга @ 80% 152 кг». Объём читается по левому краю, не разбирая названий.</p>
+      <p class="lead">На телефоне отметка идёт разделами: один большой круг
+        на блок, детали сворачиваются. Так работают по доске — вычёркивают
+        целый кусок, а не каждую строку.</p>
+
+      <div class="spec">
+        <div>
+          <div class="k">Палитра</div>
+          <div class="sw">
+            <i style="background:#A9713F"></i>
+            <i style="background:#14110F"></i>
+            <i style="background:#8A8177"></i>
+            <i style="background:#E4D8CD"></i>
+            <i style="background:#F6EFE9"></i>
+            <i style="background:#FFFFFF"></i>
+          </div>
+        </div>
+        <div>
+          <div class="k">Шрифты</div>
+          <div class="fn">
+            <div><b>Instrument&nbsp;Sans</b><s>заголовки и текст</s></div>
+            <div><b>IBM&nbsp;Plex&nbsp;Mono</b><s>подписи и все числа</s></div>
+          </div>
+        </div>
+        <div>
+          <div class="k">Чем держится</div>
+          <div class="note">Капитель в разрядку и бронза по одному поводу.
+            Скруглений нет вовсе, кнопки — текст: экран читается как
+            расписанная доска, а не как приложение.</div>
+        </div>
+      </div>
+
+      <div class="pv">
+        <a class="scr" href="04-hwpo/trainer.html" target="_blank">
+          <span class="fr" data-w="1440" data-h="940" style="aspect-ratio:1440/940">
+            <iframe src="04-hwpo/trainer.html" scrolling="no" title="Конструктор — 04"></iframe>
+            <span class="hit"></span>
+          </span>
+          <span class="cap">Конструктор · десктоп</span>
+        </a>
+        <a class="scr" href="04-hwpo/client.html" target="_blank">
+          <span class="fr" data-w="390" data-h="760" style="aspect-ratio:390/760">
+            <iframe src="04-hwpo/client.html?bare" scrolling="no" title="Мобилка — 04"></iframe>
+            <span class="hit"></span>
+          </span>
+          <span class="cap">Клиент · телефон</span>
+        </a>
+      </div>
+      <p class="src">Исходные макеты, с которых собрана стилистика:
+        <a href="04-hwpo/reference/board-trainer.html" target="_blank">конструктор</a> ·
+        <a href="04-hwpo/reference/board-client.html" target="_blank">клиент</a></p>
+    </div>
+  </section>
+
+  <!-- ─── 05 ─────────────────────────────────────────────── -->
+  <section class="v">
+    <div class="vh">
+      <span class="no">05</span>
+      <h2>Документ</h2>
+      <span class="sp"></span>
+      <span class="open">
+        <a href="05-violet/trainer.html" target="_blank">Конструктор
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h7v7M13 3 4 12"/></svg></a>
+        <a href="05-violet/client.html" target="_blank">Мобилка
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h7v7M13 3 4 12"/></svg></a>
+      </span>
+    </div>
+    <div class="vb">
+      <p class="lead"><b>Лист, а не карточки.</b> Ни одной панели и ни одной тени:
+        белая страница на сиреневом, разделяют пунктирные линейки и поля.
+        Блоки пронумерованы на полях, как разделы в вёрстке.</p>
+      <p class="lead">Все числа набраны моноширинным, фиолетовым и прижаты
+        к правому краю — работа читается столбцом сверху вниз, а не выискивается
+        в тексте. Отметка ничего не сдвигает: пройденное уходит в серый
+        и зачёркивается, текущее держит акцентную планку на поле.</p>
+      <p class="lead">У тренера тот же язык: слева узкий рельс иконок, неделя —
+        колонки одной таблицы с волосяными границами, дни и объём с ведущими
+        нулями. Программа здесь — текст, который пишут, поэтому и выглядит
+        она страницей, а не набором панелей.</p>
+
+      <div class="spec">
+        <div>
+          <div class="k">Палитра</div>
+          <div class="sw">
+            <i style="background:#7A3BFF"></i>
+            <i style="background:#6D28D9"></i>
+            <i style="background:#1B1533"></i>
+            <i style="background:#EDE9F7"></i>
+            <i style="background:#F0E9FF"></i>
+            <i style="background:#FFFFFF"></i>
+          </div>
+        </div>
+        <div>
+          <div class="k">Шрифты</div>
+          <div class="fn">
+            <div><b>Instrument&nbsp;Sans</b><s>заголовки и текст</s></div>
+            <div><b>IBM&nbsp;Plex&nbsp;Mono</b><s>подписи и все числа</s></div>
+          </div>
+        </div>
+        <div>
+          <div class="k">Чем держится</div>
+          <div class="note">Пунктир и правый столбец чисел. Скруглений нет вовсе,
+            заливка только под ярлыками — плотность здесь выше, чем у остальных
+            четырёх.</div>
+        </div>
+      </div>
+
+      <div class="pv">
+        <a class="scr" href="05-violet/trainer.html" target="_blank">
+          <span class="fr" data-w="1440" data-h="940" style="aspect-ratio:1440/940">
+            <iframe src="05-violet/trainer.html" scrolling="no" title="Конструктор — 05"></iframe>
+            <span class="hit"></span>
+          </span>
+          <span class="cap">Конструктор · десктоп</span>
+        </a>
+        <a class="scr" href="05-violet/client.html" target="_blank">
+          <span class="fr" data-w="390" data-h="760" style="aspect-ratio:390/760">
+            <iframe src="05-violet/client.html?bare" scrolling="no" title="Мобилка — 05"></iframe>
+            <span class="hit"></span>
+          </span>
+          <span class="cap">Клиент · телефон</span>
+        </a>
+      </div>
+      <p class="src">Исходные макеты, с которых собрана стилистика:
+        <a href="05-violet/reference/board-trainer.html" target="_blank">конструктор</a> ·
+        <a href="05-violet/reference/board-client.html" target="_blank">клиент</a></p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* Превью — настоящие страницы, а не картинки: их отдают в натуральном
+   размере и ужимают трансформацией. Так вариант нельзя показать
+   устаревшим скриншотом — в кадре всегда то, что лежит в файле. */
+function fit(){
+  document.querySelectorAll('.fr').forEach(box=>{
+    const w = +box.dataset.w, h = +box.dataset.h;
+    const f = box.querySelector('iframe');
+    const k = box.clientWidth / w;
+    f.style.width = w + 'px';
+    f.style.height = h + 'px';
+    f.style.transform = 'scale(' + k + ')';
+  });
+}
+addEventListener('resize', fit);
+addEventListener('load', fit);
+fit();
+</script>
+</body>
+</html>

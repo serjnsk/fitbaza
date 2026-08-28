@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Тренировка · HWPO — fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Четвёртый вариант живёт отдельно: своя вёрстка, свой CSS, свои
+     шаблоны и своя копия доменной модели. -->
+<link rel="stylesheet" href="assets/client.css">
+</head>
+<body>
+<div class="phone">
+  <div class="screen">
+    <div class="sb"><span>9:41 ⃠</span>
+      <span class="ind"><i></i><b>98</b></span></div>
+
+    <header class="hd">
+      <div class="nrow">
+        <button class="ic" title="Назад">‹</button>
+        <span class="pn" id="pn"></span>
+        <button class="ic" title="Действия">⋮</button>
+        <button class="ic cal" title="Календарь">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="4.5" width="14" height="12.5" rx="1.5"/><path d="M3 8.5h14M7 3v3M13 3v3M6.5 11.5h1.5M11.5 11.5H13M6.5 14.5h1.5M11.5 14.5H13"/></svg>
+        </button>
+      </div>
+      <div class="wk">
+        <div class="t" id="wkt"></div>
+        <div class="row">
+          <span class="arr">‹</span>
+          <span class="dd" id="dd"></span>
+          <span class="arr">›</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="feed" id="feed"></div>
+
+    <footer class="ft"><button class="cta" id="cta"></button></footer>
+    <div class="home"><i></i></div>
+  </div>
+</div>
+
+<aside class="side">
+  <h2>План дня</h2>
+  <p>Экран клиента — зеркало конструктора тренера. Та же среда из программы
+     «Сила + кроссфит», которую тренер собрал на своём экране.</p>
+  <p><b>Отметка идёт разделами</b>, а не построчно: один большой круг на блок.
+     Так работают по доске в зале — вычёркивают целый кусок. Отдельные строки
+     тоже нажимаются, если хочется точнее.</p>
+  <p><b>Назначение стоит перед названием</b> — «5×3 Становая тяга @ 80% 152 кг».
+     Объём читается по левому краю, не разбирая названий. Процентов клиент
+     не считает: килограммы уже посчитаны от его ПМ.</p>
+  <div class="req">
+    <div><b>CLI-1</b><span>Клиент видит тренировки, которые пишет тренер</span></div>
+    <div><b>CLI-2</b><span>Запись результатов: веса, повторения, комментарии</span></div>
+    <div><b>CON-16</b><span>Проценты от ПМ превращены в килограммы</span></div>
+    <div><b>EX-3</b><span>Гибкие показатели: кг, повторы, секунды, метры, калории</span></div>
+  </div>
+</aside>
+
+<script src="assets/data.js"></script>
+<script src="assets/client.js"></script>
+</body>
+</html>

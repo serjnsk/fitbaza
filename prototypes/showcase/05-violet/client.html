@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Тренировка · Фиолетовый — fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Пятый вариант живёт отдельно: своя вёрстка, свой CSS, свои шаблоны
+     и своя копия доменной модели. -->
+<link rel="stylesheet" href="assets/client.css">
+</head>
+<body>
+<div class="phone">
+  <div class="screen">
+    <div class="sb"><span>9:41</span><span class="ind"><i></i><i></i></span></div>
+    <header class="hd">
+      <div class="nrow">
+        <button class="ic" title="Назад">←</button>
+        <span class="wk" id="wk"></span>
+        <button class="ic" title="Действия">···</button>
+      </div>
+      <div class="day" id="day"></div>
+      <h1 id="title"></h1>
+      <div class="sub" id="sub"></div>
+    </header>
+    <div class="feed" id="feed"></div>
+    <footer class="ft"><button class="cta" id="cta"></button></footer>
+    <div class="home"><i></i></div>
+  </div>
+</div>
+
+<aside class="side">
+  <h2>План тренировки</h2>
+  <p>Экран клиента — зеркало конструктора тренера. Та же среда из программы
+     «Сила + кроссфит», которую тренер собрал на своём экране.</p>
+  <p><b>Экран — документ.</b> Все блоки видны сразу, ничего не сворачивается.
+     Отметка не двигает вёрстку: пройденное уходит в серый и зачёркивается,
+     текущее держит акцентную планку на поле.</p>
+  <p><b>Процентов здесь нет.</b> Тренер написал «70 % от ПМ» — клиент видит
+     килограммы. Думает тренер, считает система, поднимает атлет.</p>
+  <div class="req">
+    <div><b>CLI-1</b><span>Клиент видит тренировки, которые пишет тренер</span></div>
+    <div><b>CLI-2</b><span>Запись результатов: веса, повторения, комментарии</span></div>
+    <div><b>CON-16</b><span>Проценты от ПМ превращены в килограммы</span></div>
+    <div><b>EX-3</b><span>Гибкие показатели: кг, повторы, секунды, метры, калории</span></div>
+  </div>
+</aside>
+
+<script src="assets/data.js"></script>
+<script src="assets/client.js"></script>
+</body>
+</html>
