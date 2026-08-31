@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Карточка клиента · fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/base-trainer.css">
+<link rel="stylesheet" href="assets/theme-01-strava.css">
+<link rel="stylesheet" href="assets/pages.css">
+</head>
+<body>
+<div class="app">
+  <aside class="nav" id="nav"></aside>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <div class="page"><div class="pagewrap" id="page"></div></div>
+  </div>
+</div>
+<div class="ov" id="ov"></div>
+<script src="assets/data.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+/* ═══════════ КАРТОЧКА КЛИЕНТА — профиль спортсмена ═══════════ */
+const CID = new URLSearchParams(location.search).get('id') || STATE.curClient || 'c1';
+const C = client(CID) || CLIENTS[0];
+STATE.curClient = C.id; saveState();
+const V = { metric: Object.keys(C.hist)[0] || 'squat' };
+
+function resultsFor(cid){
+  return LOG.filter(r=>r.cid===cid).sort((a,b)=> a.date<b.date?1:-1);
+}
+function pmLabel(k){ return PMNAMES[k] || k }
+
+function render(){
+  const P = C.prog ? program(C.prog) : null;
+  const pm = pmOf(C.id);
+  const res = resultsFor(C.id);
+
+  $('#page').innerHTML = `
+    <div class="prohead">
+      <span class="av xl">${esc(C.ini)}</span>
+      <div style="flex:1;min-width:0">
+        <div class="nm">${esc(C.n)}</div>
+        <div class="mt">
+          <span class="chip">${C.sex==='ж'?'Женский':'Мужской'}</span>
+          <span class="chip">${esc(C.sport)}</span>
+          <span class="chip">${esc(C.level)}</span>
+          <span class="chip">${esc(C.tariff)}</span>
+          <span>${esc(C.phone)}</span>
+        </div>
+      </div>
+      <a class="btn gh" href="constructor.html">${ICON.build} ${P?'Открыть в конструкторе':'Назначить программу'}</a>
+    </div>
+
+    <div class="facts" style="margin-top:14px">
+      <div class="fact"><div class="k">Возраст</div><div class="v">${age(C.born)} <small>лет</small></div></div>
+      <div class="fact"><div class="k">В работе</div><div class="v" style="font-size:14px">${yearsSince(C.since)}</div></div>
+      <div class="fact"><div class="k">Рост</div><div class="v">${C.h?C.h+' <small>см</small>':'—'}</div></div>
+      <div class="fact"><div class="k">Вес</div><div class="v">${C.w?fmtNum(C.w)+' <small>кг</small>':'—'}</div></div>
+      <div class="fact"><div class="k">Тренировок</div><div class="v">${C.plan?C.done+'<small>/'+C.plan+'</small>':'—'}</div></div>
+      <div class="fact"><div class="k">Серия</div><div class="v">${C.streak||'—'}${C.streak?' <small>подряд</small>':''}</div></div>
+      <div class="fact"><div class="k">Активность</div><div class="v" style="font-size:14px">${ago(C.last)}</div></div>
+    </div>
+
+    <div class="cols2" style="grid-template-columns:1.3fr 1fr;align-items:start;margin-top:22px">
+      <div>
+        <div class="sechead"><span class="t">История показателя</span><span class="ln"></span></div>
+        <div class="card">
+          <div class="cb" style="padding-bottom:6px">
+            <div class="pmpick">${Object.keys(C.hist).map(k=>`<button data-m="${k}" class="${V.metric===k?'on':''}">${esc(pmLabel(k))}</button>`).join('') || '<span style="font-size:12px;color:var(--tx4)">Нет истории максимумов</span>'}</div>
+          </div>
+          <div class="cb chartbox" style="padding-top:0">${lineChart(C.hist[V.metric], 'кг')}</div>
+        </div>
+
+        <div class="sechead"><span class="t">Записанные результаты</span><span class="ln"></span></div>
+        <div class="card cb flush">
+          ${res.length ? `<div class="feed">${res.map(r=>{ const e=byId(r.exId);
+            return `<div class="fitem">
+              <span class="av s">${e?initials(e):'—'}</span>
+              <div class="c">
+                <div class="h"><b>${e?esc(e.ru):esc(r.exId)}</b><span style="font-size:11.5px;color:var(--tx4)">· ${esc(r.scheme)}</span><time>${humanDate(r.date)}</time></div>
+                <div class="tx">${r.kg!=null?`Рабочий вес ${fmtNum(r.kg)} кг`:''}${r.done?`Сделано: ${esc(r.done)}`:''}</div>
+              </div>
+            </div>`; }).join('')}</div>` : `<div class="empty"><div class="t">Пока нет записанных результатов</div><div class="d">Появятся, когда клиент отметит выполнение в мобильном приложении</div></div>`}
+        </div>
+      </div>
+
+      <div>
+        <div class="sechead"><span class="t">Персональные максимумы</span><span class="ln"></span></div>
+        <div class="card cb">
+          ${Object.keys(pm).length ? `<div style="display:flex;flex-direction:column;gap:8px">
+            ${Object.entries(pm).map(([k,v])=>`<div class="pmgrid"><span class="pn">${esc(pmLabel(k))}</span><input class="pmin" data-pm="${k}" value="${fmtNum(v)}"></div>`).join('')}
+          </div><div class="hint">Проценты в назначенных тренировках пересчитываются от этих значений автоматически.</div>`
+          : `<div style="font-size:12.5px;color:var(--tx4)">Клиент ещё не указал ни одного максимума</div>`}
+        </div>
+
+        <div class="sechead"><span class="t">Антропометрия</span><span class="ln"></span></div>
+        <div class="card cb">
+          <div class="cols2">
+            <div class="formfld"><span class="k">Рост, см</span><input class="inp" id="fH" value="${C.h||''}"></div>
+            <div class="formfld"><span class="k">Вес, кг</span><input class="inp" id="fW" value="${C.w||''}"></div>
+          </div>
+        </div>
+
+        <div class="sechead"><span class="t">Обратная связь</span><span class="ln"></span></div>
+        <div class="card cb flush">
+          ${C.comments.length ? `<div class="feed">${C.comments.map((cm,i)=>{ const key=C.id+':'+i, replied = cm.reply || STATE.replied[key];
+            return `<div class="fitem">
+              <span class="av s">${esc(C.ini)}</span>
+              <div class="c">
+                <div class="h"><b>${esc(C.n)}</b>${cm.ex?`<span style="font-size:11.5px;color:var(--tx4)">· ${esc(cm.ex)}</span>`:''}<time>${humanDate(cm.d)}</time></div>
+                <div class="tx">${esc(cm.tx)}</div>
+                ${cm.reply?`<div class="tx" style="margin-top:8px;color:var(--tx1)"><b>Вы:</b> ${esc(cm.reply)}</div>`
+                  : `<div class="reply"><input placeholder="Ответить…" data-key="${key}"><button class="btn gh sm" data-send="${key}" data-i="${i}">Отправить</button></div>`}
+              </div>
+            </div>`; }).join('')}</div>` : `<div class="empty"><div class="t">Комментариев ещё нет</div></div>`}
+        </div>
+      </div>
+    </div>`;
+
+  $$('.pmpick button').forEach(b=>b.onclick=()=>{ V.metric=b.dataset.m; render() });
+  $$('[data-pm]').forEach(inp=>inp.onchange=()=>{
+    const v = parseFloat(inp.value.replace(',','.')); if(!isFinite(v)) return;
+    pmOf(C.id)[inp.dataset.pm] = v; saveState();
+    toast('Максимум обновлён — проценты в тренировках пересчитаются');
+  });
+  $$('[data-send]').forEach(b=>b.onclick=()=>{
+    const key=b.dataset.send, i=+b.dataset.i;
+    const input=$(`[data-key="${key}"]`); const v=input.value.trim(); if(!v) return;
+    C.comments[i].reply=v; STATE.replied[key]=true; saveState();
+    toast('Ответ отправлен'); render();
+  });
+  $('#fH').onchange=e=>{ C.h=+e.target.value||null; toast('Рост обновлён') };
+  $('#fW').onchange=e=>{ C.w=+e.target.value||null; toast('Вес обновлён') };
+}
+render();
+initShell({page:'clients.html', crumb:[{n:'Клиенты',h:'clients.html'},{n:C.n}]});
+</script>
+</body>
+</html>

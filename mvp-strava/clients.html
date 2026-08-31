@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Клиенты · fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/base-trainer.css">
+<link rel="stylesheet" href="assets/theme-01-strava.css">
+<link rel="stylesheet" href="assets/pages.css">
+</head>
+<body>
+<div class="app">
+  <aside class="nav" id="nav"></aside>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <div class="page"><div class="pagewrap" id="page"></div></div>
+  </div>
+</div>
+<div class="ov" id="ov"></div>
+<script src="assets/data.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+/* ═══════════ КЛИЕНТЫ — рабочий список тренера ═══════════ */
+const V = {q:'', f:'all'};
+const unread = c => c.comments.filter((cm,i)=>!cm.reply && !STATE.replied[c.id+':'+i]).length;
+const needsAttention = c => unread(c)>0 || (c.prog && c.last && daysBetween(c.last,TODAY)>=3);
+
+function match(c){
+  if(V.f==='ind' && c.tariff!=='Индивидуально') return false;
+  if(V.f==='grp' && c.tariff!=='Группа') return false;
+  if(V.f==='noprog' && c.prog) return false;
+  if(V.f==='attn' && !needsAttention(c)) return false;
+  if(V.q && norm(c.n).indexOf(norm(V.q))<0) return false;
+  return true;
+}
+
+function render(){
+  const list = CLIENTS.filter(match);
+  const FILTERS = [['all','Все'],['ind','Индивидуально'],['grp','Группа'],['noprog','Без программы'],['attn','Требуют внимания']];
+
+  $('#page').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <label class="search" style="width:260px">${ICON.search}<input id="q" placeholder="Поиск клиента…" value="${esc(V.q)}"></label>
+      <div class="filters">${FILTERS.map(([k,n])=>`<button data-f="${k}" class="${V.f===k?'on':''}">${esc(n)}</button>`).join('')}</div>
+    </div>
+
+    <div class="card">
+      ${list.length ? `<table class="tbl"><thead><tr>
+        <th>Клиент</th><th>Программа</th><th>Прогресс</th><th>Последняя активность</th><th>Динамика приседа</th>
+      </tr></thead><tbody>
+        ${list.map(c=>{
+          const u = unread(c), pr = program(c.prog);
+          const idle = c.last && daysBetween(c.last,TODAY)>=3;
+          const sq = c.hist.squat;
+          return `<tr class="click" data-id="${c.id}">
+            <td><div class="cellname">
+              <span class="av m">${esc(c.ini)}</span>
+              <div>
+                <div class="n">${esc(c.n)}${u?` <span class="chip acc">${u}</span>`:''}</div>
+                <div class="s">${age(c.born)} лет · ${esc(c.sport)} · ${esc(c.level)}</div>
+              </div>
+            </div></td>
+            <td>${pr?esc(pr.title):`<span style="color:var(--tx4)">без программы</span>`}</td>
+            <td>${c.plan?`<div style="display:flex;align-items:center;gap:8px"><div class="bar" style="width:64px"><i style="width:${Math.round(c.done/c.plan*100)}%"></i></div><span style="font-size:12px;color:var(--tx3)">${c.done}/${c.plan}</span></div>`:'<span style="color:var(--tx4)">—</span>'}</td>
+            <td>${c.last?`<span class="chip ${idle?'warn':'ok'}">${ago(c.last)}</span>`:`<span class="chip ghost">не заходил</span>`}</td>
+            <td>${sq?`<div style="display:flex;align-items:center;gap:9px">${sparkline(sq.map(h=>h[1]),56,20)}<span style="font-size:12.5px;font-weight:600">${fmtNum(c.pm.squat)} кг</span></div>`:'<span style="color:var(--tx4)">—</span>'}</td>
+          </tr>`;
+        }).join('')}
+      </tbody></table>` : `<div class="empty"><div class="t">Никого не нашли</div><div class="d">Измените поиск или фильтр</div></div>`}
+    </div>
+    <div class="hint">Клиент попадает в этот список сам, как только перейдёт по <a href="brand.html" style="color:var(--tx3)">пригласительной ссылке</a> и войдёт по номеру телефона.</div>`;
+
+  $$('tr[data-id]').forEach(r=>r.onclick=()=>location.href='client.html?id='+r.dataset.id);
+  $$('.filters button').forEach(b=>b.onclick=()=>{ V.f=b.dataset.f; render() });
+  $('#q').oninput=e=>{ V.q=e.target.value; render() };
+  $('#q').focus(); $('#q').setSelectionRange(V.q.length,V.q.length);
+}
+render();
+initShell({page:'clients.html', title:'Клиенты'});
+</script>
+</body>
+</html>
