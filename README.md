@@ -29,9 +29,14 @@ cd mvp && python3 -m http.server 8765
 
 ## Черновые итерации
 
-Предыдущие пробы остались в отдельных ветках и на Pages не публикуются:
+Ветки с черновиками удалены, их последние коммиты закреплены тегами. Содержимое доступно по тегу, на Pages не публикуется:
 
-- `prototype/screens-4-styles` — пять стилистик × два экрана (`prototypes/showcase/`), плюс более ранняя итерация в четырёх (`prototypes/screens/`). Отсюда выбран вариант 01 «Список», доведённый до `mvp/`.
-- `prototype/constructor-styles` — самая первая проба конструктора в пяти направлениях.
+| Тег | Что внутри |
+|---|---|
+| [`archive/screens-4-styles`](https://github.com/serjnsk/fitbaza/tree/archive/screens-4-styles) | Пять стилистик × два экрана (`prototypes/showcase/`), более ранняя итерация в четырёх (`prototypes/screens/`), первая проба конструктора (`prototypes/constructor-styles/`) и `reference/` с исходными макетами дизайнера и токенами. Отсюда выбран вариант 01 «Список», доведённый до `mvp/` |
+| [`archive/constructor-styles`](https://github.com/serjnsk/fitbaza/tree/archive/constructor-styles) | Самая первая проба конструктора в пяти направлениях |
+| [`archive/mvp-strava-prototype`](https://github.com/serjnsk/fitbaza/tree/archive/mvp-strava-prototype) | Прежний дом `mvp/` до переноса в эту ветку |
+
+Достать содержимое: `git checkout archive/screens-4-styles`.
 
 Что уже решено и что переигрывать не стоит, а также открытые вопросы к заказчику — в [`HANDOVER.md`](HANDOVER.md).

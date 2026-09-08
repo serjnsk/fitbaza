@@ -25,7 +25,7 @@
 | [Бренд и профиль](https://serjnsk.github.io/fitbaza/prototype/brand.html) | Оформление профиля тренера, пригласительная ссылка, живой превью в телефоне |
 | [Карта сайта](https://serjnsk.github.io/fitbaza/prototype/sitemap.html) | Объём MVP и то, что сознательно осталось за скобками первой версии |
 
-Конструктор (`constructor.html`) — точная копия дизайн-концепции `showcase/01-strava/trainer.html` (ветка `prototype/screens-4-styles`), доведённая до полноценного MVP остальными восемью страницами в том же визуальном языке.
+Конструктор (`constructor.html`) — точная копия дизайн-концепции `showcase/01-strava/trainer.html` (тег `archive/screens-4-styles`), доведённая до полноценного MVP остальными восемью страницами в том же визуальном языке.
 
 ## Функции конструктора (по [`02 — Функциональные требования`](https://serjnsk.github.io/fitbaza/docs/02-functional-requirements/), раздел CON)
 
@@ -58,4 +58,4 @@
 
 ## Технически
 
-Статические HTML-страницы без сборки, общие `assets/data.js` (доменная модель), `assets/ui.js` (навигация/топбар/тосты/модалки/графики) и `assets/pages.css` (компоненты страниц, которых нет в исходной дизайн-концепции). `constructor.html` использует `assets/trainer.js`, `assets/base-trainer.css`, `assets/theme-01-strava.css` — без изменений, byte-in-byte как в `showcase/01-strava/trainer.html` (ветка `prototype/screens-4-styles`).
+Статические HTML-страницы без сборки, общие `assets/data.js` (доменная модель), `assets/ui.js` (навигация/топбар/тосты/модалки/графики) и `assets/pages.css` (компоненты страниц, которых нет в исходной дизайн-концепции). `constructor.html` использует `assets/trainer.js`, `assets/base-trainer.css`, `assets/theme-01-strava.css` — без изменений, byte-in-byte как в `showcase/01-strava/trainer.html` (тег `archive/screens-4-styles`).

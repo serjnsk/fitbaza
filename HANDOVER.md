@@ -3,11 +3,13 @@
 Документ для того, кто продолжает. Отвечает на три вопроса: что уже
 сделано, почему сделано именно так и что осталось открытым.
 
-Документ написан на ветке `prototype/screens-4-styles`, где лежали пять
+Документ написан на ветке `prototype/screens-4-styles` (теперь тег
+`archive/screens-4-styles`), где лежали пять
 стилистик. Итоговый выбор — вариант 01 «Список», он доведён до полного
 объёма MVP и лежит в `mvp/` этой ветки (`prototypes`); публикуется на
 <https://serjnsk.github.io/fitbaza/prototype/>. Черновые итерации остались
-в ветках `prototype/screens-4-styles` и `prototype/constructor-styles`.
+под тегами `archive/screens-4-styles` и `archive/constructor-styles` —
+ветки удалены, коммиты сохранены.
 
 ---
 
@@ -21,9 +23,9 @@
 
 Итоговый прототип: <https://serjnsk.github.io/fitbaza/prototype/>
 
-Сводная страница пяти стилистик осталась только в ветке
-`prototype/screens-4-styles` (`prototypes/showcase/index.html`) — на Pages
-она не публикуется, открывается локальным сервером из той ветки.
+Сводная страница пяти стилистик осталась только под тегом
+`archive/screens-4-styles` (`prototypes/showcase/index.html`) — на Pages
+она не публикуется. Достать: `git checkout archive/screens-4-styles`.
 
 ---
 
