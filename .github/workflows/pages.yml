@@ -1,0 +1,70 @@
+# Одна публикация GitHub Pages из двух параллельных веток:
+#   main        -> /docs/       документация (MkDocs Material)
+#   prototypes  -> /prototype/  рабочий прототип (статика без сборки)
+# Корень отдаёт заглавную страницу landing/index.html с двумя ссылками.
+#
+# Файл лежит в обеих ветках и намеренно одинаков: Actions запускает workflow
+# из той ветки, в которую был push, а собирает он всегда обе — по явным ref.
+# Результат не зависит от того, что стало триггером. Правите в одной ветке —
+# перенесите во вторую.
+name: pages
+
+on:
+  push:
+    branches: [main, prototypes]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Документация — ветка main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Версия закреплена намеренно: команда Material предупреждает, что
+      # MkDocs 2.0 ломает темы и плагины без пути миграции. Обновлять осознанно.
+      - run: pip install "mkdocs-material==9.7.7"
+
+      - name: Собрать документацию в /docs/
+        run: mkdocs build --strict --site-dir _site/docs
+
+      - name: Прототип — ветка prototypes
+        uses: actions/checkout@v4
+        with:
+          ref: prototypes
+          path: .prototypes
+
+      - name: Разложить прототип и заглавную
+        run: |
+          cp -R .prototypes/mvp _site/prototype
+          cp landing/index.html _site/index.html
+          touch _site/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

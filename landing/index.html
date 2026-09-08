@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>fitbaza — приложение для тренеров</title>
+<meta name="description" content="Документация и рабочий прототип приложения для ведения тренировок.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Визуальный язык прототипа: плоскость. Ни карточек, ни теней —
+   разделяют тонкие линии и воздух. Токены из assets/theme-01-strava.css. */
+:root{
+  --acc:#FC5200; --acc-a:#FFF1EA;
+  --tx1:#141414; --tx2:#5E5E5E; --tx3:#8E8E8E;
+  --bg:#FFFFFF; --line:#E7E7E7;
+  --ui:"Inter",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--tx1);font:400 15px/1.55 var(--ui);
+     -webkit-font-smoothing:antialiased}
+.wrap{max-width:680px;margin:0 auto;padding:64px 24px 80px}
+.logo{width:150px;height:auto;color:var(--tx1);display:block}
+h1{font-size:15px;font-weight:600;margin:26px 0 6px;letter-spacing:-.01em}
+.lede{color:var(--tx2);margin:0 0 6px;max-width:52ch}
+.note{color:var(--tx3);font-size:13px;margin:0}
+
+.rows{margin:40px 0 0;border-top:1px solid var(--line)}
+a.row{display:flex;align-items:baseline;gap:16px;padding:20px 2px;
+      border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
+a.row:hover{background:var(--acc-a)}
+a.row:focus-visible{outline:2px solid var(--acc);outline-offset:-2px}
+.row .n{font-size:12px;font-weight:600;color:var(--tx3);font-variant-numeric:tabular-nums;
+        min-width:20px;padding-top:3px}
+.row .b{flex:1;min-width:0}
+.row .t{font-size:17px;font-weight:600;letter-spacing:-.015em;margin-bottom:3px}
+.row:hover .t{color:var(--acc)}
+.row .d{color:var(--tx2);font-size:14px}
+.row .u{color:var(--tx3);font-size:12.5px;margin-top:5px}
+.row .go{color:var(--acc);font-weight:600;font-size:14px;padding-top:3px}
+
+footer{margin-top:36px;color:var(--tx3);font-size:13px}
+footer a{color:var(--tx2)}
+@media (max-width:520px){
+  .wrap{padding:40px 18px 60px}
+  .row .go{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<svg class="logo" viewBox="0 0 336 49" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="fitbaza">
+<path d="M2 2H37.584V12.56H16.144V20.112H34.576V30.224H16.144V46.032H2V2Z" fill="currentColor"/>
+<path d="M45.3275 46.032V2H59.4715V46.032H45.3275Z" fill="currentColor"/>
+<path d="M94.9065 13.264V46.032H80.7625V13.264H66.2985V2H109.307V13.264H94.9065Z" fill="currentColor"/>
+<path d="M145.062 2C147.281 2 149.307 2.46933 151.142 3.408C153.019 4.304 154.491 5.584 155.558 7.248C156.667 8.912 157.222 10.768 157.222 12.816C157.222 18.2347 154.769 21.648 149.862 23.056V23.312C155.451 24.592 158.246 28.2613 158.246 34.32C158.246 36.624 157.67 38.672 156.518 40.464C155.409 42.2133 153.873 43.5787 151.91 44.56C149.947 45.5413 147.793 46.032 145.446 46.032H115.75V2H145.062ZM129.894 19.152H139.622C140.561 19.152 141.329 18.832 141.926 18.192C142.566 17.5093 142.886 16.6773 142.886 15.696V15.056C142.886 14.1173 142.566 13.328 141.926 12.688C141.286 12.0053 140.518 11.664 139.622 11.664H129.894V19.152ZM129.894 35.792H140.646C141.585 35.792 142.353 35.472 142.95 34.832C143.59 34.1493 143.91 33.3173 143.91 32.336V31.696C143.91 30.7147 143.59 29.904 142.95 29.264C142.353 28.5813 141.585 28.24 140.646 28.24H129.894V35.792Z" fill="currentColor"/>
+<path d="M194.004 46.032L192.148 39.824H176.724L174.868 46.032H160.404L176.468 2H192.916L208.98 46.032H194.004ZM179.668 29.968H189.204L184.596 14.288H184.34L179.668 29.968Z" fill="currentColor"/>
+<path d="M232.872 35.472H253.801V46.032H211.113V41.488L231.529 12.56H212.648V2H253.288V6.544L232.872 35.472Z" fill="currentColor"/>
+<path d="M290.004 46.032L288.148 39.824H272.724L270.868 46.032H256.404L272.468 2H288.916L304.98 46.032H290.004ZM275.668 29.968H285.204L280.596 14.288H280.34L275.668 29.968Z" fill="currentColor"/>
+<path d="M333.98 26.032H313.98V46.032H333.98V26.032Z" fill="var(--acc)"/>
+</svg>
+
+<h1>Приложение для тренеров</h1>
+<p class="lede">Ведение тренировок для тренеров по кроссфиту, тренажёрному залу и смежным видам спорта. Документация продукта и кликабельный прототип.</p>
+<p class="note">«fitbaza» — тестовое название на период разработки.</p>
+
+<nav class="rows">
+  <a class="row" href="docs/">
+    <span class="n">01</span>
+    <span class="b">
+      <span class="t">Документация</span>
+      <div class="d">Обзор продукта, 84 функциональных требования, MVP и роадмап, конкуренты, реестр решений, технологический стек, оффлайн-режим.</div>
+      <div class="u">Ветка main · MkDocs Material</div>
+    </span>
+    <span class="go">→</span>
+  </a>
+  <a class="row" href="prototype/">
+    <span class="n">02</span>
+    <span class="b">
+      <span class="t">Прототип</span>
+      <div class="d">Кликабельный прототип полного объёма MVP: дашборд, клиенты, календарь, конструктор тренировок, база упражнений, шаблоны, бренд.</div>
+      <div class="u">Ветка prototypes · статика, данные демонстрационные</div>
+    </span>
+    <span class="go">→</span>
+  </a>
+</nav>
+
+<footer>Исходники — <a href="https://github.com/serjnsk/fitbaza">github.com/serjnsk/fitbaza</a></footer>
+
+</div>
+</body>
+</html>

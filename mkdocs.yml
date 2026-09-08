@@ -1,5 +1,5 @@
 site_name: fitbaza — документация
-site_url: https://serjnsk.github.io/fitbaza/
+site_url: https://serjnsk.github.io/fitbaza/docs/
 repo_url: https://github.com/serjnsk/fitbaza
 docs_dir: docs
 
@@ -34,6 +34,7 @@ nav:
   - 05 — Решения и открытые вопросы: 05-decisions.md
   - 06 — Технологический стек: 06-tech-stack.md
   - 07 — Оффлайн-режим: 07-offline-mode.md
+  - Прототип ↗: https://serjnsk.github.io/fitbaza/prototype/
 
 markdown_extensions:
   - tables
