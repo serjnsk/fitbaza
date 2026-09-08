@@ -145,49 +145,82 @@ const TPL_FOLDERS = ['Разминки','Силовые блоки','Компл�
 
 const TPL = [
  /* ── уровень: упражнение — сохранённое назначение одной строкой ── */
- {id:'e1', lvl:'упражнение', title:'Присед 5×3 @ 80 %',      used:26, ex:['squat','5×3',80,'%']},
- {id:'e2', lvl:'упражнение', title:'Становая 3×5 @ 70 %',    used:19, ex:['dead','3×5',70,'%']},
- {id:'e3', lvl:'упражнение', title:'Гребля 500 м',           used:31, ex:['row','',500,'м']},
- {id:'e4', lvl:'упражнение', title:'Планка 3× по 45 сек',    used:14, ex:['plank','3×',45,'сек']},
+ {id:'e1', lvl:'упражнение', own:true, at:'2026-06-12', title:'Присед 5×3 @ 80 %',      used:26, ex:['squat','5×3',80,'%']},
+ {id:'e2', lvl:'упражнение', own:true, at:'2026-06-12', title:'Становая 3×5 @ 70 %',    used:19, ex:['dead','3×5',70,'%']},
+ {id:'e3', lvl:'упражнение', own:true, at:'2026-07-02', title:'Гребля 500 м',           used:31, ex:['row','',500,'м']},
+ {id:'e4', lvl:'упражнение', own:true, at:'2026-05-30', title:'Планка 3× по 45 сек',    used:14, ex:['plank','3×',45,'сек']},
 
  /* ── уровень: блок — единственный уровень с папками (TPL-1) ── */
- {id:'b1', lvl:'блок', folder:'Разминки', kind:'warmup', title:'Общая разминка · 10 мин', used:34,
+ {id:'b1', lvl:'блок', own:true, at:'2026-05-18', folder:'Разминки', kind:'warmup', title:'Общая разминка · 10 мин', used:34,
   items:[['rom','2×',60,'сек'],['pvc','2×10'],['row','',500,'м']]},
- {id:'b2', lvl:'блок', folder:'Разминки', kind:'warmup', title:'Разминка перед приседом', used:21,
+ {id:'b2', lvl:'блок', own:true, at:'2026-06-04', folder:'Разминки', kind:'warmup', title:'Разминка перед приседом', used:21,
   items:[['rom','',90,'сек'],['squat','3×5',40,'%'],['box','2×5']]},
- {id:'b3', lvl:'блок', folder:'Разминки', kind:'warmup', title:'Разминка ТА', used:12,
+ {id:'b3', lvl:'блок', own:true, at:'2026-07-15', folder:'Разминки', kind:'warmup', title:'Разминка ТА', used:12,
   items:[['pvc','3×10'],['snatch','3×3',40,'%']]},
- {id:'b4', lvl:'блок', folder:'Силовые блоки', kind:'strength', title:'Присед 5×3 @ 75–85 %', used:18,
+ {id:'b4', lvl:'блок', own:true, at:'2026-06-21', folder:'Силовые блоки', kind:'strength', title:'Присед 5×3 @ 75–85 %', used:18,
   items:[['squat','5×3',80,'%'],['lunge','3×10']]},
- {id:'b5', lvl:'блок', folder:'Силовые блоки', kind:'strength', title:'Жим + подтягивания', used:15,
+ {id:'b5', lvl:'блок', own:true, at:'2026-06-21', folder:'Силовые блоки', kind:'strength', title:'Жим + подтягивания', used:15,
   items:[['bench','5×5',75,'%'],['pullup','5×8']]},
- {id:'b6', lvl:'блок', folder:'Силовые блоки', kind:'strength', title:'Становая 3×5 @ 70 %', used:9,
+ {id:'b6', lvl:'блок', own:true, at:'2026-07-28', folder:'Силовые блоки', kind:'strength', title:'Становая 3×5 @ 70 %', used:9,
   items:[['dead','3×5',70,'%'],['ttb','3×12']]},
- {id:'b7', lvl:'блок', folder:'Комплексы', kind:'metcon', title:'«Fran» · 21-15-9', used:7, fmt:'For time 8',
+ {id:'b7', lvl:'блок', own:true, at:'2026-05-22', folder:'Комплексы', kind:'metcon', title:'«Fran» · 21-15-9', used:7, fmt:'For time 8',
   items:[['thrust','21-15-9',43,'кг'],['pullup','21-15-9']]},
- {id:'b8', lvl:'блок', folder:'Комплексы', kind:'metcon', title:'EMOM 12 · сила + кардио', used:11, fmt:'EMOM 12',
+ {id:'b8', lvl:'блок', own:true, at:'2026-08-11', folder:'Комплексы', kind:'metcon', title:'EMOM 12 · сила + кардио', used:11, fmt:'EMOM 12',
   items:[['clean','3',70,'%'],['bike','',12,'кал']]},
- {id:'b9', lvl:'блок', folder:'Комплексы', kind:'metcon', title:'AMRAP 15 · гимнастика', used:6, fmt:'AMRAP 15',
+ {id:'b9', lvl:'блок', own:true, at:'2026-08-19', folder:'Комплексы', kind:'metcon', title:'AMRAP 15 · гимнастика', used:6, fmt:'AMRAP 15',
   items:[['wb','',15,'повт'],['du','',50,'повт'],['box','10']]},
- {id:'b10',lvl:'блок', folder:'Заминки', kind:'cooldown', title:'Заминка / растяжка · 8 мин', used:29,
+ {id:'b10', lvl:'блок', own:true, at:'2026-05-18', folder:'Заминки', kind:'cooldown', title:'Заминка / растяжка · 8 мин', used:29,
   items:[['couch','2×',90,'сек'],['plank','3×',45,'сек']]},
 
  /* ── уровень: тренировка — внутри блоки, а не россыпь упражнений ── */
- {id:'w1', lvl:'тренировка', title:'Силовой день · присед + жим', used:8, blocks:['b1','b4','b5','b10']},
- {id:'w2', lvl:'тренировка', title:'День ТА + метком', used:5, blocks:['b3','b9']},
- {id:'w3', lvl:'тренировка', title:'Становая + гимнастика', used:6, blocks:['b1','b6','b8','b10']},
+ {id:'w1', lvl:'тренировка', own:true, at:'2026-06-25', title:'Силовой день · присед + жим', used:8, blocks:['b1','b4','b5','b10']},
+ {id:'w2', lvl:'тренировка', own:true, at:'2026-07-16', title:'День ТА + метком', used:5, blocks:['b3','b9']},
+ {id:'w3', lvl:'тренировка', own:true, at:'2026-08-20', title:'Становая + гимнастика', used:6, blocks:['b1','b6','b8','b10']},
 
  /* ── уровень: неделя — внутри семь дней, null = отдых ── */
- {id:'k1', lvl:'неделя', title:'Силовая неделя · база', used:4,
+ {id:'k1', lvl:'неделя', own:true, at:'2026-07-01', title:'Силовая неделя · база', used:4,
   days:['w1', null, 'w3', null, 'w2', null, null]},
- {id:'k2', lvl:'неделя', title:'Объёмная неделя · 5 дней', used:2,
+ {id:'k2', lvl:'неделя', own:true, at:'2026-08-14', title:'Объёмная неделя · 5 дней', used:2,
   days:['w1','w2','w3', null,'w1','w2', null]},
 
  /* ── уровень: программа — последовательность недель ── */
- {id:'p1t', lvl:'программа', title:'Сила + кроссфит · 8 недель', used:3,
+ {id:'p1t', lvl:'программа', own:true, at:'2026-07-05', title:'Сила + кроссфит · 8 недель', used:3,
   goal:'Рост силовых при сохранении метконовой формы', weeks:8, base:'k1'},
- {id:'p2t', lvl:'программа', title:'Возвращение после травмы · 6 недель', used:1,
+ {id:'p2t', lvl:'программа', own:true, at:'2026-08-22', title:'Возвращение после травмы · 6 недель', used:1,
   goal:'Аккуратный возврат к базовым движениям', weeks:6, base:'k2'},
+
+ /* ── общая база сервиса: приходит из коробки, тренер её не создавал ──
+    Делится тем же полем own, что и упражнения (EX): личное — own:true. ── */
+ {id:'sb1', lvl:'блок', own:false, folder:'Разминки', kind:'warmup', title:'Суставная разминка · 8 мин', used:0,
+  items:[['rom','2×',60,'сек'],['pvc','2×10']]},
+ {id:'sb2', lvl:'блок', own:false, folder:'Разминки', kind:'warmup', title:'Кардио-разогрев · гребля', used:0,
+  items:[['row','',750,'м'],['box','2×8']]},
+ {id:'sb3', lvl:'блок', own:false, folder:'Силовые блоки', kind:'strength', title:'Линейная прогрессия · присед 3×5', used:0,
+  items:[['squat','3×5',75,'%']]},
+ {id:'sb4', lvl:'блок', own:false, folder:'Силовые блоки', kind:'strength', title:'Жим стоя 5×5', used:0,
+  items:[['press','5×5',70,'%'],['ttb','3×10']]},
+ {id:'sb5', lvl:'блок', own:false, folder:'Комплексы', kind:'metcon', title:'«Cindy» · AMRAP 20', used:0, fmt:'AMRAP 20',
+  items:[['pullup','5'],['pushup','10'],['squat','15']]},
+ {id:'sb6', lvl:'блок', own:false, folder:'Комплексы', kind:'metcon', title:'«Helen» · 3 раунда', used:0, fmt:'For time 3',
+  items:[['row','',400,'м'],['kbs','21'],['pullup','12']]},
+ {id:'sb7', lvl:'блок', own:false, folder:'Заминки', kind:'cooldown', title:'Растяжка задней цепи · 6 мин', used:0,
+  items:[['couch','2×',60,'сек']]},
+
+ {id:'sw1', lvl:'тренировка', own:false, title:'Базовый силовой день', used:0, blocks:['sb1','sb3','sb4','sb7']},
+ {id:'sw2', lvl:'тренировка', own:false, title:'Кроссфит · классический метком', used:0, blocks:['sb2','sb5','sb7']},
+ {id:'sw3', lvl:'тренировка', own:false, title:'Смешанный день · сила + Helen', used:0, blocks:['sb1','sb3','sb6','sb7']},
+
+ {id:'sk1', lvl:'неделя', own:false, title:'Стартовая неделя · 3 дня', used:0,
+  days:['sw1', null,'sw2', null,'sw3', null, null]},
+ {id:'sk2', lvl:'неделя', own:false, title:'Кроссфит-неделя · 5 дней', used:0,
+  days:['sw2','sw1','sw3', null,'sw2','sw1', null]},
+
+ {id:'sp1', lvl:'программа', own:false, title:'Линейная прогрессия · 12 недель', used:0,
+  goal:'Базовая сила для новичка: присед, жим, тяга по линейной схеме', weeks:12, base:'sk1'},
+ {id:'sp2', lvl:'программа', own:false, title:'Кроссфит база · 8 недель', used:0,
+  goal:'Общая физическая подготовка с классическими комплексами', weeks:8, base:'sk2'},
+ {id:'sp3', lvl:'программа', own:false, title:'Гипертрофия верх/низ · 10 недель', used:0,
+  goal:'Набор мышечной массы, сплит верх/низ четыре раза в неделю', weeks:10, base:'sk1'},
 ];
 const tplById = id => TPL.find(t=>t.id===id);
 

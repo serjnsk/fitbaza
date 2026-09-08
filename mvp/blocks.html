@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>База программ · fitbaza</title>
+<title>База блоков · fitbaza</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -24,14 +24,12 @@
 <script src="assets/nav.js"></script>
 <script src="assets/ui.js"></script>
 <script>
-/* ═══════════ БАЗА ПРОГРАММ (TPL-2) ═══════════
-   Недели вынесены отдельной вкладкой, а не отдельным разделом меню: неделя —
-   рабочая единица копирования внутри программы (CON-4, CON-14), искать её
-   отдельно от программ незачем. */
-const cfg = { ph:'Поиск программы или недели…', add:'Сохранить программу',
-  tabs:[{n:'Программы', level:'программа'}, {n:'Недели', level:'неделя'}] };
+/* ═══════════ БАЗА БЛОКОВ И КОМПЛЕКСОВ (TPL-1, TPL-2) ═══════════
+   Единственный уровень с папками: разминок у тренера много, и без папок
+   список нечитаем. Папки заданы в TPL_FOLDERS. */
+const cfg = { level:'блок', ph:'Поиск блока или комплекса…', add:'Сохранить блок' };
 renderLib(cfg);
-initShell({page:'programs.html', title:'База программ'});
+initShell({page:'blocks.html', title:'База блоков/комплексов'});
 </script>
 </body>
 </html>

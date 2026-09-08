@@ -113,42 +113,28 @@ const ICON = {
  clock:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5.8"/><path d="M8 4.8V8l2.2 1.4"/></svg>',
  chk:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3.5 8.5 6.5 11.5 12.5 5"/></svg>',
 };
-const NAV = [
- {g:'Работа'},
- {h:'#', k:'dash',  n:'Дашборд', a:'Дашб'},
- {h:'#', k:'users', n:'Клиенты',         a:'Клиен', c:()=>CLIENTS.length},
- {h:'#', k:'cal',   n:'Календарь', a:'Кален'},
- {g:'Программы'},
- {h:'#', k:'prog',  n:'Программы',       a:'Прогр', c:()=>PROGRAMS.length},
- {h:'constructor.html', k:'build', n:'Конструктор', a:'Констр'},
- {g:'Библиотеки'},
- {h:'#', k:'dumb',  n:'База упражнений', a:'База',  c:()=>EX.length},
- {h:'#', k:'tpl',   n:'Шаблоны',         a:'Шабл',  c:()=>TPL.length},
- {g:'Настройки'},
- {h:'#', k:'brand', n:'Бренд и профиль', a:'Бренд'},
- {h:'#', k:'map',   n:'Карта сайта', a:'Карта'},
-];
-function renderNav(){
+/* NAV живёт в assets/nav.js — общий конфиг, см. комментарий там. */
+function renderNav(page){
   $('#nav').innerHTML = `
     <div class="nh">${LOGO}</div>
     <div class="nbody">
       ${NAV.map(x => x.g
         ? `<div class="ngrp">${esc(x.g)}</div>`
-        : `<a href="${x.h}" class="${x.k==='build'?'on':''}">${ICON[x.k]}
+        : `<a href="${x.h}" class="${x.h===page?'on':''}">${ICON[x.k]}
              <span class="ntxt">${esc(x.n)}</span><i class="nab">${esc(x.a||x.n)}</i>
              ${x.c?`<span class="cnt">${x.c()}</span>`:''}</a>`).join('')}
     </div>
-    <div class="nfoot">
+    <a class="nfoot" href="brand.html">
       <span class="av">${esc(TRAINER.ini)}</span>
       <span><b>${esc(TRAINER.n)}</b><s>${esc(TRAINER.workspace)}</s></span>
-    </div>`;
+    </a>`;
 }
 function renderTop(){
   const p = program(S.pid);
   $('#topbar').innerHTML = `
     <nav class="crumb">
-      <a href="#">Программы</a><span class="sep">/</span>
-      <a href="#">${esc(p.title)}</a><span class="sep">/</span>
+      <a href="programs.html">База программ</a><span class="sep">/</span>
+      <span class="cur" style="font-weight:500">${esc(p.title)}</span><span class="sep">/</span>
       <span class="cur">Неделя ${S.wk}</span>
     </nav>
     <span class="sp"></span>
@@ -1271,4 +1257,4 @@ function openAssign(){
   const w = buildWeek(S.pid, n); WCACHE[S.pid+':'+n] = w;
   w.days.forEach(d=>d.blocks.forEach(fmtIntoTitle));
 });
-renderNav(); renderTop(); render();
+renderNav('constructor.html'); renderTop(); render();

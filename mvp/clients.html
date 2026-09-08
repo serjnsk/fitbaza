@@ -21,6 +21,7 @@
 </div>
 <div class="ov" id="ov"></div>
 <script src="assets/data.js"></script>
+<script src="assets/nav.js"></script>
 <script src="assets/ui.js"></script>
 <script>
 /* ═══════════ КЛИЕНТЫ — рабочий список тренера ═══════════ */
@@ -76,7 +77,7 @@ function render(){
   $$('tr[data-id]').forEach(r=>r.onclick=()=>location.href='client.html?id='+r.dataset.id);
   $$('.filters button').forEach(b=>b.onclick=()=>{ V.f=b.dataset.f; render() });
   $('#q').oninput=e=>{ V.q=e.target.value; render() };
-  $('#q').focus(); $('#q').setSelectionRange(V.q.length,V.q.length);
+  $('#q').focus({preventScroll:true}); $('#q').setSelectionRange(V.q.length,V.q.length);
 }
 render();
 initShell({page:'clients.html', title:'Клиенты'});

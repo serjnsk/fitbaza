@@ -69,23 +69,7 @@ const LOGO = `<svg class="logo" viewBox="0 0 336 49" fill="none" xmlns="http://w
 <path d="M333.98 26.032H313.98V46.032H333.98V26.032Z" fill="var(--acc)"/>
 </svg>`;
 
-/* ─── навигация по рабочему пространству ─── */
-const NAV = [
- {g:'Работа'},
- {h:'index.html',      k:'dash',  n:'Дашборд'},
- {h:'clients.html',    k:'users', n:'Клиенты',        a:'Клиен', c:()=>CLIENTS.length},
- {h:'calendar.html',   k:'cal',   n:'Календарь',      a:'Кален'},
- {g:'Программы'},
- {h:'programs.html',   k:'prog',  n:'Программы',      a:'Прогр', c:()=>PROGRAMS.length},
- {h:'constructor.html',k:'build', n:'Конструктор',    a:'Констр'},
- {g:'Библиотеки'},
- {h:'exercises.html',  k:'dumb',  n:'База упражнений',a:'База',  c:()=>EX.length},
- {h:'templates.html',  k:'tpl',   n:'Шаблоны',        a:'Шабл',  c:()=>TPL.length},
- {g:'Настройки'},
- {h:'brand.html',      k:'brand', n:'Бренд и профиль',a:'Бренд'},
- {h:'sitemap.html',    k:'map',   n:'Карта сайта',    a:'Карта'},
-];
-function renderNav(page){
+/* Меню вынесено в assets/nav.js — общий конфиг для всех страниц. */function renderNav(page){
   $('#nav').innerHTML = `
     <div class="nh">${LOGO}</div>
     <div class="nbody">
@@ -112,7 +96,8 @@ function renderTop(cfg){
       : `<span class="cur">${esc(c.n)}</span>`).join('')}</nav>
     ${cfg.sub?`<span class="sep">·</span><span class="cur" style="font-weight:500;color:var(--tx3)">${esc(cfg.sub)}</span>`:''}
     <span class="sp"></span>
-    ${cfg.actions||''}`;
+    ${cfg.actions||''}
+    <a class="btn" href="constructor.html">${ICON.build} Создать тренировку</a>`;
 }
 
 function initShell(cfg){
@@ -182,3 +167,116 @@ document.addEventListener('keydown', e=>{
   if(e.key==='Escape') closeModal();
   if(e.key==='/' && !/input|textarea/i.test(e.target.tagName)){ const q=$('#q'); if(q){ e.preventDefault(); q.focus() } }
 });
+
+/* ═══════════ ОБЩАЯ ВИТРИНА БИБЛИОТЕК (TPL) ═══════════
+   Блоки, тренировки, недели и программы показываются одинаково — различаются
+   только содержимым карточки. Раньше это была одна страница «Шаблоны» с
+   переключателем уровней; теперь уровни развели по разделам меню, но витрина
+   обязана остаться одной, иначе четыре базы разъедутся по поведению.
+
+   В каждой базе рядом лежит своё и общее (как у упражнений, EX-2):
+   личное помечено чипом и всегда выше, внутри личного — новое первым. */
+const LIB = { q:'', own:false, folder:'Все', tab:0 };
+
+const libSort = (a,b) =>
+  a.own !== b.own ? (a.own ? -1 : 1)                       /* своё выше общего */
+  : a.own ? (b.at||'').localeCompare(a.at||'')             /* новее выше */
+  : (b.used||0)-(a.used||0);
+
+function libLines(t){
+  if(t.lvl==='блок')
+    return (t.items||[]).map(x=>`<span>${esc((byId(x[0])||{}).ru || x[0])}${x[1]?' · '+esc(x[1]):''}</span>`).join('');
+  if(t.lvl==='тренировка')
+    return (t.blocks||[]).map(id=>`<span>${esc((tplById(id)||{}).title || id)}</span>`).join('');
+  if(t.lvl==='программа'){
+    const b = tplById(t.base);
+    return `<span>${esc(t.goal||'')}</span>${b?`<span>основа — ${esc(b.title)}</span>`:''}`;
+  }
+  return '';
+}
+
+function libCard(t){
+  const st = tplStats(t);
+  const meta = t.lvl==='блок'       ? `${st.n} ${plural(st.n,'упражнение','упражнения','упражнений')}`
+             : t.lvl==='тренировка' ? `${st.blocks} ${plural(st.blocks,'блок','блока','блоков')} · ${st.n} ${plural(st.n,'упражнение','упражнения','упражнений')}`
+             : t.lvl==='неделя'     ? `${st.days} ${plural(st.days,'день','дня','дней')} с тренировками`
+             :                        `${st.weeks} ${plural(st.weeks,'неделя','недели','недель')} · ${st.days} ${plural(st.days,'тренировка','тренировки','тренировок')} в неделю`;
+  const week = t.lvl==='неделя' ? `<div class="tweek">${(t.days||[]).map((d,i)=>{
+      const w = d ? tplById(d) : null;
+      return `<div class="td ${w?'on':''}"><i>${RU[i]}</i>${w?esc(w.title.split(' · ')[0]):'отдых'}</div>`;
+    }).join('')}</div>` : '';
+  return `<div class="tcard" data-id="${t.id}">
+    <div class="h">
+      <span class="nm">${esc(t.title)}</span>
+      ${t.own?`<span class="chip ok">своё</span>`:`<span class="chip ghost">общая</span>`}
+    </div>
+    <div class="ls">${libLines(t)}</div>
+    ${week}
+    <div class="foot">${ICON.folder} ${meta}${t.used?` · использован ${t.used}×`:''}</div>
+  </div>`;
+}
+
+/* cfg: {level, add, tabs:[{n,level}]} — tabs только у базы программ (Программы / Недели) */
+function renderLib(cfg){
+  const level = cfg.tabs ? cfg.tabs[LIB.tab].level : cfg.level;
+  const all = TPL.filter(t=>t.lvl===level);
+  const withFolders = level==='блок';
+  const list = all.filter(t=>{
+    if(LIB.own && !t.own) return false;
+    if(withFolders && LIB.folder!=='Все' && t.folder!==LIB.folder) return false;
+    if(LIB.q && norm(t.title).indexOf(norm(LIB.q))<0) return false;
+    return true;
+  }).sort(libSort);
+
+  const grid = list.length
+    ? `<div class="exgrid">${list.map(libCard).join('')}</div>`
+    : `<div class="empty"><div class="t">Ничего не нашли</div><div class="d">Измените поиск или фильтр</div></div>`;
+
+  $('#page').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <label class="search" style="width:250px">${ICON.search}<input id="q" placeholder="${esc(cfg.ph)}" value="${esc(LIB.q)}"></label>
+      <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--tx2);cursor:pointer">
+        <input type="checkbox" id="own" ${LIB.own?'checked':''}> Только свои
+      </label>
+      <span class="sp" style="flex:1"></span>
+      <button class="btn gh" id="btnAdd">${ICON.plus} ${esc(cfg.add)}</button>
+    </div>
+
+    ${cfg.tabs?`<div class="filters" style="margin-bottom:14px">
+      ${cfg.tabs.map((t,i)=>`<button data-tab="${i}" class="${LIB.tab===i?'on':''}">${esc(t.n)}</button>`).join('')}
+    </div>`:''}
+
+    ${withFolders?`<div class="filters" style="margin-bottom:16px">
+      ${['Все',...TPL_FOLDERS].map(f=>`<button data-folder="${esc(f)}" class="${LIB.folder===f?'on':''}">${esc(f)}</button>`).join('')}
+    </div>`:''}
+
+    ${grid}
+
+    <div class="cols2" style="margin-top:26px">
+      <div class="kpi"><span class="k">${ICON.folder} Общая база сервиса</span><div class="v">${all.filter(t=>!t.own).length}</div><div class="d">доступны сразу, менять нельзя — только копировать к себе</div></div>
+      <div class="kpi"><span class="k">${ICON.plus} Сохранено вами</span><div class="v acc">${all.filter(t=>t.own).length}</div><div class="d">видно только в вашем рабочем пространстве</div></div>
+    </div>`;
+
+  $$('.filters [data-tab]').forEach(b=>b.onclick=()=>{ LIB.tab=+b.dataset.tab; renderLib(cfg) });
+  $$('.filters [data-folder]').forEach(b=>b.onclick=()=>{ LIB.folder=b.dataset.folder; renderLib(cfg) });
+  $('#own').onchange=e=>{ LIB.own=e.target.checked; renderLib(cfg) };
+  $('#q').oninput=e=>{ LIB.q=e.target.value; renderLib(cfg) };
+  $('#btnAdd').onclick=()=>toast('В конструкторе: соберите и нажмите «Сохранить в библиотеку»');
+  $$('.tcard').forEach(c=>c.onclick=()=>libDetail(tplById(c.dataset.id)));
+  const qEl=$('#q'); if(qEl){ qEl.focus({preventScroll:true}); qEl.setSelectionRange(LIB.q.length,LIB.q.length) }
+}
+
+function libDetail(t){
+  if(!t) return;
+  openModal({title:t.title, body:`
+    <div style="display:flex;gap:6px;margin-bottom:14px">
+      ${t.folder?`<span class="chip">${esc(t.folder)}</span>`:''}
+      ${t.own?`<span class="chip ok">своё</span>`:`<span class="chip ghost">общая база сервиса</span>`}
+      ${t.used?`<span class="chip">использован ${t.used}×</span>`:''}
+    </div>
+    <div class="ls" style="display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--tx2)">${libLines(t)}</div>
+    <div class="hint">${t.own
+      ? 'Ваш шаблон: его можно переименовать, изменить и удалить.'
+      : 'Шаблон из общей базы сервиса. Изменить его нельзя — вставьте в тренировку и сохраните как свой.'}</div>`,
+    foot:`<span class="sp"></span><a class="btn" href="constructor.html">${ICON.build} Вставить в тренировку</a>`});
+}

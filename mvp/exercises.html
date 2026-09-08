@@ -21,6 +21,7 @@
 </div>
 <div class="ov" id="ov"></div>
 <script src="assets/data.js"></script>
+<script src="assets/nav.js"></script>
 <script src="assets/ui.js"></script>
 <script>
 /* ═══════════ БАЗА УПРАЖНЕНИЙ (EX-1, EX-2, EX-3) ═══════════ */
@@ -86,7 +87,7 @@ function render(){
   $('#own').onchange=e=>{ V.own=e.target.checked; render() };
   $('#q').oninput=e=>{ V.q=e.target.value; render() };
   $('#btnAdd').onclick=openAddModal;
-  const qEl=$('#q'); qEl.focus(); qEl.setSelectionRange(V.q.length,V.q.length);
+  const qEl=$('#q'); qEl.focus({preventScroll:true}); qEl.setSelectionRange(V.q.length,V.q.length);
 }
 
 function openDetail(e){
