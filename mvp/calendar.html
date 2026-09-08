@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Календарь · fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/base-trainer.css">
+<link rel="stylesheet" href="assets/theme-01-strava.css">
+<link rel="stylesheet" href="assets/pages.css">
+</head>
+<body>
+<div class="app">
+  <aside class="nav" id="nav"></aside>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <div class="page"><div class="pagewrap" id="page"></div></div>
+  </div>
+</div>
+<div class="ov" id="ov"></div>
+<script src="assets/data.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+/* ═══════════ КАЛЕНДАРЬ (CAL-1) ═══════════ */
+const V = { mode:'month', cur:TODAY, cli:'all' };
+const KIND_LABEL = {warmup:'Разминка', strength:'Силовая', metcon:'Комплекс', cooldown:'Заминка'};
+
+function eventsIn(from,to){
+  const all = scheduleAll(from,to);
+  return V.cli==='all' ? all : all.filter(e=>e.cid===V.cli);
+}
+function dayEvents(date, pool){ return pool.filter(e=>e.date===date) }
+
+function evDot(kind){ return kind==='warmup'?'warmup':kind==='metcon'?'metcon':kind==='cooldown'?'cooldown':'' }
+
+function monthGrid(anchor){
+  const d = D(anchor);
+  const first = iso(new Date(d.getFullYear(), d.getMonth(), 1));
+  const last  = iso(new Date(d.getFullYear(), d.getMonth()+1, 0));
+  const start = addDays(first, -dowMon(first));
+  const cells = Array.from({length:42}, (_,i)=>addDays(start,i));
+  const pool = eventsIn(cells[0], cells[41]);
+  return `<div class="cal">
+    <div class="calhead">${RU.map(w=>`<div>${w}</div>`).join('')}</div>
+    <div class="calgrid">
+      ${cells.map(date=>{
+        const inMonth = date.slice(0,7)===first.slice(0,7);
+        const evs = dayEvents(date,pool);
+        return `<div class="cell ${!inMonth?'out':''} ${date===TODAY?'today':''}">
+          <div class="cd">${+date.slice(8,10)}</div>
+          ${evs.slice(0,3).map(e=>{ const c=client(e.cid);
+            return `<div class="ev ${e.status==='done'?'done':''}" data-date="${e.date}" data-cid="${e.cid}" title="${esc(c.n)} · ${esc(e.title)}">
+              <span class="k ${evDot(e.kind)}"></span><span class="n">${esc(c.n.split(' ')[0])} · ${esc(e.title)}</span></div>`; }).join('')}
+          ${evs.length>3?`<div class="calmore">ещё ${evs.length-3}</div>`:''}
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function weekGrid(anchor){
+  const start = addDays(anchor, -dowMon(anchor));
+  const days = Array.from({length:7},(_,i)=>addDays(start,i));
+  const pool = eventsIn(days[0], days[6]);
+  return `<div class="cols" style="display:grid;grid-template-columns:repeat(7,1fr);gap:10px;align-items:start">
+    ${days.map(date=>{
+      const evs = dayEvents(date,pool);
+      return `<div class="card">
+        <div class="ch"><span class="t">${RU[dowMon(date)]} · ${dm(date)}</span></div>
+        <div class="cb" style="display:flex;flex-direction:column;gap:7px;min-height:120px">
+          ${evs.length ? evs.map(e=>{ const c=client(e.cid);
+            return `<div class="ev ${e.status==='done'?'done':''}" data-date="${e.date}" data-cid="${e.cid}" style="height:auto;align-items:flex-start;padding:8px">
+              <span class="av s" style="margin-top:1px">${esc(c.ini)}</span>
+              <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600;color:var(--tx1)">${esc(c.n)}</div>
+                <div style="font-size:11.5px;color:var(--tx3);margin-top:1px">${esc(e.title)}</div></div>
+            </div>`; }).join('') : `<span style="font-size:11.5px;color:var(--tx4)">Тренировок нет</span>`}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function periodTitle(){
+  const d = D(V.cur);
+  if(V.mode==='month') return MONTHS_N[d.getMonth()] + ' ' + d.getFullYear();
+  const start = addDays(V.cur, -dowMon(V.cur));
+  return dm(start) + ' – ' + dm(addDays(start,6));
+}
+
+function render(){
+  $('#page').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <div class="filters">
+        <button data-mode="month" class="${V.mode==='month'?'on':''}">Месяц</button>
+        <button data-mode="week" class="${V.mode==='week'?'on':''}">Неделя</button>
+      </div>
+      <button class="iact" id="pPrev">${ICON.back}</button>
+      <button class="iact" id="pNext">${ICON.arr}</button>
+      <button class="btn gh sm" id="pToday">Сегодня</button>
+      <div style="font-family:var(--disp);font-size:15px;font-weight:700;letter-spacing:-.01em">${periodTitle()}</div>
+      <span class="sp" style="flex:1"></span>
+      <div class="filters">
+        <button data-cli="all" class="${V.cli==='all'?'on':''}">Все</button>
+        ${CLIENTS.map(c=>`<button data-cli="${c.id}" class="${V.cli===c.id?'on':''}">${esc(c.n.split(' ')[0])}</button>`).join('')}
+      </div>
+    </div>
+
+    ${V.mode==='month' ? monthGrid(V.cur) : weekGrid(V.cur)}
+
+    <div class="legend">
+      <span><i style="background:#2B6FCC"></i> Разминка</span>
+      <span><i style="background:var(--acc)"></i> Силовая</span>
+      <span><i style="background:var(--rm)"></i> Комплекс</span>
+      <span><i style="background:#7C6FE0"></i> Заминка</span>
+    </div>
+    <div class="hint">Клик по тренировке открывает её в конструкторе — там же можно перенести день или скопировать неделю.</div>`;
+
+  $$('.filters [data-mode]').forEach(b=>b.onclick=()=>{ V.mode=b.dataset.mode; render() });
+  $$('.filters [data-cli]').forEach(b=>b.onclick=()=>{ V.cli=b.dataset.cli; render() });
+  $('#pToday').onclick=()=>{ V.cur=TODAY; render() };
+  $('#pPrev').onclick=()=>{ const d=D(V.cur); V.cur = V.mode==='month' ? iso(new Date(d.getFullYear(),d.getMonth()-1,1)) : addDays(V.cur,-7); render() };
+  $('#pNext').onclick=()=>{ const d=D(V.cur); V.cur = V.mode==='month' ? iso(new Date(d.getFullYear(),d.getMonth()+1,1)) : addDays(V.cur,7); render() };
+  $$('.ev[data-cid]').forEach(el=>el.onclick=()=>{
+    const c = client(el.dataset.cid), date = el.dataset.date;
+    openModal({title:esc(c.n), body:`<div style="font-size:13px;color:var(--tx2);margin-bottom:14px">${humanDate(date)} · ${esc(c.n)}</div>
+      <div class="hint">Открыть эту тренировку и внести правки можно в конструкторе.</div>`,
+      foot:`<a class="btn gh" href="client.html?id=${c.id}">Профиль клиента</a><span class="sp"></span><a class="btn" href="constructor.html">${ICON.build} Открыть в конструкторе</a>`});
+  });
+}
+render();
+initShell({page:'calendar.html', title:'Календарь'});
+</script>
+</body>
+</html>

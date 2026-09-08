@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Шаблоны · fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/base-trainer.css">
+<link rel="stylesheet" href="assets/theme-01-strava.css">
+<link rel="stylesheet" href="assets/pages.css">
+</head>
+<body>
+<div class="app">
+  <aside class="nav" id="nav"></aside>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <div class="page"><div class="pagewrap" id="page"></div></div>
+  </div>
+</div>
+<div class="ov" id="ov"></div>
+<script src="assets/data.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+/* ═══════════ ШАБЛОНЫ (TPL-1, TPL-2, TPL-3) ═══════════ */
+const V = { lvl:'блок', folder:'Все', q:'' };
+const INSERT_LABEL = {'упражнение':'В тренировку','блок':'В тренировку','тренировка':'Заполнить день','неделя':'Заполнить неделю','программа':'Создать программу'};
+const levelCount  = l => TPL.filter(t=>t.lvl===l).length;
+const folderCount = f => TPL.filter(t=>t.lvl==='блок' && t.folder===f).length;
+
+function itemLine([exId,scheme,val,unit]){
+  const e=byId(exId);
+  const valPart = val!=null ? ' '+val+(unit==='%'?unit:(unit?' '+unit:'')) : '';
+  return `${e?e.ru:exId}${scheme?' '+scheme:''}${valPart}`;
+}
+function shortTitle(t){ return t.title.replace(/\s·.*$/,'') }
+
+function bodyFor(t){
+  if(t.lvl==='упражнение') return '';
+  if(t.lvl==='блок') return `<div class="ls">${(t.items||[]).slice(0,4).map(it=>`<span>${esc(itemLine(it))}</span>`).join('')}</div>`;
+  if(t.lvl==='тренировка') return `<div class="ls">${(t.blocks||[]).map(id=>`<span>${esc(shortTitle(tplById(id)))}</span>`).join('')}</div>`;
+  const days = t.lvl==='программа' ? tplToWeekDays(tplById(t.base)) : tplToWeekDays(t);
+  return `<div class="tweek">${days.map((d,i)=>`<div class="td ${d?'on':''}"><i>${RU[i]}</i>${d?esc(shortTitle({title:d.title})):'—'}</div>`).join('')}</div>`;
+}
+function statLine(t){
+  const s = tplStats(t);
+  if(t.lvl==='блок') return s.n+' '+plural(s.n,'упражнение','упражнения','упражнений');
+  if(t.lvl==='тренировка') return s.blocks+' '+plural(s.blocks,'блок','блока','блоков');
+  if(t.lvl==='неделя') return s.days+' '+plural(s.days,'день','дня','дней');
+  if(t.lvl==='программа') return s.weeks+' '+plural(s.weeks,'неделя','недели','недель');
+  return '';
+}
+
+function tcard(t){
+  return `<div class="tcard" data-id="${t.id}">
+    <div class="h"><span class="nm">${esc(shortTitle(t))}</span>${statLine(t)?`<span class="chip">${statLine(t)}</span>`:''}</div>
+    ${bodyFor(t)}
+    <div class="foot">${ICON.star} использован ${t.used}×</div>
+  </div>`;
+}
+
+function list(){
+  return TPL.filter(t=>t.lvl===V.lvl)
+    .filter(t=> V.lvl!=='блок' || V.folder==='Все' || t.folder===V.folder)
+    .filter(t=> !V.q || norm(t.title).indexOf(norm(V.q))>=0);
+}
+
+function render(){
+  const items = list();
+  $('#page').innerHTML = `
+    <div class="split">
+      <div>
+        <div class="lab" style="margin-bottom:8px">Уровни библиотеки</div>
+        <div class="folders">${TPL_LEVELS.map(l=>`<div class="folder ${V.lvl===l?'on':''}" data-lvl="${esc(l)}">
+          <span class="n">${esc(l[0].toUpperCase()+l.slice(1))}</span><span class="c">${levelCount(l)}</span></div>`).join('')}</div>
+        ${V.lvl==='блок' ? `
+          <div class="lab" style="margin:20px 0 8px">Папки блоков</div>
+          <div class="folders">
+            <div class="folder ${V.folder==='Все'?'on':''}" data-folder="Все"><span class="n">Все</span><span class="c">${levelCount('блок')}</span></div>
+            ${TPL_FOLDERS.map(f=>`<div class="folder ${V.folder===f?'on':''}" data-folder="${esc(f)}"><span class="n">${esc(f)}</span><span class="c">${folderCount(f)}</span></div>`).join('')}
+          </div>
+          <button class="btn gh sm" id="btnFolder" style="margin-top:10px;width:100%;justify-content:center">${ICON.plus} Новая папка</button>` : ''}
+      </div>
+      <div>
+        <label class="search" style="margin-bottom:16px;width:290px">${ICON.search}<input id="q" placeholder="Поиск по названию…" value="${esc(V.q)}"></label>
+        ${items.length ? `<div class="exgrid">${items.map(tcard).join('')}</div>` : `<div class="empty"><div class="t">Здесь пока пусто</div><div class="d">Сохраняйте блоки и тренировки в шаблоны прямо из конструктора</div></div>`}
+      </div>
+    </div>`;
+
+  $$('.folder[data-lvl]').forEach(f=>f.onclick=()=>{ V.lvl=f.dataset.lvl; render() });
+  $$('.folder[data-folder]').forEach(f=>f.onclick=()=>{ V.folder=f.dataset.folder; render() });
+  $$('.tcard').forEach(c=>c.onclick=()=>openDetail(tplById(c.dataset.id)));
+  const bf = $('#btnFolder'); if(bf) bf.onclick=()=>toast('Папка создаётся из конструктора при сохранении блока');
+  $('#q').oninput=e=>{ V.q=e.target.value; render() };
+  const qEl=$('#q'); qEl.focus(); qEl.setSelectionRange(V.q.length,V.q.length);
+}
+
+function openDetail(t){
+  openModal({title:shortTitle(t), body:`
+    <div class="chip" style="margin-bottom:14px">${esc(t.lvl)} · использован ${t.used}×</div>
+    ${bodyFor(t) || `<div style="font-size:13px;color:var(--tx2)">${esc(t.title)}</div>`}
+  `, foot:`<a class="btn gh" href="constructor.html">${INSERT_LABEL[t.lvl]}</a>`});
+}
+render();
+initShell({page:'templates.html', title:'Шаблоны'});
+</script>
+</body>
+</html>

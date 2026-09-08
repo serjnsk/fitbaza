@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Дашборд · fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/base-trainer.css">
+<link rel="stylesheet" href="assets/theme-01-strava.css">
+<link rel="stylesheet" href="assets/pages.css">
+</head>
+<body>
+<div class="app">
+  <aside class="nav" id="nav"></aside>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <div class="page"><div class="pagewrap" id="page"></div></div>
+  </div>
+</div>
+<div class="ov" id="ov"></div>
+<script src="assets/data.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+/* ═══════════ ДАШБОРД — что сегодня требует внимания ═══════════ */
+function unanswered(){
+  const out=[];
+  CLIENTS.forEach(c=>c.comments.forEach((cm,i)=>{
+    const key=c.id+':'+i;
+    if(!cm.reply && !STATE.replied[key]) out.push({c,cm,key});
+  }));
+  return out;
+}
+const recentPRs = () => CLIENTS.filter(c=>c.pr && daysBetween(c.pr.at,TODAY)<=7);
+const idle       = () => CLIENTS.filter(c=>c.prog && c.last && daysBetween(c.last,TODAY)>=3);
+const gaps        = () => PROGRAMS.filter(p=>(COMPOSED_WEEKS[p.id]||0) < p.cur);
+const noProg       = () => CLIENTS.filter(c=>!c.prog);
+
+function render(){
+  const today = scheduleAll(TODAY,TODAY);
+  const un = unanswered(), prs = recentPRs(), idl = idle(), gp = gaps(), np = noProg();
+
+  $('#page').innerHTML = `
+    <div class="cols4">
+      <div class="kpi"><span class="k">${ICON.cal} Тренировок сегодня</span><div class="v">${today.length}</div><div class="d">по всем клиентам</div></div>
+      <div class="kpi"><span class="k">${ICON.chat} Ждут ответа</span><div class="v ${un.length?'acc':''}">${un.length}</div><div class="d">комментариев без ответа</div></div>
+      <div class="kpi"><span class="k">${ICON.star} Рекорды за неделю</span><div class="v">${prs.length}</div><div class="d">новых персональных максимумов</div></div>
+      <div class="kpi"><span class="k">${ICON.clock} Простой 3+ дня</span><div class="v ${idl.length?'warn':''}">${idl.length}</div><div class="d">клиентов не появлялись</div></div>
+    </div>
+
+    <div class="cols2" style="grid-template-columns:1.4fr 1fr;align-items:start;margin-top:22px">
+      <div>
+        <div class="sechead"><span class="t">Тренировки сегодня</span><span class="ln"></span><span class="n">${today.length}</span></div>
+        <div class="card">
+          ${today.length ? `<table class="tbl"><thead><tr><th>Клиент</th><th>Тренировка</th><th>Статус</th></tr></thead><tbody>
+            ${today.map(e=>{ const c=client(e.cid);
+              return `<tr class="click" onclick="location.href='client.html?id=${c.id}'">
+                <td><div class="cellname"><span class="av s">${esc(c.ini)}</span><span class="n">${esc(c.n)}</span></div></td>
+                <td>${esc(e.title)}</td>
+                <td>${e.status==='done'?`<span class="chip ok">Выполнено</span>`:e.status==='missed'?`<span class="chip rm">Пропущено</span>`:`<span class="chip">Запланировано</span>`}</td>
+              </tr>`; }).join('')}
+          </tbody></table>` : `<div class="empty"><div class="t">На сегодня ничего не запланировано</div></div>`}
+        </div>
+
+        <div class="sechead"><span class="t">Прогресс программ</span><span class="ln"></span></div>
+        <div class="card cb">
+          ${PROGRAMS.map(p=>{ const cw=COMPOSED_WEEKS[p.id]||0, pct=Math.round(cw/p.weeks*100);
+            return `<div style="display:flex;align-items:center;gap:12px;padding:9px 0">
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:6px">
+                  <a href="programs.html" style="font-size:13px;font-weight:600;color:var(--tx1);text-decoration:none">${esc(p.title)}</a>
+                  <span style="font-size:12px;color:var(--tx4)">неделя ${cw} из ${p.weeks}</span>
+                </div>
+                <div class="bar"><i style="width:${pct}%"></i></div>
+              </div>
+            </div>`; }).join('')}
+        </div>
+      </div>
+
+      <div>
+        <div class="sechead"><span class="t">Требует внимания</span><span class="ln"></span></div>
+        <div class="card cb flush">
+          <div class="feed">
+            ${un.map(({c,cm,key})=>`
+              <div class="fitem">
+                <span class="av s">${esc(c.ini)}</span>
+                <div class="c">
+                  <div class="h"><b>${esc(c.n)}</b>${cm.ex?`<span style="font-size:11.5px;color:var(--tx4)">· ${esc(cm.ex)}</span>`:''}</div>
+                  <div class="tx">${esc(cm.tx)}</div>
+                  <div class="reply"><input placeholder="Ответить…" data-key="${key}" data-cid="${c.id}"><button class="btn gh sm" data-send="${key}" data-cid="${c.id}">Отправить</button></div>
+                </div>
+              </div>`).join('')}
+            ${prs.map(c=>`
+              <div class="fitem">
+                <span class="av s">${esc(c.ini)}</span>
+                <div class="c">
+                  <div class="h"><b>${esc(c.n)}</b><span style="font-size:11.5px;color:var(--tx4)">· ${humanDate(c.pr.at)}</span></div>
+                  <div class="tx">${esc(PMNAMES[c.pr.ex]||c.pr.ex)} ${c.pr.v} кг — новый максимум (было ${c.pr.prev})</div>
+                  <button class="btn gh sm" data-recalc="${c.id}" style="margin-top:8px">Пересчитать проценты</button>
+                </div>
+              </div>`).join('')}
+            ${idl.map(c=>`
+              <div class="fitem">
+                <span class="av s">${esc(c.ini)}</span>
+                <div class="c">
+                  <div class="h"><b>${esc(c.n)}</b></div>
+                  <div class="tx">Не появлялся ${ago(c.last)}</div>
+                  <a class="btn gh sm" href="client.html?id=${c.id}" style="margin-top:8px;display:inline-flex">Открыть профиль</a>
+                </div>
+              </div>`).join('')}
+            ${gp.map(p=>`
+              <div class="fitem">
+                <span class="av s">${ICON.prog}</span>
+                <div class="c">
+                  <div class="h"><b>${esc(p.title)}</b></div>
+                  <div class="tx">Неделя ${p.cur} ещё не составлена</div>
+                  <a class="btn gh sm" href="constructor.html" style="margin-top:8px;display:inline-flex">Открыть в конструкторе</a>
+                </div>
+              </div>`).join('')}
+            ${np.map(c=>`
+              <div class="fitem">
+                <span class="av s">${esc(c.ini)}</span>
+                <div class="c">
+                  <div class="h"><b>${esc(c.n)}</b></div>
+                  <div class="tx">Пришёл по приглашению, программа ещё не назначена</div>
+                  <a class="btn gh sm" href="client.html?id=${c.id}" style="margin-top:8px;display:inline-flex">Назначить программу</a>
+                </div>
+              </div>`).join('')}
+            ${!un.length && !prs.length && !idl.length && !gp.length && !np.length ? `<div class="empty"><div class="t">Всё под контролем</div><div class="d">Новых сигналов нет</div></div>` : ''}
+          </div>
+        </div>
+
+        <div class="sechead"><span class="t">Быстрые действия</span><span class="ln"></span></div>
+        <div class="card cb" style="display:flex;flex-direction:column;gap:8px">
+          <a class="btn gh" href="constructor.html" style="justify-content:flex-start">${ICON.build} Составить неделю</a>
+          <button class="btn gh" id="btnInvite" style="justify-content:flex-start">${ICON.plus} Пригласить клиента</button>
+          <a class="btn gh" href="templates.html" style="justify-content:flex-start">${ICON.tpl} Библиотека шаблонов</a>
+        </div>
+      </div>
+    </div>`;
+
+  $$('[data-recalc]').forEach(b=>b.onclick=()=>toast('Проценты в назначенных тренировках пересчитаны от нового максимума'));
+  $$('[data-send]').forEach(b=>b.onclick=()=>{
+    const key=b.dataset.send, cid=b.dataset.cid;
+    const input=$(`[data-key="${key}"]`); const v=input.value.trim();
+    if(!v) return;
+    const c=client(cid), i=+key.split(':')[1];
+    c.comments[i].reply=v; STATE.replied[key]=true; saveState();
+    toast('Ответ отправлен'); render();
+  });
+  $('#btnInvite').onclick=()=>{
+    openModal({
+      title:'Пригласить клиента',
+      body:`<div class="copyfield"><code>${esc(TRAINER.invite)}</code><button class="btn gh sm" id="btnCopyInvite">Скопировать</button></div>
+        <div class="hint">Клиент открывает ссылку → входит по номеру телефона без паролей и подтверждений по почте → сразу привязан к вашему рабочему пространству.</div>`
+    });
+    $('#btnCopyInvite').onclick=()=>{ navigator.clipboard?.writeText(TRAINER.invite); toast('Ссылка скопирована') };
+  };
+}
+render();
+initShell({page:'index.html', title:'Дашборд'});
+</script>
+</body>
+</html>

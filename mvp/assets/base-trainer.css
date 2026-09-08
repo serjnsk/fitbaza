@@ -1,0 +1,491 @@
+/* ============================================================
+   Структура без цвета. Все цвета, шрифты и скругления берутся
+   из переменных темы — файл сам не задаёт ни одного значения
+   напрямую, поэтому одна и та же раскладка работает во всех
+   четырёх стилистиках.
+   ============================================================ */
+/* ============================================================
+   Тренер · конструктор тренировки
+
+   Каркас взят из рабочей версии mvp: слева полная навигация по
+   рабочему пространству, сверху хлебные крошки и действия, по
+   центру только неделя и документ дня, справа панель источников.
+   Стилистика — клиентская: белая база, один оранжевый акцент,
+   Inter. Вложенность показана тоном: холст серый → панель белая
+   → блок серый → строка белая. Ровно как на экране клиента.
+   ============================================================ */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--ui);color:var(--ink);background:var(--s2);
+  -webkit-font-smoothing:antialiased;font-size:14px}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit;border:0;background:none}
+button{cursor:pointer}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+/* ─── каркас ─── */
+.app{display:grid;grid-template-columns:238px 1fr;min-height:100vh}
+.main{min-width:0;display:flex;flex-direction:column}
+
+/* ─── левая навигация ─── */
+.nav{background:var(--bg);border-right:1px solid var(--line);
+  position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+.nh{height:58px;display:flex;align-items:center;padding:0 16px;
+  border-bottom:1px solid var(--line);flex:none}
+/* Высота задана, ширина следует за пропорцией 336×49 — 151px в сайдбаре. */
+.nh .logo{height:21px;width:auto;color:var(--ink);display:block}
+.nbody{flex:1;overflow-y:auto;padding:12px 10px 16px}
+.ngrp{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--tx4);padding:14px 8px 6px}
+.ngrp:first-child{padding-top:2px}
+.nav a{display:flex;align-items:center;gap:10px;padding:8px 9px;border-radius:var(--rad-m);
+  text-decoration:none;color:var(--tx2);font-size:13.5px;font-weight:500;letter-spacing:-.01em}
+.nav a:hover{background:var(--s1);color:var(--ink)}
+.nav a.on{background:var(--acc-a);color:var(--acc-d);font-weight:600}
+.nav a svg{width:17px;height:17px;flex:none;stroke-width:1.6}
+.nav a .ntxt{flex:1;min-width:0}
+/* Короткая подпись для стилистик с узким рельсом иконок. Обрезать
+   «База упражнений» средствами CSS нельзя — получится «БАЗА У»,
+   поэтому сокращение приходит из данных. Кому не нужно — не показывает. */
+.nav a .nab{display:none}
+.nav a .cnt{font-size:11px;font-weight:600;color:var(--tx4);
+  background:var(--s1);border-radius:var(--rad-s);padding:1px 6px}
+.nav a.on .cnt{background:var(--bg);color:var(--acc-d)}
+.nfoot{border-top:1px solid var(--line);padding:11px 14px;flex:none;
+  display:flex;align-items:center;gap:9px}
+.nfoot .av{width:28px;height:28px;border-radius:50%;background:var(--s1);
+  display:grid;place-items:center;font-size:10px;font-weight:700;color:var(--tx3);flex:none}
+.nfoot b{font-size:12.5px;font-weight:600;display:block;letter-spacing:-.01em}
+.nfoot s{text-decoration:none;font-size:11px;color:var(--tx3);display:block}
+
+/* ─── топбар ─── */
+.topbar{height:58px;background:var(--bg);border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:0 20px;flex:none}
+.crumb{display:flex;align-items:center;gap:7px;font-size:13px;min-width:0}
+.crumb a{color:var(--tx3);text-decoration:none;white-space:nowrap}
+.crumb a:hover{color:var(--ink)}
+.crumb .sep{color:var(--tx4)}
+.crumb .cur{font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+.topbar .sp{flex:1}
+.iact{width:32px;height:32px;border-radius:var(--rad-m);background:var(--s1);display:grid;place-items:center;color:var(--tx2)}
+.iact:hover{background:var(--s2);color:var(--ink)}
+.iact svg{width:16px;height:16px}
+.forw{display:flex;align-items:center;gap:8px;background:var(--s1);border-radius:var(--rad-m);padding:4px 4px 4px 11px}
+.forw span{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tx4)}
+/* Системная стрелка селекта прижималась к правому краю плашки. Рисуем свою
+   и отводим ей место паддингом — тогда она стоит там, где задумано. */
+.forw select{height:28px;border-radius:var(--rad-s);background:var(--bg);font-size:13px;font-weight:600;
+  appearance:none;-webkit-appearance:none;padding:0 30px 0 11px;cursor:pointer;
+  background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%235E5E5E' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6.5 8 10.5l4-4'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center;background-size:13px}
+.forw select:hover{background-color:var(--s1)}
+.btn{height:36px;padding:0 16px;border-radius:var(--rad-m);background:var(--acc);color:var(--on-acc);
+  font-weight:600;font-size:13.5px;letter-spacing:-.01em;display:inline-flex;align-items:center;gap:7px}
+.btn:hover{background:var(--acc-d)}
+.btn svg{width:15px;height:15px}
+.btn.gh{background:var(--s1);color:var(--ink)}
+.btn.gh:hover{background:var(--s2)}
+
+/* ─── страница конструктора ─── */
+.page{flex:1;background:var(--s2);min-width:0}
+.cons{display:grid;grid-template-columns:minmax(0,1fr) 318px;gap:14px;
+  padding:14px 18px 60px;align-items:start}
+@media (max-width:1120px){ .cons{grid-template-columns:minmax(0,1fr)} .rail{display:none} }
+
+/* полоса недели */
+.wk{background:var(--bg);border-radius:var(--rad-l);padding:12px 14px;margin-bottom:12px}
+/* Переносится: в темах с капителью и разрядкой подписи кнопок шире,
+   и в одну строку неделя перестаёт помещаться. */
+.wkh{display:flex;align-items:center;gap:10px 11px;margin-bottom:10px;flex-wrap:wrap}
+.wkh b{font-family:var(--disp);white-space:nowrap}
+/* Стрелки стоят у самой недели, а не в топбаре: они листают её, и место
+   действия должно совпадать с местом, где виден результат. */
+.wkh .wkn{display:flex;gap:3px;flex:none}
+.wkh .wkn button{width:28px;height:28px;border-radius:var(--rad-s);background:var(--s1);
+  display:grid;place-items:center;color:var(--tx2)}
+.wkh .wkn button:hover:not(:disabled){background:var(--s2);color:var(--ink)}
+.wkh .wkn button:disabled{color:var(--tx4);cursor:default;background:none}
+.wkh .wkn svg{width:14px;height:14px}
+.wkh b{font-size:14.5px;font-weight:700;letter-spacing:-.02em}
+.wkh s{text-decoration:none;font-size:12.5px;color:var(--tx3)}
+.wkh .sp{flex:1}
+.wkh .cp{font-size:12.5px;font-weight:500;color:var(--tx3);display:flex;align-items:center;gap:6px;
+  white-space:nowrap}
+.wkh .cp:hover{color:var(--acc)}
+.wkh .cp svg{width:14px;height:14px}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.day{border-radius:var(--rad-m);background:var(--s1);padding:9px 9px 10px;text-align:left;min-height:76px;
+  display:flex;flex-direction:column;gap:4px;transition:.14s;border:1.5px solid transparent}
+.day:hover{background:var(--s2)}
+.day.on{background:var(--acc-a);border-color:var(--acc)}
+.day .d{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--tx3)}
+.day.on .d{color:var(--acc-d)}
+.day .t{font-size:12px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.day .e{font-size:12px;color:var(--tx4);font-weight:500}
+.day .k{margin-top:auto;padding-top:7px;font-size:11px;font-weight:500;color:var(--tx4);
+  letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day.on .k{color:var(--acc-d)}
+/* Полоса нагрузки — приём стилистик с дорожкой недели; остальные
+   показывают объём словами и полосу не выводят. */
+.day .ld{display:none}
+
+/* документ дня */
+.doc{background:var(--bg);border-radius:var(--rad-l);padding:15px 16px 18px}
+/* Шапка дня одной строкой: название, счёт, действия иконками — теми же,
+   что у блоков. Одинаковые действия должны выглядеть одинаково на всех
+   уровнях, иначе тренеру приходится запоминать два языка. */
+.doch{display:flex;align-items:center;gap:11px;margin-bottom:6px}
+.doch .x{width:30px;height:30px;border-radius:var(--rad-m);display:grid;place-items:center;
+  color:var(--tx4);flex:none;background:var(--s1)}
+.doch .x:hover{background:var(--acc-a);color:var(--acc)}
+.doch .x.rm:hover{background:var(--rm-a);color:var(--rm)}
+.doch .x svg{width:15px;height:15px}
+.doch input{font-family:var(--disp);font-size:21px;font-weight:700;letter-spacing:-.03em;flex:1;min-width:0;
+  padding:3px 6px;margin-left:-6px;border-radius:var(--rad-s)}
+.doch input:focus{outline:0;background:var(--s1)}
+.doch .stat{font-size:12.5px;color:var(--tx3);white-space:nowrap;font-weight:500}
+
+.blk{background:var(--s1);border-radius:var(--rad-l);padding:11px 12px;margin-top:11px}
+.blk.over{box-shadow:inset 0 0 0 1.5px var(--acc)}
+.blkh{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.blkh .bt{flex:1;min-width:0;font-size:14.5px;font-weight:600;letter-spacing:-.02em;
+  padding:4px 7px;margin-left:-7px;border-radius:var(--rad-s)}
+.blkh .bt:focus{outline:0;background:var(--bg)}
+.blkh .x{width:26px;height:26px;border-radius:var(--rad-s);display:grid;place-items:center;color:var(--tx4);flex:none}
+.blkh .x:hover{background:var(--bg);color:var(--acc)}
+.blkh .x svg{width:14px;height:14px}
+
+.bmeta{display:flex;flex-direction:column;gap:5px;margin-bottom:8px}
+.fld{display:flex;align-items:center;gap:9px;background:var(--bg);border-radius:var(--rad-m);
+  padding:7px 10px;border:1.5px solid transparent}
+.fld:focus-within{border-color:var(--acc)}
+.fld .k{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--tx4);flex:none;width:58px}
+.fld input{flex:1;min-width:0;font-size:13.5px}
+.fld input:focus{outline:0}
+.fld input::placeholder{color:var(--tx4)}
+.fld .hint{font-size:11.5px;color:var(--acc-d);white-space:nowrap;font-weight:500}
+
+.line{display:flex;align-items:center;gap:9px;background:var(--bg);border-radius:var(--rad-m);
+  padding:8px 10px;margin-bottom:4px;border:1.5px solid transparent;transition:.12s}
+.line:hover{border-color:var(--line2)}
+.line.edit{border-color:var(--acc)}
+/* Строка, которая осталась текстом: это нормальный этап работы, а не
+   ошибка. Пунктир вместо жёлтого — «здесь ещё не структура», спокойно. */
+.line.raw{border-style:dashed;border-color:var(--line2);background:none}
+.line.raw .txt{color:var(--tx2)}
+.gr{color:var(--tx4);cursor:grab;flex:none;display:grid}
+.gr:active{cursor:grabbing}
+.gr:hover{color:var(--acc)}
+.line .gr svg{width:13px;height:13px}
+.blkh .gr svg{width:14px;height:14px}
+.doch .gr svg{width:16px;height:16px}
+.line .txt{flex:1;min-width:0;padding:2px 0;font-size:13.5px}
+.line .txt:focus{outline:0}
+.line .nm{font-weight:600;letter-spacing:-.01em}
+.line .sc{color:var(--tx2);font-weight:500}
+.line .pct{height:25px;padding:0 9px;border-radius:var(--rad-s);background:var(--acc-a);color:var(--acc-d);
+  font-size:11.5px;font-weight:700;flex:none}
+.line .pct.none{background:var(--s1);color:var(--tx4);font-weight:500}
+.line .kg{font-size:12px;color:var(--tx3);white-space:nowrap;font-weight:500;flex:none;min-width:56px;text-align:right}
+.line .x{width:25px;height:25px;border-radius:var(--rad-s);display:grid;place-items:center;color:var(--tx4);flex:none}
+.line .x:hover{background:var(--s1);color:var(--acc)}
+.line .x svg{width:13px;height:13px}
+.addl{width:100%;text-align:left;padding:8px 10px;border-radius:var(--rad-m);color:var(--tx4);
+  font-size:12.5px;font-weight:500;display:flex;align-items:center;gap:8px}
+.addl:hover{background:var(--bg);color:var(--acc)}
+.addl svg{width:14px;height:14px}
+.addb{width:100%;margin-top:10px;padding:10px;border-radius:var(--rad-l);border:1.5px dashed var(--line2);
+  color:var(--tx3);font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px}
+.addb:hover{border-color:var(--acc);color:var(--acc);background:var(--acc-a)}
+.addb svg{width:15px;height:15px}
+
+/* подсказка разбора: текст и структура — одно и то же (CON-1 + CON-5) */
+.sug{position:absolute;z-index:60;background:var(--bg);border-radius:var(--rad-m);min-width:290px;
+  box-shadow:0 12px 36px rgba(0,0,0,.15),0 0 0 1px var(--line);padding:5px}
+.sug .row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--rad-m);width:100%;text-align:left}
+.sug .row:hover,.sug .row.on{background:var(--s1)}
+.sug .row b{font-weight:600;flex:1;min-width:0;letter-spacing:-.01em;font-size:13.5px}
+.sug .row s{text-decoration:none;font-size:11.5px;color:var(--tx3);white-space:nowrap}
+.sug .cap{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--tx4);padding:8px 10px 5px}
+.sug .ok{border-top:1px solid var(--line);margin-top:4px;padding-top:5px}
+
+/* ─── правая панель источников ─── */
+.rail{position:sticky;top:72px;background:var(--bg);border-radius:var(--rad-l);
+  display:flex;flex-direction:column;max-height:calc(100vh - 88px);overflow:hidden}
+.railhead{padding:12px 13px 11px;border-bottom:1px solid var(--line);flex:none}
+.tabs{display:flex;gap:3px;background:var(--s1);border-radius:var(--rad-m);padding:3px}
+.tabs button{flex:1;height:28px;border-radius:var(--rad-s);font-size:11.5px;font-weight:600;color:var(--tx3)}
+.tabs button.on{background:var(--bg);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.search{display:flex;align-items:center;gap:8px;background:var(--s1);border-radius:var(--rad-m);
+  padding:0 11px;height:34px;margin-top:9px;border:1.5px solid transparent}
+.search:focus-within{border-color:var(--acc);background:var(--bg)}
+.search svg{width:14px;height:14px;color:var(--tx4);flex:none}
+.search input{flex:1;min-width:0;font-size:13px}
+.search input:focus{outline:0}
+.railbody{flex:1;overflow-y:auto;padding:9px 10px 12px}
+.railfoot{border-top:1px solid var(--line);padding:10px 13px;flex:none;
+  font-size:11px;color:var(--tx4);line-height:1.5}
+
+.grpttl{display:flex;align-items:center;gap:8px;padding:11px 4px 6px}
+.grpttl .lab{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tx4)}
+.grpttl .ln{flex:1;height:1px;background:var(--line)}
+.grpttl .n{font-size:10.5px;color:var(--tx4);font-weight:600}
+.exc{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:var(--rad-m);cursor:pointer}
+.exc:hover{background:var(--s1)}
+.exc .thumb{width:30px;height:30px;border-radius:var(--rad-m);background:var(--s1);flex:none;
+  display:grid;place-items:center;font-size:9.5px;font-weight:700;color:var(--tx3)}
+.exc:hover .thumb{background:var(--bg)}
+.exc .thumb.pending{color:var(--tx4)}
+.exc .body{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.exc .nm{display:block;font-size:13px;font-weight:600;letter-spacing:-.01em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.exc .en{display:block;font-size:11px;color:var(--tx4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.exc .add{width:24px;height:24px;border-radius:var(--rad-s);display:grid;place-items:center;
+  color:var(--tx4);flex:none;opacity:0;pointer-events:none}
+.exc:hover .add{opacity:1}
+.exc .add:hover{background:var(--acc-a);color:var(--acc)}
+.exc .add svg{width:13px;height:13px}
+
+.tplc{padding:9px 10px;border-radius:var(--rad-m);background:var(--s1);margin-bottom:6px;cursor:pointer}
+.tplc:hover{background:var(--acc-a)}
+.tplc .h{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.tplc .nm{flex:1;min-width:0;font-size:13px;font-weight:600;letter-spacing:-.01em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tplc .chip{font-size:10px;font-weight:600;color:var(--acc-d);background:var(--bg);
+  border-radius:var(--rad-s);padding:2px 7px;flex:none;white-space:nowrap}
+.tplc .ls{display:flex;flex-direction:column;gap:2px}
+.tplc .ls span{font-size:11px;color:var(--tx3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.railbody .empty{padding:26px 8px;text-align:center;color:var(--tx4);font-size:12px}
+.railbody .hint{font-size:11px;color:var(--tx4);line-height:1.5;padding:10px 4px 0}
+
+/* ─── шторка назначения ─── */
+.ov{position:fixed;inset:0;background:rgba(20,20,20,.4);display:none;
+  align-items:center;justify-content:center;z-index:80;padding:24px}
+.ov.on{display:flex}
+.md{background:var(--bg);border-radius:var(--rad-l);width:100%;max-width:760px;
+  display:flex;flex-direction:column;max-height:calc(100vh - 48px);overflow:hidden}
+.mdh{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line);flex:none}
+.mdh .dot{width:7px;height:7px;border-radius:50%;background:var(--acc);flex:none}
+.mdh h2{font-family:var(--disp);flex:1;font-size:17px;font-weight:700;letter-spacing:-.03em}
+.mdh .cls{width:30px;height:30px;border-radius:var(--rad-m);color:var(--tx4);font-size:14px;flex:none}
+.mdh .cls:hover{background:var(--s1);color:var(--ink)}
+.mdb{flex:1;overflow-y:auto;padding:16px 20px 18px}
+.mdf{display:flex;align-items:center;gap:9px;padding:13px 20px;border-top:1px solid var(--line);flex:none}
+.mdf .sp{flex:1}
+.mdf .btn{height:40px}
+.mdf .btn:disabled{background:var(--s2);color:var(--tx4);cursor:default}
+
+/* Что назначаем — с отбивкой акцентом, как в референсе */
+.mdt{border-left:3px solid var(--acc);padding-left:12px;margin-bottom:18px}
+.mdt b{display:block;font-size:17px;font-weight:700;letter-spacing:-.03em;margin-bottom:3px}
+.mdt s{text-decoration:none;font-size:12.5px;color:var(--tx3);letter-spacing:.01em}
+.md .lab{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--tx3);margin-bottom:8px}
+
+.md .cl{width:100%;display:flex;align-items:center;gap:13px;padding:10px 16px 10px 12px;
+  border-radius:var(--rad-m);margin-bottom:6px;border:1.5px solid var(--line);text-align:left;background:none}
+.md .cl:hover{border-color:var(--line2)}
+.md .cl.on{border-color:var(--acc);background:var(--acc-a)}
+.md .cl .box{width:22px;height:22px;border-radius:var(--rad-s);border:1.5px solid var(--line2);
+  display:grid;place-items:center;flex:none;color:transparent;background:var(--bg)}
+.md .cl.on .box{background:var(--acc);border-color:var(--acc);color:var(--on-acc)}
+.md .cl .box svg{width:13px;height:13px}
+.md .cl .av{width:32px;height:32px;border-radius:var(--rad-m);background:var(--s1);
+  display:grid;place-items:center;font-size:10px;font-weight:700;color:var(--tx3);flex:none}
+.md .cl.on .av{background:var(--bg)}
+.md .cl .who{flex:1;min-width:0}
+.md .cl .who b{display:block;font-size:14px;font-weight:600;letter-spacing:-.015em}
+.md .cl .who s{display:block;text-decoration:none;font-size:11.5px;color:var(--tx4);
+  margin-top:2px;letter-spacing:.01em}
+.md .cl .pmv{text-align:right;flex:none}
+.md .cl .pmv b{display:block;font-size:17px;font-weight:700;letter-spacing:-.03em;color:var(--acc)}
+.md .cl .pmv s{display:block;text-decoration:none;font-size:10.5px;color:var(--tx4)}
+
+/* Сообщение ко всей тренировке (COM-4) — над блоками, как и у клиента:
+   там оно стоит под именем тренера и читается первым. */
+.wmsg{margin-top:10px;background:var(--acc-a);border-color:transparent}
+/* Иконка речи — та же, что у реплик на экране клиента: сразу видно, что
+   это обращение к человеку, а не поле назначения. */
+.wmsg .k{color:var(--acc-d);width:auto;display:inline-flex;align-items:center;gap:5px}
+.wmsg .k svg{width:13px;height:13px}
+.wmsg input::placeholder{color:var(--acc-d);opacity:.5}
+
+/* Назначение: видно, что программа едет, а переписка остаётся. Тренер
+   не должен об этом догадываться — граница показана до нажатия. */
+.carry{display:flex;flex-direction:column;gap:7px;margin-top:14px}
+.carry div{border-radius:var(--rad-m);padding:9px 11px;font-size:12px;line-height:1.5}
+.carry b{display:block;font-size:11px;font-weight:700;letter-spacing:.05em;
+  text-transform:uppercase;margin-bottom:3px}
+.carry s{text-decoration:none;color:var(--tx2)}
+.carry .go{background:var(--acc-a)}
+.carry .go b{color:var(--acc-d)}
+.carry .stay{background:var(--s1)}
+.carry .stay b{color:var(--tx3)}
+
+/* Клиент без максимума: тренировка на процентах придёт к нему пустой */
+.md .cl.blind .who s{color:var(--warn)}
+.md .cl.blind .pmv b{color:var(--tx4)}
+
+/* ═══════════ ПЕРЕТАСКИВАНИЕ ═══════════
+   Куда именно ляжет — показываем линией по краю цели, а не подсветкой
+   целиком: при переносе важно место вставки, а не сам факт наведения. */
+.dropbefore{box-shadow:0 -2px 0 0 var(--acc)}
+.dropafter{box-shadow:0 2px 0 0 var(--acc)}
+.blk.over{box-shadow:inset 0 0 0 1.5px var(--acc)}
+.day.dayover{background:var(--acc-a);border-color:var(--acc);
+  box-shadow:0 0 0 3px rgba(252,82,0,.14)}
+.doc[draggable="true"],.blk[draggable="true"],.line[draggable="true"]{cursor:grabbing}
+.doc[draggable="true"],.blk[draggable="true"]{opacity:.55}
+
+/* Подсказка про Enter лежит ПОВЕРХ поля, а не в потоке: во flex-строке
+   она резервировала место даже будучи невидимой, и текст обрывался,
+   не доходя до края. Слева — растушёвка фона, чтобы длинная строка
+   не упиралась в чип, а уходила под него. */
+.wmsg{position:relative}
+.wmsg .ent{position:absolute;right:9px;top:50%;transform:translateY(-50%);
+  font-family:var(--ui);font-size:10.5px;font-weight:600;letter-spacing:.02em;
+  color:var(--acc-d);background:var(--bg);border-radius:var(--rad-s);padding:3px 7px;
+  opacity:0;transition:opacity .14s;pointer-events:none}
+.wmsg .ent::before{content:"";position:absolute;right:100%;top:-4px;bottom:-4px;width:26px;
+  background:linear-gradient(90deg,rgba(255,241,234,0),var(--acc-a))}
+.wmsg:focus-within .ent{opacity:1}
+.wmsg .ent.done{opacity:1;background:var(--ok);color:var(--on-acc)}
+
+.line .pick{flex:none;height:25px;padding:0 10px;border-radius:var(--rad-s);background:var(--s1);
+  color:var(--tx3);font-size:11.5px;font-weight:600;white-space:nowrap}
+.line .pick:hover{background:var(--acc-a);color:var(--acc-d)}
+
+/* «В шаблоны» — вторичное действие: заметное, но не спорит с «Назначить» */
+.tosave{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;
+  border-radius:var(--rad-m);background:var(--s1);color:var(--tx2);font-size:12.5px;font-weight:500;flex:none}
+.tosave:hover{background:var(--acc-a);color:var(--acc-d)}
+.tosave.rm:hover{background:var(--rm-a);color:var(--rm)}
+.tosave.rm svg{width:12px;height:12px}
+.tosave svg{width:13px;height:13px}
+.blkh .x[data-savblk]:hover{color:var(--acc)}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);z-index:90;
+  background:var(--ink);color:var(--on-acc);font-size:13px;font-weight:500;letter-spacing:-.01em;
+  padding:10px 12px 10px 18px;border-radius:var(--rad-m);box-shadow:0 8px 28px rgba(0,0,0,.22);
+  opacity:0;transition:opacity .18s,transform .18s;pointer-events:none;
+  display:flex;align-items:center;gap:14px}
+.toast .undo{color:var(--acc);font-weight:600;font-size:13px;padding:4px 10px;
+  border-radius:var(--rad-s);pointer-events:auto}
+.toast .undo:hover{background:rgba(255,255,255,.1)}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast.on{pointer-events:auto}
+
+/* ═══════════ ТЕКСТ → СТРУКТУРА (CON-5) ═══════════ */
+/* Поле вставки в пустом дне: не форма с полями, а лист бумаги. */
+/* Развилка пустого дня: два равных пути, ИИ — акцентом, потому что это
+   главное отличие от тетради и тренер должен про него узнать. */
+.start{margin-top:12px}
+.ways{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:820px){ .ways{grid-template-columns:1fr} }
+.way{text-align:left;padding:16px 16px 15px;border-radius:var(--rad-l);border:1.5px solid var(--line);
+  background:var(--bg);transition:.14s}
+.way:hover{border-color:var(--line2);background:var(--s1)}
+.way .ic{width:32px;height:32px;border-radius:var(--rad-m);background:var(--s1);color:var(--tx3);
+  display:grid;place-items:center;margin-bottom:11px}
+.way .ic svg{width:16px;height:16px}
+.way b{display:block;font-size:14.5px;font-weight:600;letter-spacing:-.02em;margin-bottom:4px}
+.way s{display:block;text-decoration:none;font-size:12.5px;line-height:1.45;color:var(--tx3)}
+.way.ai{border-color:var(--acc-a);background:var(--acc-a)}
+.way.ai:hover{border-color:var(--acc)}
+.way.ai .ic{background:var(--acc);color:var(--on-acc)}
+.way.ai b{color:var(--acc-d)}
+.way.ai s{color:var(--tx2)}
+.orelse{margin-top:12px;text-align:center;font-size:12.5px;color:var(--tx4)}
+.orelse .lnk{font-size:12.5px;color:var(--tx3);text-decoration:underline;text-underline-offset:2px}
+.orelse .lnk:hover{color:var(--acc)}
+
+.pastef{display:flex;align-items:center;gap:10px;margin-top:10px}
+.pastef .sp{flex:1}
+.pastef .lnk{font-size:13px;color:var(--tx3)}
+.pastef .lnk:hover{color:var(--ink)}
+
+.paste{width:100%;border:1.5px dashed var(--line2);border-radius:var(--rad-l);padding:14px 16px;
+  font-family:var(--ui);font-size:14px;line-height:1.6;color:var(--ink);resize:vertical;
+  background:var(--s1);margin-top:10px}
+.paste:focus{outline:0;border-color:var(--acc);border-style:solid;background:var(--bg)}
+.paste::placeholder{color:var(--tx4);line-height:1.6}
+
+/* Предложение: разобрано, но ещё не принято. Полоса сверху, блоки пунктиром —
+   видно, что это не готовый день, а вариант, от которого можно отказаться. */
+.propose{display:flex;align-items:center;gap:11px;background:var(--acc-a);
+  border-radius:var(--rad-l);padding:11px 13px;margin:10px 0 2px;
+  box-shadow:0 0 0 1.5px var(--acc)}
+.propose .t{flex:1;min-width:0}
+.propose .t b{display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;color:var(--acc-d)}
+.propose .t b svg{width:12px;height:12px}
+.propose .t s{display:block;text-decoration:none;font-size:13px;color:var(--tx1);margin-top:2px}
+.propose .lnk{font-size:12.5px;font-weight:500;color:var(--acc-d);text-decoration:underline;
+  text-underline-offset:2px;flex:none}
+.propose .btn{height:34px;flex:none}
+.propose .btn.gh{background:var(--bg)}
+.blk.pending{border:1.5px dashed var(--acc);background:var(--bg)}
+
+.srcov .md{max-width:560px}
+.src{font-family:var(--mono),ui-monospace,monospace;font-size:12.5px;line-height:1.7;
+  white-space:pre-wrap;color:var(--tx2);background:var(--s1);border-radius:var(--rad-m);padding:14px 16px;
+  max-height:52vh;overflow:auto}
+
+/* Только что добавленное: короткая вспышка, чтобы глаз нашёл, куда легло */
+.just{animation:just .9s ease-out}
+@keyframes just{
+  0%   {box-shadow:0 0 0 2px var(--acc); background:var(--acc-a)}
+  100% {box-shadow:0 0 0 2px transparent}
+}
+
+/* ═══════════ НЕДЕЛЯ ИЗ ШАБЛОНА ═══════════
+   Выбирают не по названию, а по раскладке: где тяжёлый день, где отдых.
+   Поэтому каждая неделя показана всеми семью днями сразу. */
+.wmd{max-width:820px}
+.wmd .warn{font-size:13px;color:var(--tx3);line-height:1.5;margin-bottom:14px}
+.wtpl{display:block;width:100%;text-align:left;border:1.5px solid var(--line);
+  border-radius:var(--rad-l);padding:13px 14px 14px;margin-bottom:10px;background:none;transition:.14s}
+.wtpl:hover{border-color:var(--acc);background:var(--acc-a)}
+.wtpl b{display:block;font-size:15px;font-weight:600;letter-spacing:-.02em}
+.wtpl s{display:block;text-decoration:none;font-size:12px;color:var(--tx4);margin:3px 0 11px}
+.wdays{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.wd{border-radius:var(--rad-m);padding:7px 7px 8px;font-size:11px;line-height:1.35;min-height:56px;
+  border:1.5px dashed var(--line2);color:var(--tx4);display:flex;flex-direction:column;gap:3px}
+.wd i{font-style:normal;font-size:9.5px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--tx4)}
+.wd.on{border-style:solid;border-color:transparent;background:var(--s1);color:var(--tx1)}
+.wtpl:hover .wd.on{background:var(--bg)}
+.wd.on i{color:var(--tx3)}
+.foot-note{border-left:3px solid var(--line2);padding-left:11px;margin-top:4px;
+  font-size:12px;line-height:1.5;color:var(--tx4)}
+
+/* ═══════════ СОХРАНЕНИЕ НЕДЕЛИ ═══════════
+   Одно окно, одно решение. Сводка вместо перечисления: тренер хотел
+   сохранить неделю, а не каталогизировать двадцать блоков. */
+.wsave{max-width:600px}
+.wsave .nmf{margin-bottom:14px}
+.wsave .nmf .k{width:70px}
+.audit{border-radius:var(--rad-m);background:var(--s1);padding:12px 13px;margin-bottom:9px}
+.audit b{display:block;font-size:10.5px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--tx3);margin-bottom:4px}
+.audit s{display:block;text-decoration:none;font-size:13.5px;color:var(--tx1);font-weight:500}
+.audit.new{background:var(--acc-a)}
+.audit.new b{color:var(--acc-d)}
+.audit .names{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.audit .names span{font-size:11.5px;color:var(--tx2);background:var(--bg);
+  border-radius:var(--rad-s);padding:3px 8px}
+.audit .chk{display:flex;gap:9px;margin-top:12px;padding-top:11px;
+  border-top:1px solid rgba(0,0,0,.07);cursor:pointer}
+.audit .chk input{width:17px;height:17px;flex:none;margin-top:1px;accent-color:var(--acc)}
+.audit .chk span{font-size:12.5px;line-height:1.45;color:var(--tx2)}
+.audit .chk b{display:block;font-size:13px;font-weight:600;letter-spacing:-.01em;
+  text-transform:none;letter-spacing:0;color:var(--ink);margin-bottom:2px}
+
+/* Подтверждение очистки: предмет назван, последствия описаны, кнопка
+   действия окрашена в цвет последствия, а не в акцент продукта. */
+.ask{max-width:460px}
+.ask .lead{font-size:14.5px;line-height:1.5;color:var(--tx1);margin-bottom:5px}
+.ask .lead b{font-weight:600}
+.ask .sub{font-size:13px;color:var(--tx3);margin-bottom:14px}
+.btn.rm{background:var(--rm)}
+.btn.rm:hover{background:var(--rm-d)}

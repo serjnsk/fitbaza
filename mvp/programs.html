@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Программы · fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/base-trainer.css">
+<link rel="stylesheet" href="assets/theme-01-strava.css">
+<link rel="stylesheet" href="assets/pages.css">
+</head>
+<body>
+<div class="app">
+  <aside class="nav" id="nav"></aside>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <div class="page"><div class="pagewrap" id="page"></div></div>
+  </div>
+</div>
+<div class="ov" id="ov"></div>
+<script src="assets/data.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+/* ═══════════ ПРОГРАММЫ ═══════════ */
+const V = { pid: PROGRAMS[0].id };
+
+function weekRow(p, n){
+  const composed = n <= (COMPOSED_WEEKS[p.id]||0);
+  let workouts=0, exs=0;
+  if(composed){ const w = buildWeek(p.id,n);
+    w.days.forEach(d=>{ if(!d.rest){ workouts++; d.blocks.forEach(b=>exs+=b.items.filter(i=>i.exId).length) } }); }
+  return {n, start:weekStartDate(p.id,n), composed, workouts, exs};
+}
+
+function programCard(p){
+  const cw = COMPOSED_WEEKS[p.id]||0, pct = Math.round(cw/p.weeks*100);
+  return `<div class="card">
+    <div class="cb">
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
+        <div style="min-width:0">
+          <div style="font-family:var(--disp);font-size:16px;font-weight:700;letter-spacing:-.01em">${esc(p.title)}</div>
+          <div style="font-size:12.5px;color:var(--tx3);margin-top:4px;line-height:1.4">${esc(p.goal)}</div>
+        </div>
+        <span class="chip ${p.kind==='group'?'':'acc'}">${p.kind==='group'?'Группа':'Индивидуально'}</span>
+      </div>
+      <div style="margin:16px 0 6px;display:flex;justify-content:space-between;font-size:12px;color:var(--tx3)">
+        <span>Составлено</span><span>неделя ${cw} из ${p.weeks}</span>
+      </div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:16px">
+        ${p.clients.map(cid=>{ const c=client(cid); return `<a class="av s" href="client.html?id=${c.id}" title="${esc(c.n)}">${esc(c.ini)}</a>`; }).join('')}
+        <span class="sp" style="flex:1"></span>
+        <button class="btn gh sm" data-weeks="${p.id}">Недели</button>
+        <a class="btn gh sm" href="constructor.html">${ICON.build}</a>
+      </div>
+    </div>
+  </div>`;
+}
+
+function render(){
+  const p = program(V.pid);
+  const rows = Array.from({length:p.weeks},(_,i)=>weekRow(p,i+1));
+
+  $('#page').innerHTML = `
+    <div class="sechead"><span class="t">Программы</span><span class="ln"></span><span class="n">${PROGRAMS.length}</span></div>
+    <div class="cols3">
+      ${PROGRAMS.map(programCard).join('')}
+      <a class="card" href="constructor.html" style="display:flex;align-items:center;justify-content:center;
+        min-height:170px;border:1.5px dashed var(--line2);color:var(--tx3);flex-direction:column;gap:8px">
+        ${ICON.plus}<span style="font-size:13px;font-weight:500">Новая программа</span>
+      </a>
+    </div>
+
+    <div class="sechead"><span class="t">Недели программы</span><span class="ln"></span></div>
+    <div class="filters" style="margin-bottom:12px">
+      ${PROGRAMS.map(pp=>`<button data-pid="${pp.id}" class="${V.pid===pp.id?'on':''}">${esc(pp.title)}</button>`).join('')}
+    </div>
+    <div class="card">
+      <table class="tbl"><thead><tr><th>Неделя</th><th>Даты</th><th>Тренировок</th><th>Упражнений</th><th>Состояние</th><th></th></tr></thead>
+      <tbody>
+        ${rows.map(r=>`<tr>
+          <td>Неделя ${r.n}</td>
+          <td>${dm(r.start)} – ${dm(addDays(r.start,6))}</td>
+          <td>${r.composed?r.workouts:'—'}</td>
+          <td>${r.composed?r.exs:'—'}</td>
+          <td>${r.composed?`<span class="chip ok">Составлена</span>`:`<span class="chip warn">Не составлена</span>`}</td>
+          <td class="r">
+            ${r.composed
+              ? `<a class="btn gh sm" href="constructor.html">Открыть</a>`
+              : `<a class="btn gh sm" href="constructor.html">${ICON.copy} Заполнить</a>`}
+          </td>
+        </tr>`).join('')}
+      </tbody></table>
+    </div>`;
+
+  $$('.filters [data-pid]').forEach(b=>b.onclick=()=>{ V.pid=b.dataset.pid; render() });
+  $$('[data-weeks]').forEach(b=>b.onclick=()=>{ V.pid=b.dataset.weeks; render(); $('.card:has(table)')?.scrollIntoView({behavior:'smooth',block:'nearest'}) });
+}
+render();
+initShell({page:'programs.html', title:'Программы'});
+</script>
+</body>
+</html>

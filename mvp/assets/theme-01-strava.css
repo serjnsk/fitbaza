@@ -1,0 +1,116 @@
+/* ═══════════════════════════════════════════════════════════════
+   01 · СПИСОК
+
+   Визуальный язык: плоскость. Ни карточек, ни теней, ни вложенных
+   подложек — содержимое разделяют тонкие линии и воздух. Это самая
+   плотная из четырёх концепций: на экран влезает больше всего,
+   потому что каждая вложенность стоит отступов, а их здесь нет.
+
+   Типографический контраст небольшой: заголовок упражнения всего
+   в полтора раза крупнее подписи. Смысл несёт вес и цвет, а не размер.
+   Акцент работает ровно на одном — на том, что нужно нажать.
+   ═══════════════════════════════════════════════════════════════ */
+:root{
+  --acc:#FC5200; --acc-d:#D94600; --acc-a:#FFF1EA; --acc-p:#FFE4D6; --on-acc:#FFFFFF;
+  --ink:#141414; --tx1:#141414; --tx2:#5E5E5E; --tx3:#8E8E8E; --tx4:#B8B8B8;
+  --bg:#FFFFFF; --s1:#F1F1F1; --s2:#F7F7F7; --line:#E7E7E7; --line2:#D8D8D8;
+  --page:#ECECEC; --page-d:#DEDEDE; --frame:#101012;
+  --ok:#1A9E5C; --ok-a:#F4FAF6;
+  --rm:#C0392B; --rm-d:#A93226; --rm-a:#FFF0EE; --warn:#B8860B;
+  --rad-s:6px; --rad-m:8px; --rad-l:10px; --rad-xl:20px;
+  --ui:"Inter",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --disp:"Inter",-apple-system,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+  --tm-bg:#141414; --tm-ink:#FFFFFF; --tm-dim:rgba(255,255,255,.14);
+}
+
+/* ─── клиент: белые полосы на сером ───
+   Блоки разделяет не линия, а серый зазор: полоса белого содержимого
+   кончилась — значит кончился блок. Плоскость при этом сохраняется,
+   у полос ни скруглений, ни теней, они идут во всю ширину экрана.
+   Линия внутри блока теперь означает ровно одно — границу упражнения,
+   и спорить ей больше не с чем. */
+/* Отступ сверху тоже серый: первый блок не должен прилипать к шапке,
+   иначе непонятно, где кончилась она и началась тренировка. */
+.screen .feed{background:var(--page);padding:10px 0 130px}
+.screen .blk{background:var(--bg);border-radius:0;padding:14px 20px 4px;margin-top:10px}
+.screen .blk:first-child{margin-top:0}
+/* Подпись блока и заметка тренера — разные голоса: один служебный,
+   другой человеческий. Между ними нужен воздух, иначе заметка читается
+   как подзаголовок блока, а не как речь. */
+.screen .blkh{margin-bottom:11px}
+/* Полоса под подписью блока ни к чему: границу держит сам зазор. */
+.screen .blkh .ln{display:none}
+.screen .note.top{margin:0 0 4px}
+/* Когда линия — единственный инструмент разделения, она обязана быть
+   разной. Между упражнениями: во всю ширину и темнее. Между подходами:
+   с отступом слева под колонку номера и светлее. Плюс воздух — между
+   упражнениями его вдвое больше. Так глаз читает, что именно кончилось:
+   подход или всё упражнение. Одинаковая линия эту разницу стирала. */
+.screen .ex{background:none;border-radius:0;margin:0;
+  box-shadow:inset 0 -1px 0 0 var(--line2)}
+.screen .ex:last-child{box-shadow:none}
+.screen .exin{padding:16px 0 18px}
+.screen .exh .th{background:var(--s2)}
+.screen .sets{gap:0;margin-top:8px}
+.screen .set{background:none;border-radius:0;padding:9px 0;position:relative}
+.screen .set::after{content:"";position:absolute;left:35px;right:0;bottom:0;
+  height:1px;background:var(--line)}
+.screen .set:last-child::after{display:none}
+.screen .set.done{background:none;opacity:.55}
+.screen .set.now{background:none;box-shadow:inset 2px 0 0 0 var(--acc);padding-left:11px}
+.screen .ex.now{box-shadow:none}
+.screen .ex.now .exin{background:none;box-shadow:inset 2px 0 0 0 var(--acc);padding-left:11px}
+/* Комментарий — действие, а не подпись. В плоском языке кнопка тоже
+   плоская: обводка и фон, без теней. Раньше строка с иконкой ничем
+   не отличалась от служебного текста рядом, и нажать её не приходило
+   в голову. */
+.screen .addc{width:100%;height:40px;padding:0 13px;margin:12px 0 0;
+  justify-content:center;
+  border:1px solid var(--line2);border-radius:var(--rad-m);
+  background:var(--bg);color:var(--tx2);font-weight:500;gap:8px}
+.screen .addc:active{background:var(--s2)}
+.screen .addc.has{border-color:var(--acc);background:var(--acc-a);color:var(--acc-d)}
+.screen .addc svg{width:15px;height:15px}
+.screen .addc .cnt{font-size:12.5px}
+
+.screen .note{background:var(--s2);border-radius:var(--rad-m)}
+.screen .coach .msg{border-radius:var(--rad-m)}
+.screen .mres{border-radius:var(--rad-m)}
+
+/* ─── тренер: та же плоскость ─── */
+.app .wk,.app .doc,.app .rail,.app .card{border-radius:var(--rad-l);box-shadow:none}
+.app .blk{background:none;padding:0;margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.app .line{background:none;border-radius:0;margin:0;padding:9px 2px;
+  border:0;box-shadow:inset 0 -1px 0 0 var(--line)}
+.app .line:hover{background:var(--s2)}
+.app .line:last-of-type{box-shadow:none}
+/* Поля — заливкой, а не подчёркиванием. Линий в конструкторе и так
+   много: рамка блока, граница каждого упражнения, разделитель списка.
+   Ещё две на каждый блок превращали документ в разлинованный лист.
+   Заливка отделяет не хуже и не добавляет ни одной линии. */
+.app .fld{background:var(--s2);border:0;border-radius:var(--rad-m);padding:9px 12px}
+.app .fld:focus-within{background:var(--acc-a);box-shadow:inset 0 0 0 1.5px var(--acc)}
+.app .fld .k{color:var(--tx3)}
+.app .wmsg{background:var(--acc-a)}
+.app .wmsg:focus-within{box-shadow:inset 0 0 0 1.5px var(--acc)}
+.app .day{background:none;border:1px solid var(--line);border-radius:var(--rad-m)}
+.app .day.on{background:var(--acc-a);border-color:var(--acc)}
+.app .exc,.app .tplc{border-radius:var(--rad-m)}
+.app .tplc{background:none;border:1px solid var(--line)}
+
+/* Правая панель. Сегмент-контрол с плашкой — приём из чужого языка:
+   здесь нет ни одной приподнятой поверхности, и «таблетка» с тенью
+   выглядит наклейкой. Вкладки набраны просто текстом, активную держит
+   подчёркивание акцентом — тем же способом, каким в этом варианте
+   помечено всё выбранное. Поиск — заливкой, как и поля в конструкторе.
+   Строки упражнений остаются строками: список, а не карточки. */
+.app .tabs{background:none;border-radius:0;padding:0;gap:17px}
+.app .tabs button{flex:none;height:26px;border-radius:0;font-size:12.5px;
+  font-weight:600;box-shadow:none}
+.app .tabs button.on{background:none;color:var(--ink);
+  box-shadow:inset 0 -2px 0 0 var(--acc)}
+.app .search{background:var(--s2);border:0;height:36px;margin-top:11px}
+.app .search:focus-within{background:var(--acc-a);box-shadow:inset 0 0 0 1.5px var(--acc)}
+.app .exc{border-radius:var(--rad-s)}
+.app .exc .thumb{background:var(--s2);border-radius:var(--rad-s)}

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Бренд и профиль · fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/base-trainer.css">
+<link rel="stylesheet" href="assets/theme-01-strava.css">
+<link rel="stylesheet" href="assets/pages.css">
+</head>
+<body>
+<div class="app">
+  <aside class="nav" id="nav"></aside>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <div class="page"><div class="pagewrap" id="page"></div></div>
+  </div>
+</div>
+<div class="ov" id="ov"></div>
+<script src="assets/data.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+/* ═══════════ БРЕНД ТРЕНЕРА (BRD-1) · приглашение (REG-1) · профиль (REG-3) ═══════════ */
+const B = (STATE.brand ||= {...TRAINER.brand});
+const PALETTE = ['#FC5200','#E8B93B','#1F6FC4','#178A5C','#D8342C','#6F5BD8','#FF4D8D','#1C1C1C'];
+const BGS = ['#FFFFFF','#F4F5F6','#14161A','#0B0D0F'];
+const isLight = bg => ['#F4F5F6','#FFFFFF'].includes(bg);
+
+function render(){
+  $('#page').innerHTML = `
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 272px;gap:20px;align-items:start;max-width:920px">
+      <div>
+        <div class="sechead" style="margin-top:0"><span class="t">Оформление профиля</span><span class="ln"></span></div>
+        <div class="card">
+          <div class="cb" style="display:flex;flex-direction:column;gap:12px">
+            <div class="formfld"><span class="k">Название профиля</span><input class="inp" id="bTitle" value="${esc(B.title)}"></div>
+            <div class="cols2">
+              <div class="formfld"><span class="k">Логотип / инициалы</span><input class="inp" id="bLogo" maxlength="3" value="${esc(B.logo)}"></div>
+              <div class="formfld"><span class="k">Аватар и обложка</span><button class="btn gh" id="btnUpload" style="justify-content:center">${ICON.plus} Загрузить</button></div>
+            </div>
+            <div class="formfld"><span class="k">Основной цвет</span>
+              <div class="swatches">${PALETTE.map(c=>`<div class="sw ${c===B.color?'on':''}" data-c="${c}" style="background:${c}"></div>`).join('')}</div></div>
+            <div class="formfld"><span class="k">Фон приложения</span>
+              <div class="swatches">${BGS.map(c=>`<div class="sw ${c===B.bg?'on':''}" data-bg="${c}" style="background:${c};border-color:var(--line2)"></div>`).join('')}</div></div>
+          </div>
+        </div>
+
+        <div class="sechead"><span class="t">Приглашение клиентов</span><span class="ln"></span></div>
+        <div class="card cb">
+          <div class="copyfield"><code>${esc(TRAINER.invite)}</code><button class="btn gh sm" id="btnCopy">Скопировать</button></div>
+          <div class="hint">Клиент открывает ссылку → входит по номеру телефона без паролей и подтверждений по почте → сразу привязан к вашему рабочему пространству.</div>
+        </div>
+
+        <div class="sechead"><span class="t">Профиль тренера и рабочее пространство</span><span class="ln"></span></div>
+        <div class="card cb">
+          <div class="cols2">
+            <div class="formfld"><span class="k">Имя</span><input class="inp" id="tName" value="${esc(TRAINER.n)}"></div>
+            <div class="formfld"><span class="k">Рабочее пространство</span><input class="inp" id="tWs" value="${esc(TRAINER.workspace)}"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="position:sticky;top:78px">
+        <div class="phone">
+          <div class="scr">
+            <div class="cover" style="background:${B.color}">
+              <div class="pav" style="background:${isLight(B.bg)?'#fff':'#141414'};color:${B.color}">${esc(B.logo)}</div>
+            </div>
+            <div class="pb" style="background:${B.bg}">
+              <div class="pn" style="color:${isLight(B.bg)?'#141414':'#fff'}">${esc(B.title)}</div>
+              <div class="ps">Тренировка на сегодня</div>
+              <div class="btnp" style="background:${B.color};color:#fff">Открыть тренировку</div>
+            </div>
+          </div>
+        </div>
+        <div class="hint" style="margin-top:12px">Так клиент увидит ваш бренд в мобильном приложении — обложка, инициалы и акцент действия.</div>
+      </div>
+    </div>`;
+
+  $$('.sw[data-c]').forEach(sw=>sw.onclick=()=>{ B.color=sw.dataset.c; saveState(); render() });
+  $$('.sw[data-bg]').forEach(sw=>sw.onclick=()=>{ B.bg=sw.dataset.bg; saveState(); render() });
+  $('#bTitle').onchange=e=>{ B.title=e.target.value; saveState(); render() };
+  $('#bLogo').onchange=e=>{ B.logo=e.target.value.toUpperCase(); saveState(); render() };
+  $('#tName').onchange=e=>{ TRAINER.n=e.target.value; saveState(); toast('Имя обновлено') };
+  $('#tWs').onchange=e=>{ TRAINER.workspace=e.target.value; saveState(); toast('Название пространства обновлено') };
+  $('#btnUpload').onclick=()=>toast('Загрузка изображений появится позже — пока используются инициалы');
+  $('#btnCopy').onclick=()=>{ navigator.clipboard?.writeText(TRAINER.invite); toast('Ссылка скопирована') };
+}
+render();
+initShell({page:'brand.html', title:'Бренд и профиль'});
+</script>
+</body>
+</html>

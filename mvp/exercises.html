@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>База упражнений · fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/base-trainer.css">
+<link rel="stylesheet" href="assets/theme-01-strava.css">
+<link rel="stylesheet" href="assets/pages.css">
+</head>
+<body>
+<div class="app">
+  <aside class="nav" id="nav"></aside>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <div class="page"><div class="pagewrap" id="page"></div></div>
+  </div>
+</div>
+<div class="ov" id="ov"></div>
+<script src="assets/data.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+/* ═══════════ БАЗА УПРАЖНЕНИЙ (EX-1, EX-2, EX-3) ═══════════ */
+const V = { q:'', eq:'', own:false, g:'Все' };
+
+function matchEX(e){
+  if(V.g!=='Все' && e.g!==V.g) return false;
+  if(V.eq && e.eq!==V.eq) return false;
+  if(V.own && !e.own) return false;
+  if(V.q){ const n=norm(V.q); if(norm(e.ru).indexOf(n)<0 && norm(e.en).indexOf(n)<0) return false; }
+  return true;
+}
+
+function card(e){
+  return `<div class="excard" data-id="${e.id}">
+    <div class="top">
+      <div class="thumb ${e.m==='pending'?'pending':''}">${e.m==='pending'?'':initials(e)}</div>
+      <div style="flex:1;min-width:0">
+        <div class="nm">${esc(e.ru)}</div>
+        <div class="en">${esc(e.en)}</div>
+      </div>
+    </div>
+    <div class="met">
+      <span class="chip">${esc(e.g)}</span>
+      <span class="chip">${esc(e.eq)}</span>
+      ${e.pm?`<span class="chip acc">ПМ</span>`:''}
+      ${e.own?`<span class="chip ok">своё</span>`:''}
+      ${e.m==='pending'?`<span class="chip warn">без изображения</span>`:''}
+    </div>
+  </div>`;
+}
+
+function render(){
+  const list = EX.filter(matchEX);
+  $('#page').innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <label class="search" style="width:240px">${ICON.search}<input id="q" placeholder="Поиск упражнения…" value="${esc(V.q)}"></label>
+      <select class="inp" id="eq" style="width:170px">
+        <option value="">Любое оснащение</option>
+        ${EQUIP.map(x=>`<option ${V.eq===x?'selected':''}>${esc(x)}</option>`).join('')}
+      </select>
+      <label style="display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--tx2);cursor:pointer">
+        <input type="checkbox" id="own" ${V.own?'checked':''}> Только свои
+      </label>
+      <span class="sp" style="flex:1"></span>
+      <button class="btn" id="btnAdd">${ICON.plus} Добавить упражнение</button>
+    </div>
+    <div class="filters" style="margin-bottom:16px">
+      ${GROUPS.map(g=>`<button data-g="${esc(g)}" class="${V.g===g?'on':''}">${esc(g)}</button>`).join('')}
+    </div>
+
+    ${list.length ? `<div class="exgrid">${list.map(card).join('')}</div>` : `<div class="empty"><div class="t">Ничего не нашли</div><div class="d">Измените поиск или фильтр</div></div>`}
+
+    <div class="cols3" style="margin-top:26px">
+      <div class="kpi"><span class="k">${ICON.dumb} Стартовая база</span><div class="v">${EX.filter(e=>!e.own).length}</div><div class="d">упражнений с техникой и метриками</div></div>
+      <div class="kpi"><span class="k">${ICON.plus} Свои упражнения</span><div class="v acc">${EX.filter(e=>e.own).length}</div><div class="d">видны только вам и вашим клиентам</div></div>
+      <div class="kpi"><span class="k">${ICON.star} Расчёт от максимума</span><div class="v">${EX.filter(e=>e.pm).length}</div><div class="d">упражнений с процентовкой от ПМ</div></div>
+    </div>`;
+
+  $$('.excard').forEach(c=>c.onclick=()=>openDetail(byId(c.dataset.id)));
+  $$('.filters [data-g]').forEach(b=>b.onclick=()=>{ V.g=b.dataset.g; render() });
+  $('#eq').onchange=e=>{ V.eq=e.target.value; render() };
+  $('#own').onchange=e=>{ V.own=e.target.checked; render() };
+  $('#q').oninput=e=>{ V.q=e.target.value; render() };
+  $('#btnAdd').onclick=openAddModal;
+  const qEl=$('#q'); qEl.focus(); qEl.setSelectionRange(V.q.length,V.q.length);
+}
+
+function openDetail(e){
+  openModal({title:e.ru, body:`
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px">
+      <div class="thumb ${e.m==='pending'?'pending':''}" style="width:44px;height:44px;font-size:12px">${e.m==='pending'?'':initials(e)}</div>
+      <div><div style="font-size:12.5px;color:var(--tx3)">${esc(e.en)}</div>
+        <div style="display:flex;gap:6px;margin-top:5px">
+          <span class="chip">${esc(e.g)}</span><span class="chip">${esc(e.eq)}</span>${e.pm?`<span class="chip acc">Максимум: ${esc(PMNAMES[e.pm]||e.pm)}</span>`:''}
+        </div>
+      </div>
+    </div>
+    <div class="lab">Единицы записи результата</div>
+    <div style="display:flex;gap:6px;margin-bottom:14px">${e.u.map(u=>`<span class="chip">${esc(u)}</span>`).join('')}</div>
+    ${TECH[e.id]?`<div class="lab">Техника</div><div style="font-size:13px;color:var(--tx2);line-height:1.55">${esc(TECH[e.id])}</div>`:''}
+  `, foot:`<a class="btn gh" href="constructor.html">Использовать в тренировке</a>`});
+}
+
+function openAddModal(){
+  openModal({title:'Добавить упражнение', wide:false, body:`
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="formfld"><span class="k">Название (рус.)</span><input class="inp" id="nRu"></div>
+      <div class="formfld"><span class="k">Название (англ.)</span><input class="inp" id="nEn"></div>
+      <div class="cols2">
+        <div class="formfld"><span class="k">Группа</span><select class="inp" id="nG">${GROUPS.filter(g=>g!=='Все').map(g=>`<option>${esc(g)}</option>`).join('')}</select></div>
+        <div class="formfld"><span class="k">Оснащение</span><select class="inp" id="nEq">${EQUIP.map(x=>`<option>${esc(x)}</option>`).join('')}</select></div>
+      </div>
+    </div>`,
+    foot:`<span class="sp"></span><button class="btn gh" data-close>Отмена</button><button class="btn" id="nSave">Добавить</button>`});
+  $('#nSave').onclick=()=>{
+    const ru=$('#nRu').value.trim(), en=$('#nEn').value.trim();
+    if(!ru) return toast('Укажите название упражнения');
+    EX.push({id:'own'+(EX.length+1), ru, en:en||ru, g:$('#nG').value, eq:$('#nEq').value, pm:null, u:['кг','повт'], m:'ok', own:true});
+    closeModal(); toast('Упражнение добавлено в вашу базу'); render();
+  };
+}
+render();
+initShell({page:'exercises.html', title:'База упражнений'});
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Карта сайта · fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/base-trainer.css">
+<link rel="stylesheet" href="assets/theme-01-strava.css">
+<link rel="stylesheet" href="assets/pages.css">
+</head>
+<body>
+<div class="app">
+  <aside class="nav" id="nav"></aside>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <div class="page"><div class="pagewrap" id="page"></div></div>
+  </div>
+</div>
+<div class="ov" id="ov"></div>
+<script src="assets/data.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+/* ═══════════ КАРТА САЙТА — объём MVP ═══════════ */
+const MAP = [
+  {h:'index.html',       k:'dash',  n:'Дашборд', d:'Что сегодня требует внимания — одним экраном.',
+    f:['Тренировки на сегодня по всем клиентам','Непрочитанные комментарии и новые рекорды','Клиенты без активности 3+ дня','Недели программ, которые пора составить']},
+  {h:'clients.html',     k:'users', n:'Клиенты', d:'Рабочий список тренера с фильтрами и поиском.',
+    f:['Поиск и фильтры: индивидуально / группа / без программы','Прогресс по назначенной программе','Динамика приседа и последняя активность']},
+  {h:'calendar.html',    k:'cal',   n:'Календарь', d:'Месяц и неделя тренировок по всем клиентам.',
+    f:['Переключение месяц / неделя','Фильтр по клиенту','Клик по тренировке открывает её в конструкторе']},
+  {h:'programs.html',    k:'prog',  n:'Программы', d:'Программа — это последовательность недель.',
+    f:['Прогресс составления по каждой программе','Недельная таблица: даты, тренировки, упражнения','Назначение клиентам, индивидуально или группой']},
+  {h:'constructor.html', k:'build', n:'Конструктор', d:'Ядро продукта — тренировка как документ.',
+    f:['Ручной ввод, база упражнений, готовые блоки','Простой текст и вставка из буфера — разбираются на лету','Копирование прошлой недели, перенос дня','Расчёт рабочего веса от максимума клиента']},
+  {h:'exercises.html',   k:'dumb',  n:'База упражнений', d:'Стартовая база плюс собственные упражнения тренера.',
+    f:['Поиск, фильтр по группе мышц и оснащению','Свои упражнения видны только вам и клиентам','Гибкие единицы измерения результата']},
+  {h:'templates.html',   k:'tpl',   n:'Шаблоны', d:'Библиотека тренера — от упражнения до программы.',
+    f:['Пять уровней: упражнение → блок → тренировка → неделя → программа','Папки для блоков — разминки, силовые, комплексы, заминки']},
+  {h:'brand.html',       k:'brand', n:'Бренд и профиль', d:'Оформление, которое видит клиент, плюс приглашение.',
+    f:['Название, инициалы, акцентный цвет и фон приложения','Пригласительная ссылка — вход по номеру телефона','Профиль тренера и рабочего пространства']},
+  {h:'sitemap.html',     k:'map',   n:'Карта сайта', d:'Эта страница — объём первой версии и то, что осталось за скобками.'},
+];
+
+const OUT = [
+  ['Платежи','Первым тренерам — бесплатно или вручную'],
+  ['Групповые программы с индивидуальными правками','Пока программа группы правится целиком'],
+  ['Импорт из Excel / Google Sheets / TRNR','Перенос архива тренера — отдельная задача'],
+  ['Таймер тренировки','Формат комплекса (EMOM, AMRAP…) остаётся текстом в блоке — без отсчёта, звука и вибрации'],
+  ['Оффлайн тренера и автосинхронизация','У клиента оффлайн есть с первого дня, у тренера — нет'],
+  ['Видеозагрузка и видеотека','Техника пока текстом, без роликов'],
+  ['Опросы, анкеты, уведомления','Коммуникация — только комментарии к тренировке'],
+  ['Медицинские данные, цели, личные заметки','Базовый профиль без чувствительных полей'],
+  ['Курсы, лидерборды, ИИ-тренер, публичная страница','Следующие этапы после MVP'],
+];
+
+function mapcard(m){
+  return `<a class="mapcard" href="${m.h}">
+    <div class="mh2">${ICON[m.k]}<span class="n">${esc(m.n)}</span></div>
+    <ul><li style="color:var(--tx2);padding-bottom:8px">${esc(m.d)}</li>${(m.f||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+  </a>`;
+}
+
+function render(){
+  $('#page').innerHTML = `
+    <div class="card cb" style="margin-bottom:22px">
+      <div style="font-family:var(--disp);font-size:19px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px">Объём первой версии</div>
+      <div style="font-size:13.5px;color:var(--tx2);max-width:640px;line-height:1.55">Скелет продукта — визуал, конструктор, профили тренера и клиента, календарь — плюс всё, что ускоряет тренера: текстовый ввод, шаблоны, массовые операции. Минимальный рабочий цикл: тренер составляет программу → клиент выполняет и записывает результат → тренер видит.</div>
+      <div class="cols2" style="margin-top:18px">
+        <div class="kpi"><span class="k">Разделов в MVP</span><div class="v">${MAP.length}</div></div>
+        <div class="kpi"><span class="k">Критерий готовности</span><div class="v" style="font-size:14.5px;line-height:1.35">5–10 живых тренеров ведут клиентов неделями без возврата к таблицам</div></div>
+      </div>
+    </div>
+
+    <div class="mapgrid">${MAP.map(mapcard).join('')}</div>
+
+    <div class="sechead"><span class="t">Сознательно не входит в первую итерацию</span><span class="ln"></span></div>
+    <div class="card">
+      <table class="tbl"><tbody>
+        ${OUT.map(([n,d])=>`<tr><td style="width:280px;font-weight:600">${esc(n)}</td><td style="color:var(--tx3)">${esc(d)}</td></tr>`).join('')}
+      </tbody></table>
+    </div>
+
+    <div class="sechead"><span class="t">Другие поверхности MVP</span><span class="ln"></span></div>
+    <div class="cols3">
+      <div class="card cb"><div style="font-weight:600;margin-bottom:4px">Клиент · iOS / Android</div><div style="font-size:12.5px;color:var(--tx3);line-height:1.5">Просмотр тренировки и запись результата, работает офлайн.</div></div>
+      <div class="card cb"><div style="font-weight:600;margin-bottom:4px">Тренер · мобильное приложение</div><div style="font-size:12.5px;color:var(--tx3);line-height:1.5">Составление программ почти всегда идёт с компьютера — мобильный веб-конструктор здесь не показан.</div></div>
+      <div class="card cb"><div style="font-weight:600;margin-bottom:4px">Админка платформы</div><div style="font-size:12.5px;color:var(--tx3);line-height:1.5">Минимальные списки тренеров и клиентов на стороне сервиса.</div></div>
+    </div>`;
+}
+render();
+initShell({page:'sitemap.html', title:'Карта сайта'});
+</script>
+</body>
+</html>
