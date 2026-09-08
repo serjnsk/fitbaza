@@ -1,4 +1,4 @@
-site_name: fitbaza — документация
+site_name: Внутренняя документация
 site_url: https://serjnsk.github.io/fitbaza/docs/
 repo_url: https://github.com/serjnsk/fitbaza
 docs_dir: docs
@@ -6,24 +6,29 @@ docs_dir: docs
 theme:
   name: material
   language: ru
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
+  # Светлая тема без переключателя — как в lovix-docs (DOCS_RULES, п. 1.1:
+  # «белая, чистая», без тёмных секций).
   palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: deep purple
-      toggle:
-        icon: material/brightness-7
-        name: Тёмная тема
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: deep purple
-      toggle:
-        icon: material/brightness-4
-        name: Светлая тема
+    scheme: default
+  font:
+    text: Inter
+    code: JetBrains Mono
   features:
     - navigation.instant
-    - navigation.footer
-    - toc.follow
+    - navigation.instant.progress
+    - navigation.sections      # группы в левом меню заголовками, как .sn-grp
+    - navigation.top
+    - navigation.footer        # карточки «Назад / Далее» внизу
+    - toc.follow               # активный пункт TOC подсвечивается при скролле
     - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+
+extra_css:
+  - stylesheets/docs.css
 
 nav:
   - Главная: index.md
