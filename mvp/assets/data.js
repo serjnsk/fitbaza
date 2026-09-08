@@ -140,16 +140,10 @@ const ALIAS = {
    в тренировке — блоки, в блоке — упражнения. Иначе «достать из
    шаблона сразу неделю» физически невозможно.
    ──────────────────────────────────────────────────────────── */
-const TPL_LEVELS = ['упражнение','блок','тренировка','неделя','программа'];
+const TPL_LEVELS = ['блок','тренировка','неделя','программа'];
 const TPL_FOLDERS = ['Разминки','Силовые блоки','Комплексы','Заминки'];
 
 const TPL = [
- /* ── уровень: упражнение — сохранённое назначение одной строкой ── */
- {id:'e1', lvl:'упражнение', own:true, at:'2026-06-12', title:'Присед 5×3 @ 80 %',      used:26, ex:['squat','5×3',80,'%']},
- {id:'e2', lvl:'упражнение', own:true, at:'2026-06-12', title:'Становая 3×5 @ 70 %',    used:19, ex:['dead','3×5',70,'%']},
- {id:'e3', lvl:'упражнение', own:true, at:'2026-07-02', title:'Гребля 500 м',           used:31, ex:['row','',500,'м']},
- {id:'e4', lvl:'упражнение', own:true, at:'2026-05-30', title:'Планка 3× по 45 сек',    used:14, ex:['plank','3×',45,'сек']},
-
  /* ── уровень: блок — единственный уровень с папками (TPL-1) ── */
  {id:'b1', lvl:'блок', own:true, at:'2026-05-18', folder:'Разминки', kind:'warmup', title:'Общая разминка · 10 мин', used:34,
   items:[['rom','2×',60,'сек'],['pvc','2×10'],['row','',500,'м']]},
@@ -248,7 +242,6 @@ function tplLine([ex, scheme, val, unit]){
   else if(val!=null && val!==''){ i.unit = unit || i.unit; i.val = String(val) }
   return i;
 }
-const tplToItem  = t => tplLine(t.ex);
 const tplToBlock = t => ({id:nid('b'), kind:t.kind||'strength', title:t.title.replace(/\s·.*$/,''),
                           note:'', fmt:t.fmt||null, items:(t.items||[]).map(tplLine)});
 function tplToWorkout(t){
@@ -263,7 +256,6 @@ function tplToWeekDays(t){
 }
 /* сколько дней с тренировками и упражнений внутри — для карточек библиотеки */
 function tplStats(t){
-  if(t.lvl==='упражнение') return {n:1};
   if(t.lvl==='блок') return {n:(t.items||[]).length};
   if(t.lvl==='тренировка'){ const w=tplToWorkout(t);
     return {n:w.blocks.reduce((a,b)=>a+b.items.length,0), blocks:w.blocks.length} }
@@ -643,6 +635,18 @@ function scheduleAll(from,to){ return CLIENTS.flatMap(c=>scheduleFor(c.id,from,t
    перестаёт читаться уже на десятке. */
 const NOW = '13:40';                        /* как и TODAY — фиксируем для детерминизма */
 const hhmm = t => +t.slice(0,2)*60 + +t.slice(3,5);
+
+/* ═══════ Очередь составления (CON-4, CON-12, NFR-4) ═══════
+   Главный рабочий вопрос тренера — не «что сегодня», а «где программа скоро
+   кончится». Считаем запас в днях от сегодня до последнего составленного дня:
+   отрицательный запас значит, что клиенты уже без тренировок. */
+function composeQueue(){
+  return PROGRAMS.map(p=>{
+    const composed = COMPOSED_WEEKS[p.id] || 0;
+    const lastDay = composed ? addDays(weekStartDate(p.id, composed), 6) : addDays(p.start,-1);
+    return {p, composed, lastDay, runway: daysBetween(TODAY, lastDay), athletes: p.clients.length};
+  }).sort((a,b)=>a.runway-b.runway);
+}
 
 /* ═══════ Сводка дня для месяца-обзора ═══════
    Месяц намеренно не показывает ни одной фамилии: при полусотне клиентов

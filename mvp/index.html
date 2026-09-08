@@ -51,11 +51,47 @@ function render(){
       <div class="kpi"><span class="k">${ICON.clock} Простой 3+ дня</span><div class="v ${idl.length?'warn':''}">${idl.length}</div><div class="d">клиентов не появлялись</div></div>
     </div>
 
-    <div class="cols2" style="grid-template-columns:1.4fr 1fr;align-items:start;margin-top:22px">
+    <div class="cols2" style="grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);align-items:start;margin-top:22px">
       <div>
         <div class="sechead"><span class="t">Таймлайн дня</span><span class="ln"></span><span class="n">${ses.length}</span></div>
         <div class="card cb">
           ${timelineHTML(ses, 0)}
+        </div>
+
+        <div class="sechead"><span class="t">Неделя одним взглядом</span><span class="ln"></span></div>
+        <div class="card cb">
+          <div class="wk">
+            ${weekDays().map(d=>{ const st=dayStats(d), total=st.n+st.gaps;
+              return `<a class="${d===TODAY?'today':''}" href="calendar.html">
+                <span class="d">${RU[dowMon(d)]}</span>
+                <span class="dt">${dm(d)}</span>
+                <span class="n">${st.n||'—'}</span>
+                <span class="s">${st.n?`${st.athletes} ${plural(st.athletes,'атлет','атлета','атлетов')}`:'отдых'}</span>
+                ${st.gaps?`<span class="g">${st.gaps} не сост.</span>`:''}
+                ${total?`<span class="b"><i class="on" style="width:${Math.round(st.n/total*100)}%"></i><i class="no" style="width:${Math.round(st.gaps/total*100)}%"></i></span>`:''}
+              </a>`; }).join('')}
+          </div>
+        </div>
+
+        <div class="sechead"><span class="t">Очередь составления</span><span class="ln"></span></div>
+        <div class="card cb">
+          <div class="q">
+            ${composeQueue().map(x=>{
+              /* Запас в днях, а не «неделя N из M»: тренеру важно, сколько
+                 осталось до того, как клиенты упрутся в пустоту. */
+              const lbl = x.runway < 0 ? `кончилась ${-x.runway} ${plural(-x.runway,'день','дня','дней')} назад`
+                        : x.runway === 0 ? 'кончается сегодня'
+                        : `хватит на ${x.runway} ${plural(x.runway,'день','дня','дней')}`;
+              const cls = x.runway < 0 ? 'rm' : x.runway <= 7 ? 'warn' : 'ok';
+              return `<div class="r">
+                <span class="c">
+                  <a class="t" href="constructor.html">${esc(x.p.title)}</a>
+                  <span class="s">составлено ${x.composed} из ${x.p.weeks} ${plural(x.p.weeks,'недели','недель','недель')} · ${x.athletes} ${plural(x.athletes,'атлет','атлета','атлетов')}</span>
+                </span>
+                <span class="chip ${cls}">${lbl}</span>
+                <a class="btn gh sm" href="constructor.html">Составить</a>
+              </div>`; }).join('')}
+          </div>
         </div>
       </div>
 

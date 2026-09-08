@@ -328,3 +328,9 @@ function timelineHTML(ses, gaps){
   return `<div class="tl">${rows}${tail}${gap}</div>`;
 }
 const nowRow = () => `<div class="now"><span class="tm">${NOW}</span><span class="sp"><i></i></span><span class="ln"></span></div>`;
+
+/* Семь дней недели, в которую попадает сегодня — для «Недели одним взглядом». */
+const weekDays = (anchor=TODAY) => {
+  const start = addDays(anchor, -dowMon(anchor));
+  return Array.from({length:7},(_,i)=>addDays(start,i));
+};
