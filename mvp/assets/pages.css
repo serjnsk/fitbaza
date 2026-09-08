@@ -259,3 +259,24 @@ select.inp{-webkit-appearance:none;appearance:none;cursor:pointer;padding-right:
 .tl .now .sp{justify-content:center}
 .tl .now .sp i{width:7px;height:7px;border-radius:50%;background:var(--acc);display:block}
 .tl .now .ln{height:1px;background:var(--acc);opacity:.45;margin-left:12px}
+
+/* ─── месяц-обзор ───
+   В ячейке нет ни одной фамилии и ни одного названия тренировки. При
+   полусотне клиентов список в дне нечитаем при любой единице: у персонального
+   тренера все программы индивидуальные, и схлопывать по программе нечего.
+   Месяц отвечает на свой вопрос — где дырки и где перегруз; имена уровнем
+   ниже, на экране дня. */
+.cell.pick{cursor:pointer}
+.cell.pick:hover{background:var(--s2)}
+.cell.today.pick:hover{background:var(--acc-p)}
+.dfill{display:flex;height:4px;border-radius:2px;background:var(--s1);overflow:hidden;margin:2px 0 1px}
+.dfill i{display:block;height:100%}
+.dfill i.on{background:var(--acc)}
+.dfill i.no{background:var(--line2)}
+.dn{font-size:13px;font-weight:600;color:var(--tx1);letter-spacing:-.01em;line-height:1.3}
+.ds{font-size:11px;color:var(--tx4);line-height:1.35}
+.dg{font-size:11px;color:var(--warn);font-weight:600;line-height:1.35}
+.cell .quiet{font-size:11px;color:var(--tx4);opacity:.7}
+/* строка «не составлено» в таймлайне дня */
+.tl .r.gap .dot{background:var(--bg);border-color:var(--warn);border-style:dashed}
+.tl .r.gap .t{color:var(--warn)}

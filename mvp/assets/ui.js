@@ -280,3 +280,51 @@ function libDetail(t){
       : 'Шаблон из общей базы сервиса. Изменить его нельзя — вставьте в тренировку и сохраните как свой.'}</div>`,
     foot:`<span class="sp"></span><a class="btn" href="constructor.html">${ICON.build} Вставить в тренировку</a>`});
 }
+
+
+/* ═══════════ ТАЙМЛАЙН ДНЯ — общий для дашборда и дня календаря ═══════════
+   Строка — занятие, а не клиент (см. sessionsOn в data.js). Держим в одном
+   месте: экран дня в календаре показывает ровно то же, что дашборд, и
+   расхождение между ними было бы багом, а не вариантом. */
+function timelineHTML(ses, gaps){
+  if(!ses.length && !gaps) return `<div class="empty"><div class="t">Занятий нет</div></div>`;
+  const rows = ses.map((s,i)=>{
+    const prev = ses[i-1];
+    /* Маркер «сейчас» вставляется между занятиями, а не поверх шкалы:
+       равномерной временной оси тут нет, строки идут подряд. */
+    const nowHere = hhmm(s.time) >= hhmm(NOW) && (!prev || hhmm(prev.time) < hhmm(NOW));
+    const p = program(s.pid);
+    const many = s.who.length > 3;
+    return `${nowHere?nowRow():''}
+      <a class="r ${s.state}" href="constructor.html">
+        <span class="tm">${s.time}</span>
+        <span class="sp"><span class="dot"></span></span>
+        <span class="bd">
+          <span class="t">${esc(s.title)}</span>
+          <span class="sub">
+            <span>${esc(p?p.title:'')}</span>
+            ${s.state==='done'?`<span class="chip ok">Результаты записаны</span>`
+              :s.state==='nores'?`<span class="chip warn">${s.done?`${s.done} из ${s.who.length} записали`:'Без результата'}</span>`
+              :`<span class="chip">${s.who.length} ${plural(s.who.length,'атлет','атлета','атлетов')}</span>`}
+          </span>
+          <span class="who">
+            <span class="stack">${s.who.slice(0,many?4:3).map(c=>`<span class="av s" title="${esc(c.n)}">${esc(c.ini)}</span>`).join('')}</span>
+            <span class="nm">${many ? `${s.who.length} ${plural(s.who.length,'атлет','атлета','атлетов')}` : s.who.map(c=>esc(c.n)).join(', ')}</span>
+          </span>
+        </span>
+      </a>`;
+  }).join('');
+  const tail = ses.length && hhmm(NOW) > hhmm(ses[ses.length-1].time) ? nowRow() : '';
+  /* Несоставленное — тоже строка дня: пустой день и «программа кончилась»
+     обязаны выглядеть по-разному, иначе дырку не видно (NFR-4). */
+  const gap = gaps ? `<a class="r gap" href="constructor.html">
+      <span class="tm">—</span>
+      <span class="sp"><span class="dot"></span></span>
+      <span class="bd">
+        <span class="t">Не составлено</span>
+        <span class="sub"><span>${gaps} ${plural(gaps,'атлет ждёт','атлета ждут','атлетов ждут')} тренировку на этот день</span></span>
+      </span>
+    </a>` : '';
+  return `<div class="tl">${rows}${tail}${gap}</div>`;
+}
+const nowRow = () => `<div class="now"><span class="tm">${NOW}</span><span class="sp"><i></i></span><span class="ln"></span></div>`;

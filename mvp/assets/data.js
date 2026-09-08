@@ -644,6 +644,28 @@ function scheduleAll(from,to){ return CLIENTS.flatMap(c=>scheduleFor(c.id,from,t
 const NOW = '13:40';                        /* как и TODAY — фиксируем для детерминизма */
 const hhmm = t => +t.slice(0,2)*60 + +t.slice(3,5);
 
+/* ═══════ Сводка дня для месяца-обзора ═══════
+   Месяц намеренно не показывает ни одной фамилии: при полусотне клиентов
+   список в ячейке нечитаем при любой единице — и по клиентам, и по занятиям,
+   если программы у всех индивидуальные. Месяц отвечает на другой вопрос:
+   где дырки в составлении и где перегруз. Имена — уровнем ниже, в дне. */
+function dayStats(date){
+  const ses = sessionsOn(date);
+  let gaps = 0;                              /* назначения, чья неделя ещё не составлена */
+  CLIENTS.forEach(c=>{
+    if(!c.prog) return;
+    const p = program(c.prog), pat = PATTERN[c.prog] || [];
+    for(let n=1; n<=p.weeks; n++){
+      const start = weekStartDate(c.prog, n);
+      if(date < start || date > addDays(start,6)) continue;
+      if(n <= (COMPOSED_WEEKS[c.prog]||0)) break;
+      if(pat[dowMon(date)]) gaps++;
+      break;
+    }
+  });
+  return {ses, gaps, n:ses.length, athletes:ses.reduce((a,s)=>a+s.who.length,0)};
+}
+
 function sessionsOn(date){
   const by = new Map();
   scheduleAll(date,date).forEach(e=>{

@@ -55,34 +55,7 @@ function render(){
       <div>
         <div class="sechead"><span class="t">Таймлайн дня</span><span class="ln"></span><span class="n">${ses.length}</span></div>
         <div class="card cb">
-          ${ses.length ? `<div class="tl">
-            ${ses.map((s,i)=>{
-              const prev = ses[i-1];
-              /* Маркер «сейчас» вставляется между занятиями, а не поверх шкалы:
-                 равномерной временной оси тут нет, строки идут подряд. */
-              const nowHere = hhmm(s.time) >= hhmm(NOW) && (!prev || hhmm(prev.time) < hhmm(NOW));
-              const p = program(s.pid);
-              const many = s.who.length > 3;
-              return `${nowHere?`<div class="now"><span class="tm">${NOW}</span><span class="sp"><i></i></span><span class="ln"></span></div>`:''}
-              <a class="r ${s.state}" href="constructor.html">
-                <span class="tm">${s.time}</span>
-                <span class="sp"><span class="dot"></span></span>
-                <span class="bd">
-                  <span class="t">${esc(s.title)}</span>
-                  <span class="sub">
-                    <span>${esc(p?p.title:'')}</span>
-                    ${s.state==='done'?`<span class="chip ok">Результаты записаны</span>`
-                      :s.state==='nores'?`<span class="chip warn">${s.done?`${s.done} из ${s.who.length} записали`:'Без результата'}</span>`
-                      :`<span class="chip">${s.who.length} ${plural(s.who.length,'атлет','атлета','атлетов')}</span>`}
-                  </span>
-                  <span class="who">
-                    <span class="stack">${s.who.slice(0,many?4:3).map(c=>`<span class="av s" title="${esc(c.n)}">${esc(c.ini)}</span>`).join('')}</span>
-                    <span class="nm">${many ? `${s.who.length} ${plural(s.who.length,'атлет','атлета','атлетов')}` : s.who.map(c=>esc(c.n)).join(', ')}</span>
-                  </span>
-                </span>
-              </a>`; }).join('')}
-            ${hhmm(NOW) > hhmm(ses[ses.length-1].time) ? `<div class="now"><span class="tm">${NOW}</span><span class="sp"><i></i></span><span class="ln"></span></div>` : ''}
-          </div>` : `<div class="empty"><div class="t">На сегодня занятий нет</div></div>`}
+          ${timelineHTML(ses, 0)}
         </div>
       </div>
 
