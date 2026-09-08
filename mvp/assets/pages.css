@@ -219,3 +219,43 @@ select.inp{-webkit-appearance:none;appearance:none;cursor:pointer;padding-right:
 .legend{display:flex;gap:16px;flex-wrap:wrap;padding:12px 4px 0;font-size:12px;color:var(--tx3)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
 .legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+/* ─── таймлайн дня (дашборд) ───
+   Единица строки — занятие, а не клиент: групповая тренировка на 25 человек
+   остаётся одной строкой со стопкой аватаров. Визуальный язык прежний —
+   плоскость: время слева, вертикальная спина, никаких карточек и теней. */
+.tl{position:relative;padding:4px 0}
+.tl .r{display:grid;grid-template-columns:52px 18px 1fr;align-items:start;gap:0;
+  padding:10px 0;text-decoration:none;color:inherit}
+.tl .r+.r{border-top:1px solid var(--line)}
+.tl .tm{font:500 12px var(--mono);color:var(--tx3);font-variant-numeric:tabular-nums;
+  padding-top:2px;white-space:nowrap}
+.tl .sp{position:relative;height:100%;display:flex;justify-content:center}
+/* Спина рисуется псевдоэлементом, а не отдельным узлом: линия должна идти
+   сквозь всю строку, включая её отступы. */
+.tl .sp::before{content:"";position:absolute;top:-10px;bottom:-10px;width:1px;background:var(--line)}
+.tl .r:first-child .sp::before{top:8px}
+.tl .r:last-child .sp::before{bottom:auto;height:16px}
+.tl .dot{position:relative;width:9px;height:9px;border-radius:50%;margin-top:5px;
+  background:var(--bg);border:2px solid var(--line2)}
+.tl .r.done .dot{background:var(--ok);border-color:var(--ok)}
+.tl .r.nores .dot{background:var(--bg);border-color:var(--warn)}
+.tl .r.ahead .dot{background:var(--bg);border-color:var(--acc)}
+.tl .bd{padding-left:12px;min-width:0}
+.tl .t{font-size:13.5px;font-weight:600;color:var(--tx1);line-height:1.35}
+.tl .r:hover .t{color:var(--acc)}
+.tl .sub{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:5px;
+  font-size:12px;color:var(--tx3)}
+.tl .who{display:flex;align-items:center;gap:6px;margin-top:8px}
+/* Стопка аватаров: до трёх — с именами, дальше только счётчик, иначе строка
+   разъедется на группе. */
+.tl .stack{display:flex}
+.tl .stack .av{margin-left:-6px;box-shadow:0 0 0 2px var(--bg)}
+.tl .stack .av:first-child{margin-left:0}
+.tl .nm{font-size:12px;color:var(--tx2)}
+.tl .now{display:grid;grid-template-columns:52px 18px 1fr;align-items:center;
+  padding:2px 0;pointer-events:none}
+.tl .now .tm{color:var(--acc);font-weight:600}
+.tl .now .sp{justify-content:center}
+.tl .now .sp i{width:7px;height:7px;border-radius:50%;background:var(--acc);display:block}
+.tl .now .ln{height:1px;background:var(--acc);opacity:.45;margin-left:12px}

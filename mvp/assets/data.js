@@ -297,12 +297,14 @@ const client = id => CLIENTS.find(c=>c.id===id);
 
 /* ─── Программы (сущность «программа» = последовательность недель) ─── */
 const PROGRAMS = [
+ /* time — час занятия. Поле у программы, а не у клиента: групповое занятие
+    идёт одно на всех, и в таймлайне дня оно обязано быть одной строкой. */
  {id:'p1', title:'Сила + кроссфит', goal:'Рост силовых при сохранении метконовой формы',
-  weeks:8, cur:4, clients:['c1'], start:'2026-08-03', kind:'individual'},
+  weeks:8, cur:4, clients:['c1'], start:'2026-08-03', kind:'individual', time:'07:30'},
  {id:'p2', title:'Командная подготовка', goal:'Общая база для группы, индивидуальные проценты',
-  weeks:12, cur:6, clients:['c3','c4','c5'], start:'2026-07-20', kind:'group'},
+  weeks:12, cur:6, clients:['c3','c4','c5'], start:'2026-07-20', kind:'group', time:'18:30'},
  {id:'p3', title:'Возвращение после травмы', goal:'Аккуратный возврат к приседу после колена',
-  weeks:6, cur:3, clients:['c2'], start:'2026-08-10', kind:'individual'},
+  weeks:6, cur:3, clients:['c2'], start:'2026-08-10', kind:'individual', time:'11:00'},
 ];
 const program = id => PROGRAMS.find(p=>p.id===id);
 
@@ -600,6 +602,35 @@ function scheduleFor(cid, from, to){
   return out;
 }
 function scheduleAll(from,to){ return CLIENTS.flatMap(c=>scheduleFor(c.id,from,to)) }
+
+/* ═══════ Занятия дня для таймлайна ═══════
+   Единица — занятие (программа + тренировка), а не клиент. Одна и та же
+   тренировка, назначенная группе из 25 человек (CON-11), это одна строка с
+   25 атлетами, а не 25 строк: иначе список растёт с числом клиентов и
+   перестаёт читаться уже на десятке. */
+const NOW = '13:40';                        /* как и TODAY — фиксируем для детерминизма */
+const hhmm = t => +t.slice(0,2)*60 + +t.slice(3,5);
+
+function sessionsOn(date){
+  const by = new Map();
+  scheduleAll(date,date).forEach(e=>{
+    const c = client(e.cid);
+    const key = c.prog + '|' + e.title;
+    if(!by.has(key)) by.set(key,{pid:c.prog, title:e.title, kind:e.kind,
+      time:(program(c.prog)||{}).time || '12:00', who:[]});
+    by.get(key).who.push(c);
+  });
+  return [...by.values()].map(s=>{
+    /* «Записал результат» читаем из факта, а не из назначения: клиент отметился,
+       если его последняя тренировка — сегодня (CLI-2). */
+    s.done = s.who.filter(c=>c.last===date).length;
+    s.past = hhmm(s.time) < hhmm(NOW);
+    s.state = s.done===s.who.length ? 'done'        /* все записали */
+            : s.past               ? 'nores'        /* время прошло, результата нет */
+                                   : 'ahead';
+    return s;
+  }).sort((a,b)=>hhmm(a.time)-hhmm(b.time));
+}
 
 /* ═══════ Состояние приложения (общее между страницами) ═══════ */
 const STATE = (function(){
