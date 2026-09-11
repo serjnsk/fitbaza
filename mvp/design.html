@@ -6,201 +6,197 @@
 <title>Бренд и дизайн-система · fitbaza</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@800;900&family=Oswald:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Реальные стили прототипа. Страница не пересказывает дизайн-систему, а
+     измеряет её: типографика ниже снята с настоящих классов через
+     getComputedStyle, поэтому разойтись с прототипом она не может. -->
 <link rel="stylesheet" href="assets/theme-01-strava.css">
+<link rel="stylesheet" href="assets/base-trainer.css">
+<link rel="stylesheet" href="assets/pages.css">
 <style>
 /* ═══════════ БРЕНД И ДИЗАЙН-СИСТЕМА ═══════════
-   Рабочая страница, а не экран приложения: здесь выбирают название и сверяют
-   токены. Поэтому она standalone — без сайдбара и топбара, и в меню её нет. */
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx1);
-  font:400 14px/1.55 var(--ui);-webkit-font-smoothing:antialiased}
-.wrap{max-width:1180px;margin:0 auto;padding:40px 28px 90px}
-h1{font-size:26px;font-weight:700;letter-spacing:-.02em;margin:0 0 6px}
-.lede{color:var(--tx2);max-width:64ch;margin:0 0 4px}
-.note{color:var(--tx3);font-size:12.5px;margin:0}
-h2{font-size:15px;font-weight:700;letter-spacing:-.01em;margin:44px 0 4px;
+   Рабочая страница, а не экран приложения: standalone, вне меню.
+   Направление логотипа выбрано — сплошной wordmark со срезом 45°.
+   Отклонённые направления лежат в истории, коммит 9b30940.
+
+   Все классы с префиксом d-: pages.css уже занимает .sw, .bar и .legend,
+   и без префикса страница ломалась бы о собственную дизайн-систему. */
+body{background:var(--bg);color:var(--tx1);font:400 14px/1.55 var(--ui)}
+.d-wrap{max-width:1180px;margin:0 auto;padding:40px 28px 90px}
+.d-wrap h1{font-size:26px;font-weight:700;letter-spacing:-.02em;margin:0 0 6px}
+.d-lede{color:var(--tx2);max-width:64ch;margin:0 0 4px}
+.d-note{color:var(--tx3);font-size:12.5px;margin:0}
+.d-wrap h2{font-size:15px;font-weight:700;letter-spacing:-.01em;margin:44px 0 4px;
   padding-top:20px;border-top:1px solid var(--line)}
-h2 + p{color:var(--tx3);font-size:12.5px;margin:0 0 18px;max-width:70ch}
+.d-wrap h2 + p{color:var(--tx3);font-size:12.5px;margin:0 0 18px;max-width:74ch}
+.d-grp{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--tx4);margin:20px 0 8px}
 
 /* ── токены ── */
-.sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
-.sw div{border:1px solid var(--line);border-radius:var(--rad-m);overflow:hidden}
-.sw i{display:block;height:54px}
-.sw b{display:block;font-size:12px;font-weight:600;padding:8px 10px 0}
-.sw s{display:block;font-size:11px;color:var(--tx3);text-decoration:none;
+.d-sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:10px}
+.d-sw div{border:1px solid var(--line);border-radius:var(--rad-m);overflow:hidden}
+.d-sw i{display:block;height:48px}
+.d-sw b{display:block;font-size:12px;font-weight:600;padding:8px 10px 0}
+.d-sw s{display:block;font-size:10.5px;color:var(--tx3);text-decoration:none;
   font-family:var(--mono);padding:1px 10px 9px}
-.tp{display:flex;flex-direction:column;gap:12px}
-.tp div{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);padding-bottom:10px}
-.tp s{text-decoration:none;font-size:11px;color:var(--tx4);font-family:var(--mono);
-  white-space:nowrap;min-width:150px}
+.d-sw div.dark i{background-image:linear-gradient(var(--tm-bg),var(--tm-bg))}
+.d-tp{display:flex;flex-direction:column}
+.d-tp div{display:flex;align-items:baseline;gap:16px;border-bottom:1px solid var(--line);padding:11px 0}
+.d-tp .sel{font-size:11.5px;color:var(--tx3);font-family:var(--mono);min-width:130px}
+.d-tp .spec{font-size:11.5px;color:var(--tx4);font-family:var(--mono);flex:1;min-width:0}
+.d-tp .name{font-size:13px;min-width:160px}
+.d-rad{display:flex;gap:14px;flex-wrap:wrap}
+.d-rad div{text-align:center}
+.d-rad i{display:block;width:72px;height:52px;background:var(--s1);border:1px solid var(--line2)}
+.d-rad s{display:block;text-decoration:none;font-size:11px;color:var(--tx3);
+  font-family:var(--mono);margin-top:6px}
 
-/* ── заставки: точная копия референса ──
-   Фон #FC5200, белый wordmark по центру, системная строка сверху. */
-.grid{display:block}
-.item .cap{display:flex;align-items:baseline;gap:8px;margin-bottom:9px}
-.item .cap b{font-size:13px;font-weight:700}
-.item .cap s{text-decoration:none;font-size:11.5px;color:var(--tx3)}
-.ph{width:100%;aspect-ratio:9/19.5;border-radius:30px;background:var(--acc);
+/* ── заставки ── */
+.d-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;max-width:960px}
+@media(max-width:860px){.d-grid{grid-template-columns:1fr;max-width:320px}}
+.d-item .d-cap{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.d-item .d-cap b{font-size:15px;font-weight:700}
+.d-item .d-cap s{text-decoration:none;font-size:11.5px;color:var(--tx3)}
+.d-ph{width:100%;aspect-ratio:9/19.5;border-radius:34px;background:var(--acc);
   position:relative;overflow:hidden;border:1px solid rgba(0,0,0,.08);
   display:flex;align-items:center;justify-content:center}
-.ph .bar{position:absolute;top:0;left:0;right:0;height:42px;display:flex;
-  align-items:center;justify-content:space-between;padding:0 22px;color:#fff}
-.ph .bar .t{font-size:12.5px;font-weight:600;letter-spacing:-.01em}
-.ph .bar svg{display:block}
-.ph .mid{width:100%;padding:0 15px;text-align:center}
-/* Логотип: срез 45° сверху-слева и снизу-справа — фирменный приём Strava,
-   он режет первую и последнюю буквы, как в оригинале. */
-/* width:fit-content обязателен: срез режет border-box элемента, и если тот
-   растянут во всю ширину экрана, диагональ уходит в пустоту мимо букв. */
-.lg{width:fit-content;max-width:100%;margin:0 auto;text-align:center;--c:0px;
+.d-ph .d-bar{position:absolute;top:0;left:0;right:0;height:46px;display:flex;
+  align-items:center;justify-content:space-between;padding:0 24px;color:#fff}
+.d-ph .d-bar .t{font-size:13px;font-weight:600;letter-spacing:-.01em}
+.d-ph .d-mid{width:100%;padding:0 18px;text-align:center}
+/* Срез 45° сверху-слева и снизу-справа — фирменный приём Strava: он режет
+   первую и последнюю буквы. width:fit-content обязателен, иначе clip-path
+   режет border-box во всю ширину экрана и диагональ уходит мимо букв. */
+.d-lg{width:fit-content;max-width:100%;margin:0 auto;text-align:center;--c:0px;
   clip-path:polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c))}
-.lg span{display:block;font-family:"Montserrat",var(--ui);font-weight:900;
+.d-lg span{display:block;font-family:"Montserrat",var(--ui);font-weight:900;
   text-transform:uppercase;letter-spacing:-.035em;line-height:.98;color:#fff;
   white-space:nowrap}
-/* Вторая версия: смысловая часть слова — контуром. */
-.lg span.out,.lg em.out{color:transparent;-webkit-text-stroke:.055em #fff}
-.lg em{font-style:normal}
-
-/* ── направления, уходящие от шрифта Strava ── */
-/* 3 · кондансед: узкий тяжёлый гротеск — спорт-бренд, а не трекер */
-.lg.v3 span{font-family:"Oswald",var(--ui);font-weight:700;letter-spacing:.01em}
-/* 4 · со знаком: знак живёт отдельно от слова и годится в иконку приложения */
-.mark{display:block;margin:0 auto 16px;width:64px;height:64px;background:#fff;
-  display:grid;place-items:center;color:var(--acc);
-  font:800 30px/1 "Inter",var(--ui);letter-spacing:-.03em;
-  clip-path:polygon(20px 0,100% 0,100% calc(100% - 20px),calc(100% - 20px) 100%,0 100%,0 20px)}
-.lg.v4 span{font-family:"Inter",var(--ui);font-weight:800;letter-spacing:.04em}
-/* 5 · строчные: продуктовая интонация — так подписываются SaaS, а не стадион */
-.lg.v5 span{font-family:"Inter",var(--ui);font-weight:600;text-transform:lowercase;
-  letter-spacing:.16em}
-.nm{margin:38px 0 14px;display:flex;align-items:baseline;gap:10px}
-.nm b{font-size:17px;font-weight:700;letter-spacing:-.01em}
-.nm s{text-decoration:none;font-size:12px;color:var(--tx3)}
-.row{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
-@media(max-width:1080px){.row{grid-template-columns:repeat(3,1fr)}}
-.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--tx3);margin-top:14px}
-.legend i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:6px;vertical-align:middle}
-.warn{font-size:12.5px;color:var(--warn);background:#FBF1DE;border-radius:var(--rad-m);
-  padding:10px 13px;margin:14px 0 0}
+.d-legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--tx3);margin-top:18px}
+.d-legend i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:6px;vertical-align:middle}
+.d-warn{font-size:12.5px;color:var(--warn);background:#FBF1DE;border-radius:var(--rad-m);
+  padding:10px 13px;margin:14px 0 0;max-width:74ch}
+#probe{position:absolute;left:-9999px;top:0;width:420px;visibility:hidden;pointer-events:none}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="d-wrap">
 
 <h1>Бренд и дизайн-система</h1>
-<p class="lede">Рабочая страница: токены визуального языка и варианты рабочего названия сервиса на заставке. Не экран приложения — в меню её нет.</p>
-<p class="note">Референс — Strava: оранжевый #FC5200, белый тяжёлый wordmark по центру, ничего лишнего.</p>
+<p class="d-lede">Рабочая страница: токены визуального языка и рабочее название сервиса на заставке. Не экран приложения — в меню её нет.</p>
+<p class="d-note">Референс — Strava: оранжевый #FC5200, белый тяжёлый wordmark по центру, ничего лишнего.</p>
 
 <h2>Палитра</h2>
-<p>Те же значения, что в <code>assets/theme-01-strava.css</code> — страница читает их из темы, а не дублирует.</p>
-<div class="sw" id="sw"></div>
+<p>Все токены темы <code>assets/theme-01-strava.css</code>. Значения читаются из неё на лету, а не переписаны сюда: разойтись с прототипом они не могут.</p>
+<div id="pal"></div>
 
 <h2>Типографика</h2>
-<p>Inter для интерфейса, JetBrains Mono для чисел и кода. Логотип набран Montserrat 900 — ближайший к Strava тяжёлый геометрический гротеск с кириллицей.</p>
-<div class="tp" id="tp"></div>
+<p>Не таблица «как задумано», а замер: стили сняты с настоящих классов прототипа через <code>getComputedStyle</code>. Если стиль в коде изменится — изменится и здесь.</p>
+<div class="d-tp" id="tp"></div>
 
-<h2>Варианты названия</h2>
-<p>Три отобранных названия, по пять направлений на каждое. Первые два — язык Strava. Третье, четвёртое и пятое намеренно от него уходят: сравниваем не начертания, а интонацию бренда.</p>
-<div class="grid" id="grid"></div>
-<div class="legend">
+<h2>Радиусы</h2>
+<p>Четыре токена. <code>--rad-xl</code> в прототипе сейчас не используется ни разу — оставлен в теме про запас.</p>
+<div class="d-rad" id="rad"></div>
+
+<h2>Название на заставке</h2>
+<p>Направление выбрано: сплошной wordmark со срезом 45° сверху-слева и снизу-справа. Три названия в одном решении.</p>
+<div class="d-grid" id="grid"></div>
+<div class="d-legend">
   <span><i style="background:var(--acc)"></i>#FC5200 — фон заставки</span>
   <span><i style="background:#fff;border:1px solid var(--line2)"></i>#FFFFFF — логотип</span>
+  <span><i style="background:var(--line2)"></i>срез — 0.34 от кегля</span>
 </div>
-<div class="warn" id="warn"></div>
+<div class="d-warn" id="warn"></div>
 
 </div>
+<div id="probe"></div>
 <script>
-const PALETTE = [
-  ['--acc','Акцент'],['--acc-d','Акцент · нажатие'],['--acc-a','Акцент · подложка'],
-  ['--ink','Чернила'],['--tx2','Текст вторичный'],['--tx3','Текст приглушённый'],
-  ['--line','Линия'],['--s1','Поверхность 1'],['--ok','Успех'],['--rm','Ошибка'],['--warn','Внимание'],
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const cs  = getComputedStyle(document.documentElement);
+const tok = v => cs.getPropertyValue(v).trim();
+
+/* ── палитра: все токены темы, сгруппированы по роли ── */
+const GROUPS = [
+  ['Акцент',      [['--acc','Акцент'],['--acc-d','Нажатие'],['--acc-a','Подложка'],['--acc-p','Подложка плотная'],['--on-acc','Текст на акценте']]],
+  ['Текст',       [['--ink','Чернила'],['--tx1','Основной'],['--tx2','Вторичный'],['--tx3','Приглушённый'],['--tx4','Слабый']]],
+  ['Поверхности', [['--bg','Фон'],['--s1','Поверхность 1'],['--s2','Поверхность 2'],['--page','Страница'],['--page-d','Страница тёмная'],['--frame','Рамка устройства']]],
+  ['Линии',       [['--line','Линия'],['--line2','Линия контрастная']]],
+  ['Статусы',     [['--ok','Успех'],['--ok-a','Успех · подложка'],['--rm','Ошибка'],['--rm-d','Ошибка · нажатие'],['--rm-a','Ошибка · подложка'],['--warn','Внимание']]],
+  ['Таймер',      [['--tm-bg','Фон'],['--tm-ink','Текст'],['--tm-dim','Затемнение']]],
 ];
-const TYPE = [
-  ['Заголовок экрана','700 24px/1.2 Inter, -.02em'],
-  ['Заголовок раздела','700 15px/1.3 Inter'],
-  ['Основной текст','400 14px/1.55 Inter'],
-  ['Подпись','400 12px/1.4 Inter, tx3'],
-  ['Числа и веса','500 13px JetBrains Mono'],
-  ['Логотип','900 uppercase Montserrat, -.035em'],
+document.getElementById('pal').innerHTML = GROUPS.map(([g,items])=>`
+  <div class="d-grp">${esc(g)}</div>
+  <div class="d-sw">${items.map(([v,n])=>{
+    const hex = tok(v);
+    /* Полупрозрачные токены на белом не видно — кладём на тёмную подложку */
+    const dark = hex.startsWith('rgba') ? ' class="dark"' : '';
+    return `<div${dark}><i style="background:${hex}"></i><b>${esc(n)}</b><s>${esc(hex)}</s></div>`;
+  }).join('')}</div>`).join('');
+
+/* ── типографика: замер реальных классов прототипа ── */
+const PROBES = [
+  ['Заголовок экрана',   '.prohead .nm', '<div class="prohead"><div class="nm">Артём Ковалёв</div></div>'],
+  ['Заголовок раздела',  '.sechead .t',  '<div class="sechead"><span class="t">Раздел</span></div>'],
+  ['Счётчик у раздела',  '.sechead .n',  '<div class="sechead"><span class="n">12</span></div>'],
+  ['Число в KPI',        '.kpi .v',      '<div class="kpi"><div class="v">27</div></div>'],
+  ['Подпись KPI',        '.kpi .d',      '<div class="kpi"><div class="d">по всем клиентам</div></div>'],
+  ['Название карточки',  '.tcard .nm',   '<div class="tcard"><div class="h"><span class="nm">Шаблон</span></div></div>'],
+  ['Текст в ленте',      '.fitem .tx',   '<div class="fitem"><div class="c"><div class="tx">Комментарий</div></div></div>'],
+  ['Чип',                '.chip',        '<span class="chip">чип</span>'],
+  ['Время, моноширинный','.tl .tm',      '<div class="tl"><div class="r"><span class="tm">07:30</span></div></div>'],
 ];
-/* Три названия, отобранные из шести. parts — [сплошное, контурное]. */
+const probe = document.getElementById('probe');
+document.getElementById('tp').innerHTML = PROBES.map(([name,sel,html])=>{
+  probe.innerHTML = html;
+  const el = probe.querySelector(sel.split(' ').pop());
+  const c  = getComputedStyle(el);
+  const fam = c.fontFamily.split(',')[0].replace(/["']/g,'');
+  const lh  = c.lineHeight==='normal' ? '' : '/'+ (parseFloat(c.lineHeight)/parseFloat(c.fontSize)).toFixed(2);
+  const ls  = c.letterSpacing==='normal' ? '' : ', '+c.letterSpacing;
+  return `<div><span class="name">${esc(name)}</span><span class="sel">${esc(sel)}</span>
+    <span class="spec">${c.fontWeight} ${parseFloat(c.fontSize)}px${lh} ${esc(fam)}${esc(ls)}</span></div>`;
+}).join('');
+probe.innerHTML = '';
+
+/* ── радиусы ── */
+document.getElementById('rad').innerHTML =
+  ['--rad-s','--rad-m','--rad-l','--rad-xl'].map(v=>
+    `<div><i style="border-radius:${tok(v)}"></i><s>${esc(v)} ${esc(tok(v))}</s></div>`).join('');
+
+/* ── заставки ── */
 const NAMES = [
-  {n:'Тренергам', parts:['ТРЕНЕР','ГАМ'], low:'тренергам', ini:'Т'},
-  {n:'MFIT',      parts:['M','FIT'], inline:true, low:'mfit', ini:'M'},
-  {n:'Trenix',    parts:['TRE','NIX'], low:'trenix', ini:'T'},
+  {n:'Тренергам', w:'ТРЕНЕРГАМ'},
+  {n:'MFIT',      w:'MFIT'},
+  {n:'Trenix',    w:'TRENIX'},
 ];
-
-/* Пять направлений: два первых — Strava, три следующих намеренно от неё уходят,
-   чтобы сравнивать не начертания, а интонацию бренда. */
-const VARIANTS = [
-  {v:1, n:'сплошной',  d:'Strava · срез 45°'},
-  {v:2, n:'контур',    d:'Strava · часть слова обводкой'},
-  {v:3, n:'кондансед', d:'узкий гротеск · спорт'},
-  {v:4, n:'со знаком', d:'знак под иконку приложения'},
-  {v:5, n:'строчные',  d:'продуктовая интонация'},
-];
-
 const ICONS = `
 <span style="display:flex;align-items:center;gap:5px">
 <svg width="17" height="11" viewBox="0 0 17 11" fill="#fff"><rect x="0" y="7" width="3" height="4" rx=".7"/><rect x="4.5" y="5" width="3" height="6" rx=".7"/><rect x="9" y="2.5" width="3" height="8.5" rx=".7"/><rect x="13.5" y="0" width="3" height="11" rx=".7"/></svg>
 <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"><path d="M1 3.6a9.4 9.4 0 0 1 13 0"/><path d="M3.6 6.4a5.7 5.7 0 0 1 7.8 0"/><circle cx="7.5" cy="9.4" r=".9" fill="#fff" stroke="none"/></svg>
 <svg width="24" height="11" viewBox="0 0 24 11" fill="none"><rect x=".8" y=".8" width="19" height="9.4" rx="2.8" stroke="#fff" stroke-opacity=".5" stroke-width="1.1"/><rect x="2.4" y="2.4" width="15.8" height="6.2" rx="1.6" fill="#fff"/><path d="M21.6 4v3a2 2 0 0 0 0-3Z" fill="#fff" fill-opacity=".5"/></svg>
 </span>`;
-
-const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-
-/* Палитра и типографика — читаем реальные значения из темы */
-const cs = getComputedStyle(document.documentElement);
-document.getElementById('sw').innerHTML = PALETTE.map(([v,n])=>{
-  const hex = cs.getPropertyValue(v).trim();
-  return `<div><i style="background:${hex}"></i><b>${esc(n)}</b><s>${esc(hex)}</s></div>`;
-}).join('');
-document.getElementById('tp').innerHTML = TYPE.map(([n,spec])=>
-  `<div><s>${esc(spec)}</s><span>${esc(n)}</span></div>`).join('');
-
-/* Заставки */
-function logo(name, v){
-  const [a,b] = name.parts;
-  if(v===1) return {cls:'cut', html:`<span>${esc(a+b)}</span>`, base:48};
-  if(v===2) return {cls:'', base:44, html: name.inline
-    ? `<span><em>${esc(a)}</em><em class="out">${esc(b)}</em></span>`
-    : `<span>${esc(a)}</span><span class="out">${esc(b)}</span>`};
-  if(v===3) return {cls:'v3', html:`<span>${esc(a+b)}</span>`, base:58};
-  if(v===4) return {cls:'v4', html:`<span>${esc(a+b)}</span>`, base:24,
-    mark:`<span class="mark">${esc(name.ini)}</span>`};
-  return {cls:'v5', html:`<span>${esc(name.low)}</span>`, base:22};
-}
-
-function screen(name, cfg){
-  const L = logo(name, cfg.v);
-  return `<div class="item">
-    <div class="cap"><b>${cfg.v}</b><s>${esc(cfg.n)}</s></div>
-    <div class="ph">
-      <div class="bar"><span class="t">9:41</span>${ICONS}</div>
-      <div class="mid">${L.mark||''}<div class="lg ${L.cls}" data-base="${L.base}">${L.html}</div></div>
+document.getElementById('grid').innerHTML = NAMES.map(name=>`
+  <div class="d-item">
+    <div class="d-cap"><b>${esc(name.n)}</b><s>сплошной · срез 45°</s></div>
+    <div class="d-ph">
+      <div class="d-bar"><span class="t">9:41</span>${ICONS}</div>
+      <div class="d-mid"><div class="d-lg"><span>${esc(name.w)}</span></div></div>
     </div>
-  </div>`;
-}
+  </div>`).join('');
 
-document.getElementById('grid').innerHTML = NAMES.map(n=>`
-  <div class="nm"><b>${esc(n.n)}</b><s>пять направлений</s></div>
-  <div class="row">${VARIANTS.map(c=>screen(n,c)).join('')}</div>`).join('');
-
-/* Подгонка кегля: имена разной длины, а ширина экрана одна. Уменьшаем, пока
-   самая длинная строка не влезет в экран с полями. */
+/* Подгонка кегля: имена от четырёх до девяти знаков, единый размер им не
+   подходит. Срез — доля от кегля, иначе на коротком имени он съест букву. */
 function fit(){
-  document.querySelectorAll('.lg').forEach(lg=>{
-    const box = lg.closest('.ph').clientWidth - 30;
-    const lines = [...lg.querySelectorAll('span')];
-    let size = +lg.dataset.base || 48, guard = 0;
+  document.querySelectorAll('.d-lg').forEach(lg=>{
+    const box = lg.closest('.d-ph').clientWidth - 36;
+    const span = lg.querySelector('span');
+    let size = 62, guard = 0;
     const apply = ()=>{
-      lines.forEach(s=>s.style.fontSize = size+'px');
-      /* Срез — доля от кегля, иначе на мелких именах он съедает букву целиком */
-      if(lg.classList.contains('cut')) lg.style.setProperty('--c', (size*0.34).toFixed(1)+'px');
+      span.style.fontSize = size+'px';
+      lg.style.setProperty('--c', (size*0.34).toFixed(1)+'px');
     };
     apply();
-    while(lg.offsetWidth > box && size > 12 && guard++ < 90){ size -= 1; apply(); }
+    while(lg.offsetWidth > box && size > 12 && guard++ < 110){ size -= 1; apply(); }
   });
 }
 fit();
