@@ -1,4 +1,4 @@
-# fitbaza — правила для Claude Code
+# Тренерграм — правила для Claude Code
 
 ## Две ветки
 - **`main`** — документация продукта: `docs/` (01…07), `mkdocs.yml`, `landing/index.html` (заглавная сайта).
