@@ -22,7 +22,7 @@ button{cursor:pointer}
 .num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
 
 /* ─── каркас ─── */
-.app{display:grid;grid-template-columns:238px 1fr;min-height:100vh}
+.app{display:grid;grid-template-columns:var(--navw,238px) 1fr;min-height:100vh}
 .main{min-width:0;display:flex;flex-direction:column}
 
 /* ─── левая навигация ─── */
@@ -93,7 +93,7 @@ button{cursor:pointer}
 
 /* ─── страница конструктора ─── */
 .page{flex:1;background:var(--s2);min-width:0}
-.cons{display:grid;grid-template-columns:minmax(0,1fr) 318px;gap:14px;
+.cons{display:grid;grid-template-columns:minmax(0,1fr) var(--railw,318px);gap:14px;
   padding:14px 18px 60px;align-items:start}
 @media (max-width:1120px){ .cons{grid-template-columns:minmax(0,1fr)} .rail{display:none} }
 
@@ -496,3 +496,69 @@ button{cursor:pointer}
 .ask .sub{font-size:13px;color:var(--tx3);margin-bottom:14px}
 .btn.rm{background:var(--rm)}
 .btn.rm:hover{background:var(--rm-d)}
+
+/* ─── заголовок рабочей зоны ───
+   Крошки и название переехали сюда из шапки. В шапке они делали её разной на
+   каждом экране и отрывали название от содержимого, к которому относятся;
+   действия страницы тоже здесь, рядом с тем, на что они действуют. */
+.phead{padding:4px 0 16px}
+.phead:empty{display:none}
+.phead .crumb{margin-bottom:7px}
+.phead .ph-row{display:flex;align-items:center;gap:12px;min-width:0}
+.phead h1{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.phead h1{font-family:var(--disp);font-size:24px;font-weight:700;letter-spacing:-.02em;
+  margin:0;line-height:1.2}
+.phead .ph-sub{font-size:13px;color:var(--tx3)}
+.phead .sp{flex:1}
+
+/* ─── свёрнутое меню ───
+   Колонка в 64px: только иконки, подписи и счётчики скрыты, слово-логотип
+   уступает место знаку. Название пункта остаётся в title — иначе свёрнутое
+   меню превращается в ребус из восьми одинаковых квадратов. */
+.nh .logo em{display:none;font-style:normal;font:900 22px/1 "Montserrat",var(--ui);
+  letter-spacing:-.04em;color:var(--ink)}
+.navtog{margin-left:auto;width:26px;height:26px;border-radius:var(--rad-s);flex:none;
+  display:grid;place-items:center;color:var(--tx4);opacity:0;transition:opacity .12s}
+.nav:hover .navtog{opacity:1}
+.navtog:hover{background:var(--s1);color:var(--tx1)}
+.navtog svg{width:15px;height:15px}
+
+body.navmin{--navw:64px}
+body.navmin .nh{padding:0 8px;justify-content:center}
+body.navmin .nh .logo i{display:none}
+body.navmin .nh .logo em{display:block}
+body.navmin .navtog{display:none}
+body.navmin .nbody{padding:12px 8px 16px}
+/* Без подписи у пункта схлопывается высота — задаём квадрат явно,
+   иначе иконки слипаются в сплошную полосу. */
+body.navmin .nav a{justify-content:center;padding:0;gap:0;
+  width:40px;height:40px;margin:3px auto;border-radius:var(--rad-m)}
+body.navmin .nav a .ntxt,body.navmin .nav a .cnt{display:none}
+body.navmin .ngrp{font-size:0;padding:12px 0 6px;margin:0 6px;border-top:1px solid var(--line)}
+body.navmin .ngrp:first-child{border-top:0;padding-top:2px}
+body.navmin .nfoot{justify-content:center;padding:10px 0}
+body.navmin .nfoot span:last-child{display:none}
+/* Свёрнутое меню разворачивается по клику на знак — иначе из него не выйти. */
+body.navmin .nh .logo{cursor:pointer}
+
+/* ─── свёрнутая панель источников ───
+   Панель нужна, когда набирают тренировку из базы, и мешает, когда печатают
+   текстом — поэтому сворачивается в колонку 44px. Внутренности не скрываются
+   поштучно: прячем всё содержимое и оставляем только кнопку с подписью. */
+.rail{position:relative}
+.railtog{position:absolute;top:10px;right:10px;width:26px;height:26px;z-index:2;
+  border-radius:var(--rad-s);display:grid;place-items:center;color:var(--tx4);
+  background:var(--bg);opacity:0;transition:opacity .12s}
+.rail:hover .railtog{opacity:1}
+.railtog:hover{background:var(--s1);color:var(--tx1)}
+.railtog::before{content:"›";font-size:17px;line-height:1;font-weight:600}
+body.railmin{--railw:44px}
+body.railmin .railhead,body.railmin .railbody,body.railmin .railfoot{display:none}
+body.railmin .rail{min-height:180px;align-self:stretch}
+body.railmin .railtog{opacity:1;top:9px;right:9px;left:9px;width:auto;height:26px}
+body.railmin .railtog::before{content:"‹"}
+/* Подпись вертикально: иначе свёрнутая колонка не объясняет, что в ней. */
+body.railmin .rail::after{content:"Источники";position:absolute;top:46px;left:0;right:0;
+  writing-mode:vertical-rl;margin:0 auto;font-size:11.5px;font-weight:600;
+  letter-spacing:.04em;color:var(--tx4)}
+@media (max-width:1120px){ .railtog{display:none} }

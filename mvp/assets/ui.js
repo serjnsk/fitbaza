@@ -59,40 +59,41 @@ const ICON = {
 /* LOGO живёт в assets/nav.js — общий для обеих оболочек. */
 
 
-/* Меню вынесено в assets/nav.js — общий конфиг для всех страниц. */function renderNav(page){
-  $('#nav').innerHTML = `
-    <div class="nh">${LOGO}</div>
-    <div class="nbody">
-      ${NAV.map(x => x.g
-        ? `<div class="ngrp">${esc(x.g)}</div>`
-        : `<a href="${x.h}" class="${x.h===page?'on':''}">${ICON[x.k]}
-             <span class="ntxt">${esc(x.n)}</span><i class="nab">${esc(x.a||x.n)}</i>
-             ${x.c?`<span class="cnt">${x.c()}</span>`:''}</a>`).join('')}
-    </div>
-    <a class="nfoot" href="brand.html">
-      <span class="av">${esc(TRAINER.ini)}</span>
-      <span><b>${esc(TRAINER.n)}</b><s>${esc(TRAINER.workspace)}</s></span>
-    </a>`;
+/* Меню вынесено в assets/nav.js — общий конфиг для всех страниц. *//* renderNav живёт в assets/nav.js — общий для обеих оболочек. */
+
+
+/* ─── шапка ───
+   Одинакова на всех страницах и несёт ровно одно — главное действие тренера.
+   Крошки и заголовок живут в рабочей зоне (renderHead): в шапке они делали
+   её разной на каждом экране и отрывали название от содержимого. */
+function renderTop(){
+  $('#topbar').innerHTML = `
+    <span class="sp"></span>
+    <a class="btn" href="constructor.html">${ICON.build} Создать тренировку</a>`;
 }
 
-/* ─── топбар ───
-   cfg.crumb = [{n,h}...] (последний элемент — текущая страница, без ссылки)
-   либо cfg.title — простой заголовок без хлебных крошек. */
-function renderTop(cfg){
-  const crumb = cfg.crumb || [{n:cfg.title}];
-  $('#topbar').innerHTML = `
-    <nav class="crumb">${crumb.map((c,i)=>i<crumb.length-1
-      ? `<a href="${c.h}">${esc(c.n)}</a><span class="sep">/</span>`
-      : `<span class="cur">${esc(c.n)}</span>`).join('')}</nav>
-    ${cfg.sub?`<span class="sep">·</span><span class="cur" style="font-weight:500;color:var(--tx3)">${esc(cfg.sub)}</span>`:''}
-    <span class="sp"></span>
-    ${cfg.actions||''}
-    <a class="btn" href="constructor.html">${ICON.build} Создать тренировку</a>`;
+/* ─── заголовок рабочей зоны ───
+   cfg.crumb = [{n,h}...] (последний — текущая страница, без ссылки)
+   либо cfg.title. cfg.actions — действия страницы, они тоже здесь, а не в шапке. */
+function renderHead(cfg){
+  const head = $('#pagehead'); if(!head) return;
+  const crumb = cfg.crumb || [];
+  const title = cfg.title || (crumb.length ? crumb[crumb.length-1].n : '');
+  head.innerHTML = `
+    ${crumb.length > 1 ? `<nav class="crumb">${crumb.slice(0,-1).map(c=>
+      `<a href="${c.h}">${esc(c.n)}</a><span class="sep">/</span>`).join('')}</nav>` : ''}
+    <div class="ph-row">
+      <h1>${esc(title)}</h1>
+      ${cfg.sub?`<span class="ph-sub">${esc(cfg.sub)}</span>`:''}
+      <span class="sp"></span>
+      ${cfg.actions||''}
+    </div>`;
 }
 
 function initShell(cfg){
   renderNav(cfg.page);
-  renderTop(cfg);
+  renderTop();
+  renderHead(cfg);
 }
 
 /* ─── тосты и модалки (те же классы, что у шторки назначения в конструкторе) ─── */

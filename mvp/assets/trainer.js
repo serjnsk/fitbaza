@@ -103,36 +103,34 @@ const ICON = {
  chk:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3.5 8.5 6.5 11.5 12.5 5"/></svg>',
 };
 /* NAV живёт в assets/nav.js — общий конфиг, см. комментарий там. */
-function renderNav(page){
-  $('#nav').innerHTML = `
-    <div class="nh">${LOGO}</div>
-    <div class="nbody">
-      ${NAV.map(x => x.g
-        ? `<div class="ngrp">${esc(x.g)}</div>`
-        : `<a href="${x.h}" class="${x.h===page?'on':''}">${ICON[x.k]}
-             <span class="ntxt">${esc(x.n)}</span><i class="nab">${esc(x.a||x.n)}</i>
-             ${x.c?`<span class="cnt">${x.c()}</span>`:''}</a>`).join('')}
-    </div>
-    <a class="nfoot" href="brand.html">
-      <span class="av">${esc(TRAINER.ini)}</span>
-      <span><b>${esc(TRAINER.n)}</b><s>${esc(TRAINER.workspace)}</s></span>
-    </a>`;
-}
+/* renderNav живёт в assets/nav.js — общий для обеих оболочек. */
+
 function renderTop(){
-  const p = program(S.pid);
+  /* Шапка одинакова на всех страницах и несёт только главное действие.
+     Крошки, выбор клиента и «Назначить» переехали в рабочую зону — они
+     относятся к тренировке, а не к приложению. */
   $('#topbar').innerHTML = `
-    <nav class="crumb">
-      <a href="programs.html">База программ</a><span class="sep">/</span>
-      <span class="cur" style="font-weight:500">${esc(p.title)}</span><span class="sep">/</span>
-      <span class="cur">Неделя ${S.wk}</span>
-    </nav>
     <span class="sp"></span>
-    <label class="forw"><span>веса для</span>
-      <select id="cli">${CLIENTS.map(c=>
-        `<option value="${c.id}" ${c.id===S.cid?'selected':''}>${esc(c.n)}</option>`).join('')}</select>
-    </label>
-    <button class="btn" id="assign">${ICON.chk} Назначить</button>`;
+    <a class="btn gh" href="constructor.html">${ICON.build} Создать тренировку</a>`;
 }
+
+function renderHead(){
+  const p = program(S.pid);
+  $('#pagehead').innerHTML = `
+    <nav class="crumb">
+      <a href="programs.html">База программ</a>
+    </nav>
+    <div class="ph-row">
+      <h1>${esc(p.title)}</h1>
+      <span class="sp"></span>
+      <label class="forw"><span>веса для</span>
+        <select id="cli">${CLIENTS.map(c=>
+          `<option value="${c.id}" ${c.id===S.cid?'selected':''}>${esc(c.n)}</option>`).join('')}</select>
+      </label>
+      <button class="btn" id="assign">${ICON.chk} Назначить</button>
+    </div>`;
+}
+
 
 /* COM-4 — обращение тренера ко всей тренировке. На экране клиента оно
    стоит под именем тренера, выше всех блоков, и читается первым. Значит
@@ -888,8 +886,8 @@ function openWeekTpl(){
 document.addEventListener('click', e=>{
   const d = e.target.closest('[data-day]');
   if(d){ S.day = +d.dataset.day; S.compose = null; closeSug(); render(); return }
-  if(e.target.closest('#wkPrev')){ S.wk = Math.max(1, S.wk-1); S.compose = null; render(); renderTop(); return }
-  if(e.target.closest('#wkNext')){ S.wk = Math.min(program(S.pid).weeks, S.wk+1); S.compose = null; render(); renderTop(); return }
+  if(e.target.closest('#wkPrev')){ S.wk = Math.max(1, S.wk-1); S.compose = null; render(); renderHead(); return }
+  if(e.target.closest('#wkNext')){ S.wk = Math.min(program(S.pid).weeks, S.wk+1); S.compose = null; render(); renderHead(); return }
   if(e.target.closest('#copyPrev')){ copyPrev(); return }
   if(e.target.closest('#weekTpl')){ openWeekTpl(); return }
   if(e.target.closest('#weekSave')){ openWeekSave(); return }
@@ -1246,4 +1244,15 @@ function openAssign(){
   const w = buildWeek(S.pid, n); WCACHE[S.pid+':'+n] = w;
   w.days.forEach(d=>d.blocks.forEach(fmtIntoTitle));
 });
-renderNav('constructor.html'); renderTop(); render();
+renderNav('constructor.html'); renderTop(); renderHead(); render();
+
+/* Сворачивание панели источников — состояние переживает перезагрузку,
+   как и у левого меню. */
+function setRailMin(min){
+  document.body.classList.toggle('railmin', min);
+  const b = document.getElementById('railtog');
+  if(b) b.title = b.ariaLabel = min ? 'Развернуть панель' : 'Свернуть панель';
+  try{ localStorage.setItem('tg.railmin', min ? '1' : '') }catch(_){}
+}
+$('#railtog').onclick = () => setRailMin(!document.body.classList.contains('railmin'));
+try{ if(localStorage.getItem('tg.railmin')) setRailMin(true) }catch(_){}
