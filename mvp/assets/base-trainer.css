@@ -30,8 +30,15 @@ button{cursor:pointer}
   position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
 .nh{height:58px;display:flex;align-items:center;padding:0 16px;
   border-bottom:1px solid var(--line);flex:none}
-/* Высота задана, ширина следует за пропорцией 336×49 — 151px в сайдбаре. */
-.nh .logo{height:21px;width:auto;color:var(--ink);display:block}
+/* Логотип — текст, а не SVG: десять кириллических прописных рисовать путями
+   до утверждения знака рано. Кегль подобран под сайдбар 238px минус отступы
+   32px: «ТРЕНЕРГРАМ» на 22px занимает ~158px и оставляет запас.
+   Срез 45° — фирменный приём, тот же, что на заставке; width:fit-content
+   обязателен, иначе clip-path режет строку во всю ширину шапки мимо букв. */
+.nh .logo{display:block}
+.nh .logo i{font-style:normal;display:block;width:fit-content;color:var(--ink);
+  font:900 22px/1 "Montserrat",var(--ui);letter-spacing:-.035em;text-transform:uppercase;
+  clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px)}
 .nbody{flex:1;overflow-y:auto;padding:12px 10px 16px}
 .ngrp{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
   color:var(--tx4);padding:14px 8px 6px}
