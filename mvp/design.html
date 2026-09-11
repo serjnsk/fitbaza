@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Бренд и дизайн-система · fitbaza</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/theme-01-strava.css">
+<style>
+/* ═══════════ БРЕНД И ДИЗАЙН-СИСТЕМА ═══════════
+   Рабочая страница, а не экран приложения: здесь выбирают название и сверяют
+   токены. Поэтому она standalone — без сайдбара и топбара, и в меню её нет. */
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx1);
+  font:400 14px/1.55 var(--ui);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:40px 28px 90px}
+h1{font-size:26px;font-weight:700;letter-spacing:-.02em;margin:0 0 6px}
+.lede{color:var(--tx2);max-width:64ch;margin:0 0 4px}
+.note{color:var(--tx3);font-size:12.5px;margin:0}
+h2{font-size:15px;font-weight:700;letter-spacing:-.01em;margin:44px 0 4px;
+  padding-top:20px;border-top:1px solid var(--line)}
+h2 + p{color:var(--tx3);font-size:12.5px;margin:0 0 18px;max-width:70ch}
+
+/* ── токены ── */
+.sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
+.sw div{border:1px solid var(--line);border-radius:var(--rad-m);overflow:hidden}
+.sw i{display:block;height:54px}
+.sw b{display:block;font-size:12px;font-weight:600;padding:8px 10px 0}
+.sw s{display:block;font-size:11px;color:var(--tx3);text-decoration:none;
+  font-family:var(--mono);padding:1px 10px 9px}
+.tp{display:flex;flex-direction:column;gap:12px}
+.tp div{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.tp s{text-decoration:none;font-size:11px;color:var(--tx4);font-family:var(--mono);
+  white-space:nowrap;min-width:150px}
+
+/* ── заставки: точная копия референса ──
+   Фон #FC5200, белый wordmark по центру, системная строка сверху. */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:26px 22px}
+.item .cap{display:flex;align-items:baseline;gap:8px;margin-bottom:9px}
+.item .cap b{font-size:13px;font-weight:700}
+.item .cap s{text-decoration:none;font-size:11.5px;color:var(--tx3)}
+.ph{width:100%;aspect-ratio:9/19.5;border-radius:30px;background:var(--acc);
+  position:relative;overflow:hidden;border:1px solid rgba(0,0,0,.08);
+  display:flex;align-items:center;justify-content:center}
+.ph .bar{position:absolute;top:0;left:0;right:0;height:42px;display:flex;
+  align-items:center;justify-content:space-between;padding:0 22px;color:#fff}
+.ph .bar .t{font-size:12.5px;font-weight:600;letter-spacing:-.01em}
+.ph .bar svg{display:block}
+/* Логотип: срез 45° сверху-слева и снизу-справа — фирменный приём Strava,
+   он режет первую и последнюю буквы, как в оригинале. */
+/* width:fit-content обязателен: срез режет border-box элемента, и если тот
+   растянут во всю ширину экрана, диагональ уходит в пустоту мимо букв. */
+.lg{width:fit-content;max-width:100%;margin:0 auto;text-align:center;--c:0px;
+  clip-path:polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c))}
+.lg span{display:block;font-family:"Montserrat",var(--ui);font-weight:900;
+  text-transform:uppercase;letter-spacing:-.035em;line-height:.98;color:#fff;
+  white-space:nowrap}
+/* Вторая версия: смысловая часть слова — контуром. */
+.lg span.out,.lg em.out{color:transparent;-webkit-text-stroke:.055em #fff}
+.lg em{font-style:normal}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--tx3);margin-top:14px}
+.legend i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:6px;vertical-align:middle}
+.warn{font-size:12.5px;color:var(--warn);background:#FBF1DE;border-radius:var(--rad-m);
+  padding:10px 13px;margin:14px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Бренд и дизайн-система</h1>
+<p class="lede">Рабочая страница: токены визуального языка и варианты рабочего названия сервиса на заставке. Не экран приложения — в меню её нет.</p>
+<p class="note">Референс — Strava: оранжевый #FC5200, белый тяжёлый wordmark по центру, ничего лишнего.</p>
+
+<h2>Палитра</h2>
+<p>Те же значения, что в <code>assets/theme-01-strava.css</code> — страница читает их из темы, а не дублирует.</p>
+<div class="sw" id="sw"></div>
+
+<h2>Типографика</h2>
+<p>Inter для интерфейса, JetBrains Mono для чисел и кода. Логотип набран Montserrat 900 — ближайший к Strava тяжёлый геометрический гротеск с кириллицей.</p>
+<div class="tp" id="tp"></div>
+
+<h2>Варианты названия</h2>
+<p>Шесть названий в двух версиях. Версия 1 — сплошной wordmark, максимально близко к референсу. Версия 2 — смысловая часть слова контуром: тот же приём, но читается как два слова.</p>
+<div class="grid" id="grid"></div>
+<div class="legend">
+  <span><i style="background:var(--acc)"></i>#FC5200 — фон заставки</span>
+  <span><i style="background:#fff;border:1px solid var(--line2)"></i>#FFFFFF — логотип</span>
+</div>
+<div class="warn" id="warn"></div>
+
+</div>
+<script>
+const PALETTE = [
+  ['--acc','Акцент'],['--acc-d','Акцент · нажатие'],['--acc-a','Акцент · подложка'],
+  ['--ink','Чернила'],['--tx2','Текст вторичный'],['--tx3','Текст приглушённый'],
+  ['--line','Линия'],['--s1','Поверхность 1'],['--ok','Успех'],['--rm','Ошибка'],['--warn','Внимание'],
+];
+const TYPE = [
+  ['Заголовок экрана','700 24px/1.2 Inter, -.02em'],
+  ['Заголовок раздела','700 15px/1.3 Inter'],
+  ['Основной текст','400 14px/1.55 Inter'],
+  ['Подпись','400 12px/1.4 Inter, tx3'],
+  ['Числа и веса','500 13px JetBrains Mono'],
+  ['Логотип','900 uppercase Montserrat, -.035em'],
+];
+/* parts: [что сплошным, что контуром во второй версии] */
+const NAMES = [
+  {n:'Тренерграм',     parts:['ТРЕНЕР','ГРАМ']},
+  {n:'MFIT',           parts:['M','FIT'], inline:true},
+  {n:'MeetFit',        parts:['MEET','FIT']},
+  {n:'МитФит',         parts:['МИТ','ФИТ']},
+  {n:'Trener Project', parts:['TRENER','PROJECT'], two:true},
+  {n:'Trenix',         parts:['TRE','NIX']},
+];
+
+const ICONS = `
+<span style="display:flex;align-items:center;gap:5px">
+<svg width="17" height="11" viewBox="0 0 17 11" fill="#fff"><rect x="0" y="7" width="3" height="4" rx=".7"/><rect x="4.5" y="5" width="3" height="6" rx=".7"/><rect x="9" y="2.5" width="3" height="8.5" rx=".7"/><rect x="13.5" y="0" width="3" height="11" rx=".7"/></svg>
+<svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"><path d="M1 3.6a9.4 9.4 0 0 1 13 0"/><path d="M3.6 6.4a5.7 5.7 0 0 1 7.8 0"/><circle cx="7.5" cy="9.4" r=".9" fill="#fff" stroke="none"/></svg>
+<svg width="24" height="11" viewBox="0 0 24 11" fill="none"><rect x=".8" y=".8" width="19" height="9.4" rx="2.8" stroke="#fff" stroke-opacity=".5" stroke-width="1.1"/><rect x="2.4" y="2.4" width="15.8" height="6.2" rx="1.6" fill="#fff"/><path d="M21.6 4v3a2 2 0 0 0 0-3Z" fill="#fff" fill-opacity=".5"/></svg>
+</span>`;
+
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* Палитра и типографика — читаем реальные значения из темы */
+const cs = getComputedStyle(document.documentElement);
+document.getElementById('sw').innerHTML = PALETTE.map(([v,n])=>{
+  const hex = cs.getPropertyValue(v).trim();
+  return `<div><i style="background:${hex}"></i><b>${esc(n)}</b><s>${esc(hex)}</s></div>`;
+}).join('');
+document.getElementById('tp').innerHTML = TYPE.map(([n,spec])=>
+  `<div><s>${esc(spec)}</s><span>${esc(n)}</span></div>`).join('');
+
+/* Заставки */
+function screen(name, ver){
+  const [a,b] = name.parts;
+  const cut = ver===1 ? 'cut' : '';
+  const rows = ver===1
+    ? (name.two ? [[a,0],[b,0]] : [[a+b,0]])
+    : (name.two ? [[a,0],[b,1]] : [[a,0],[b,1]]);
+  /* Версия 2 всегда двумя строками — иначе контур и заливка сливаются в одно слово */
+  const lines = ver===1 && !name.two
+    ? `<span>${esc(a+b)}</span>`
+    : name.inline && ver===2
+      /* Короткое имя ломать на две строки нечем: остаётся одна буква */
+      ? `<span><em>${esc(a)}</em><em class="out">${esc(b)}</em></span>`
+      : rows.map(([t,o])=>`<span class="${o?'out':''}">${esc(t)}</span>`).join('');
+  return `<div class="item">
+    <div class="cap"><b>${esc(name.n)}</b><s>версия ${ver} — ${ver===1?'сплошной':'контур'}</s></div>
+    <div class="ph">
+      <div class="bar"><span class="t">9:41</span>${ICONS}</div>
+      <div class="lg ${cut}">${lines}</div>
+    </div>
+  </div>`;
+}
+document.getElementById('grid').innerHTML =
+  NAMES.flatMap(n=>[screen(n,1),screen(n,2)]).join('');
+
+/* Подгонка кегля: имена разной длины, а ширина экрана одна. Уменьшаем, пока
+   самая длинная строка не влезет в экран с полями. */
+function fit(){
+  document.querySelectorAll('.lg').forEach(lg=>{
+    const box = lg.closest('.ph').clientWidth - 36;
+    const lines = [...lg.querySelectorAll('span')];
+    let size = 48, guard = 0;
+    const apply = ()=>{
+      lines.forEach(s=>s.style.fontSize = size+'px');
+      /* Срез — доля от кегля, иначе на мелких именах он съедает букву целиком */
+      if(lg.classList.contains('cut')) lg.style.setProperty('--c', (size*0.34).toFixed(1)+'px');
+    };
+    apply();
+    while(lg.offsetWidth > box && size > 12 && guard++ < 90){ size -= 1; apply(); }
+  });
+}
+fit();
+/* Первый замер идёт на метриках подменного шрифта — пока Montserrat не
+   загрузился, ширины занижены и подгонка промахивается. Пересчитываем. */
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+addEventListener('resize', fit);
+
+document.getElementById('warn').textContent =
+  'В названии «МeetFit» первая буква М — кириллическая, остальные латинские. Визуально незаметно, но ломает поиск, домен и автоподстановку: на экранах ниже набрано латиницей. Стоит решить до регистрации домена.';
+</script>
+</body>
+</html>
