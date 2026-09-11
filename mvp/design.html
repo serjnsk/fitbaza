@@ -6,7 +6,7 @@
 <title>Бренд и дизайн-система · fitbaza</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@800;900&family=Oswald:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/theme-01-strava.css">
 <style>
 /* ═══════════ БРЕНД И ДИЗАЙН-СИСТЕМА ═══════════
@@ -37,7 +37,7 @@ h2 + p{color:var(--tx3);font-size:12.5px;margin:0 0 18px;max-width:70ch}
 
 /* ── заставки: точная копия референса ──
    Фон #FC5200, белый wordmark по центру, системная строка сверху. */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:26px 22px}
+.grid{display:block}
 .item .cap{display:flex;align-items:baseline;gap:8px;margin-bottom:9px}
 .item .cap b{font-size:13px;font-weight:700}
 .item .cap s{text-decoration:none;font-size:11.5px;color:var(--tx3)}
@@ -48,6 +48,7 @@ h2 + p{color:var(--tx3);font-size:12.5px;margin:0 0 18px;max-width:70ch}
   align-items:center;justify-content:space-between;padding:0 22px;color:#fff}
 .ph .bar .t{font-size:12.5px;font-weight:600;letter-spacing:-.01em}
 .ph .bar svg{display:block}
+.ph .mid{width:100%;padding:0 15px;text-align:center}
 /* Логотип: срез 45° сверху-слева и снизу-справа — фирменный приём Strava,
    он режет первую и последнюю буквы, как в оригинале. */
 /* width:fit-content обязателен: срез режет border-box элемента, и если тот
@@ -60,6 +61,24 @@ h2 + p{color:var(--tx3);font-size:12.5px;margin:0 0 18px;max-width:70ch}
 /* Вторая версия: смысловая часть слова — контуром. */
 .lg span.out,.lg em.out{color:transparent;-webkit-text-stroke:.055em #fff}
 .lg em{font-style:normal}
+
+/* ── направления, уходящие от шрифта Strava ── */
+/* 3 · кондансед: узкий тяжёлый гротеск — спорт-бренд, а не трекер */
+.lg.v3 span{font-family:"Oswald",var(--ui);font-weight:700;letter-spacing:.01em}
+/* 4 · со знаком: знак живёт отдельно от слова и годится в иконку приложения */
+.mark{display:block;margin:0 auto 16px;width:64px;height:64px;background:#fff;
+  display:grid;place-items:center;color:var(--acc);
+  font:800 30px/1 "Inter",var(--ui);letter-spacing:-.03em;
+  clip-path:polygon(20px 0,100% 0,100% calc(100% - 20px),calc(100% - 20px) 100%,0 100%,0 20px)}
+.lg.v4 span{font-family:"Inter",var(--ui);font-weight:800;letter-spacing:.04em}
+/* 5 · строчные: продуктовая интонация — так подписываются SaaS, а не стадион */
+.lg.v5 span{font-family:"Inter",var(--ui);font-weight:600;text-transform:lowercase;
+  letter-spacing:.16em}
+.nm{margin:38px 0 14px;display:flex;align-items:baseline;gap:10px}
+.nm b{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.nm s{text-decoration:none;font-size:12px;color:var(--tx3)}
+.row{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
+@media(max-width:1080px){.row{grid-template-columns:repeat(3,1fr)}}
 .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--tx3);margin-top:14px}
 .legend i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:6px;vertical-align:middle}
 .warn{font-size:12.5px;color:var(--warn);background:#FBF1DE;border-radius:var(--rad-m);
@@ -82,7 +101,7 @@ h2 + p{color:var(--tx3);font-size:12.5px;margin:0 0 18px;max-width:70ch}
 <div class="tp" id="tp"></div>
 
 <h2>Варианты названия</h2>
-<p>Шесть названий в двух версиях. Версия 1 — сплошной wordmark, максимально близко к референсу. Версия 2 — смысловая часть слова контуром: тот же приём, но читается как два слова.</p>
+<p>Три отобранных названия, по пять направлений на каждое. Первые два — язык Strava. Третье, четвёртое и пятое намеренно от него уходят: сравниваем не начертания, а интонацию бренда.</p>
 <div class="grid" id="grid"></div>
 <div class="legend">
   <span><i style="background:var(--acc)"></i>#FC5200 — фон заставки</span>
@@ -105,14 +124,21 @@ const TYPE = [
   ['Числа и веса','500 13px JetBrains Mono'],
   ['Логотип','900 uppercase Montserrat, -.035em'],
 ];
-/* parts: [что сплошным, что контуром во второй версии] */
+/* Три названия, отобранные из шести. parts — [сплошное, контурное]. */
 const NAMES = [
-  {n:'Тренерграм',     parts:['ТРЕНЕР','ГРАМ']},
-  {n:'MFIT',           parts:['M','FIT'], inline:true},
-  {n:'MeetFit',        parts:['MEET','FIT']},
-  {n:'МитФит',         parts:['МИТ','ФИТ']},
-  {n:'Trener Project', parts:['TRENER','PROJECT'], two:true},
-  {n:'Trenix',         parts:['TRE','NIX']},
+  {n:'Тренергам', parts:['ТРЕНЕР','ГАМ'], low:'тренергам', ini:'Т'},
+  {n:'MFIT',      parts:['M','FIT'], inline:true, low:'mfit', ini:'M'},
+  {n:'Trenix',    parts:['TRE','NIX'], low:'trenix', ini:'T'},
+];
+
+/* Пять направлений: два первых — Strava, три следующих намеренно от неё уходят,
+   чтобы сравнивать не начертания, а интонацию бренда. */
+const VARIANTS = [
+  {v:1, n:'сплошной',  d:'Strava · срез 45°'},
+  {v:2, n:'контур',    d:'Strava · часть слова обводкой'},
+  {v:3, n:'кондансед', d:'узкий гротеск · спорт'},
+  {v:4, n:'со знаком', d:'знак под иконку приложения'},
+  {v:5, n:'строчные',  d:'продуктовая интонация'},
 ];
 
 const ICONS = `
@@ -134,37 +160,40 @@ document.getElementById('tp').innerHTML = TYPE.map(([n,spec])=>
   `<div><s>${esc(spec)}</s><span>${esc(n)}</span></div>`).join('');
 
 /* Заставки */
-function screen(name, ver){
+function logo(name, v){
   const [a,b] = name.parts;
-  const cut = ver===1 ? 'cut' : '';
-  const rows = ver===1
-    ? (name.two ? [[a,0],[b,0]] : [[a+b,0]])
-    : (name.two ? [[a,0],[b,1]] : [[a,0],[b,1]]);
-  /* Версия 2 всегда двумя строками — иначе контур и заливка сливаются в одно слово */
-  const lines = ver===1 && !name.two
-    ? `<span>${esc(a+b)}</span>`
-    : name.inline && ver===2
-      /* Короткое имя ломать на две строки нечем: остаётся одна буква */
-      ? `<span><em>${esc(a)}</em><em class="out">${esc(b)}</em></span>`
-      : rows.map(([t,o])=>`<span class="${o?'out':''}">${esc(t)}</span>`).join('');
+  if(v===1) return {cls:'cut', html:`<span>${esc(a+b)}</span>`, base:48};
+  if(v===2) return {cls:'', base:44, html: name.inline
+    ? `<span><em>${esc(a)}</em><em class="out">${esc(b)}</em></span>`
+    : `<span>${esc(a)}</span><span class="out">${esc(b)}</span>`};
+  if(v===3) return {cls:'v3', html:`<span>${esc(a+b)}</span>`, base:58};
+  if(v===4) return {cls:'v4', html:`<span>${esc(a+b)}</span>`, base:24,
+    mark:`<span class="mark">${esc(name.ini)}</span>`};
+  return {cls:'v5', html:`<span>${esc(name.low)}</span>`, base:22};
+}
+
+function screen(name, cfg){
+  const L = logo(name, cfg.v);
   return `<div class="item">
-    <div class="cap"><b>${esc(name.n)}</b><s>версия ${ver} — ${ver===1?'сплошной':'контур'}</s></div>
+    <div class="cap"><b>${cfg.v}</b><s>${esc(cfg.n)}</s></div>
     <div class="ph">
       <div class="bar"><span class="t">9:41</span>${ICONS}</div>
-      <div class="lg ${cut}">${lines}</div>
+      <div class="mid">${L.mark||''}<div class="lg ${L.cls}" data-base="${L.base}">${L.html}</div></div>
     </div>
   </div>`;
 }
-document.getElementById('grid').innerHTML =
-  NAMES.flatMap(n=>[screen(n,1),screen(n,2)]).join('');
+
+document.getElementById('grid').innerHTML = NAMES.map(n=>`
+  <div class="nm"><b>${esc(n.n)}</b><s>пять направлений</s></div>
+  <div class="row">${VARIANTS.map(c=>screen(n,c)).join('')}</div>`).join('');
 
 /* Подгонка кегля: имена разной длины, а ширина экрана одна. Уменьшаем, пока
    самая длинная строка не влезет в экран с полями. */
 function fit(){
   document.querySelectorAll('.lg').forEach(lg=>{
-    const box = lg.closest('.ph').clientWidth - 36;
+    const box = lg.closest('.ph').clientWidth - 30;
     const lines = [...lg.querySelectorAll('span')];
-    let size = 48, guard = 0;
+    let size = +lg.dataset.base || 48, guard = 0;
     const apply = ()=>{
       lines.forEach(s=>s.style.fontSize = size+'px');
       /* Срез — доля от кегля, иначе на мелких именах он съедает букву целиком */
@@ -181,7 +210,7 @@ if(document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
 addEventListener('resize', fit);
 
 document.getElementById('warn').textContent =
-  'В названии «МeetFit» первая буква М — кириллическая, остальные латинские. Визуально незаметно, но ломает поиск, домен и автоподстановку: на экранах ниже набрано латиницей. Стоит решить до регистрации домена.';
+  'Написание не зафиксировано: в первом списке было «Тренерграм», в отборе — «Тренергам», на одну «р» короче. Здесь набрано по второму варианту. Для логотипа это разные слова — нужно выбрать одно до отрисовки финального знака.';
 </script>
 </body>
 </html>
