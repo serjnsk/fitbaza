@@ -74,6 +74,66 @@ body{background:var(--bg);color:var(--tx1);font:400 14px/1.55 var(--ui)}
   white-space:nowrap}
 .d-legend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--tx3);margin-top:18px}
 .d-legend i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:6px;vertical-align:middle}
+
+/* ── бренд в контексте ──
+   Иконке нужен знак: wordmark из десяти букв в 60 пикселей не помещается.
+   Знак — «Т» с тем же срезом 45°, что и в логотипе, иначе иконка и заставка
+   выглядели бы как два разных бренда. */
+.d-ico{display:grid;place-items:center;background:var(--acc);flex:none;
+  width:var(--s);height:var(--s);border-radius:calc(var(--s)*.225);overflow:hidden}
+.d-ico i{font-style:normal;color:#fff;display:block;
+  font:900 calc(var(--s)*.58)/1 "Montserrat",var(--ui);letter-spacing:-.04em;
+  clip-path:polygon(calc(var(--s)*.11) 0,100% 0,100% calc(100% - var(--s)*.11),calc(100% - var(--s)*.11) 100%,0 100%,0 calc(var(--s)*.11))}
+.d-mocks{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;max-width:960px}
+.d-mocks2{display:grid;grid-template-columns:repeat(2,1fr);gap:28px;max-width:960px;margin-top:30px}
+@media(max-width:860px){.d-mocks,.d-mocks2{grid-template-columns:1fr;max-width:320px}}
+
+/* домашний экран: иконка среди чужих — единственная честная проверка знака */
+.d-home{background:linear-gradient(160deg,#2C3444,#161A24 70%)}
+.d-home .d-mid{padding:0 16px;align-self:flex-start;margin-top:58px}
+.d-apps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 10px}
+.d-app{text-align:center}
+.d-app .d-ico,.d-app .ph2{margin:0 auto 5px}
+.d-app .ph2{width:var(--s);height:var(--s);border-radius:calc(var(--s)*.225);
+  background:rgba(255,255,255,.16)}
+.d-app s{display:block;text-decoration:none;font-size:9.5px;color:#fff;
+  text-shadow:0 1px 2px rgba(0,0,0,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d-dock{position:absolute;left:14px;right:14px;bottom:14px;padding:9px 10px;border-radius:22px;
+  background:rgba(255,255,255,.14);display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.d-dock i{display:block;height:0;padding-bottom:100%;border-radius:22%;background:rgba(255,255,255,.2)}
+
+/* пуш: имя бренда живёт в верхнем регистре мелким кеглем — проверка длины */
+.d-lock{background:linear-gradient(160deg,#1E2430,#0E1117 70%)}
+.d-lock .d-mid{align-self:flex-start;margin-top:52px;padding:0 14px}
+.d-clock{text-align:center;color:#fff;margin-bottom:22px}
+.d-clock b{display:block;font-size:48px;font-weight:600;letter-spacing:-.03em;line-height:1}
+.d-clock s{display:block;text-decoration:none;font-size:12px;opacity:.7;margin-top:2px}
+.d-push{background:rgba(255,255,255,.92);border-radius:16px;padding:10px 11px;text-align:left}
+.d-push .h{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.d-push .h s{text-decoration:none;font-size:9.5px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--tx3);flex:1;min-width:0;overflow:hidden;
+  white-space:nowrap;text-overflow:ellipsis}
+.d-push .h em{font-style:normal;font-size:10px;color:var(--tx4)}
+.d-push b{display:block;font-size:12.5px;font-weight:600;color:var(--ink)}
+.d-push p{margin:2px 0 0;font-size:12px;color:var(--tx2);line-height:1.4}
+
+/* карточка в сторе и шапка веб-версии — бренд в мелком кегле */
+.d-card{border:1px solid var(--line);border-radius:var(--rad-l);padding:18px}
+.d-store{display:flex;gap:14px;align-items:flex-start}
+.d-store .t b{display:block;font-size:16px;font-weight:700;letter-spacing:-.01em}
+.d-store .t s{display:block;text-decoration:none;font-size:12.5px;color:var(--tx3);margin-top:2px}
+.d-store .t .r{font-size:11.5px;color:var(--tx4);margin-top:8px}
+.d-store .go{margin-left:auto;height:30px;padding:0 16px;border-radius:15px;background:var(--acc);
+  color:#fff;font-size:12.5px;font-weight:700;display:grid;place-items:center;flex:none}
+.d-top{display:flex;align-items:center;gap:12px;height:52px;padding:0 14px;
+  border:1px solid var(--line);border-radius:var(--rad-l);background:var(--bg)}
+.d-top .wm{font:900 15px/1 "Montserrat",var(--ui);letter-spacing:-.04em;text-transform:uppercase;
+  color:var(--ink);white-space:nowrap}
+.d-top .cr{font-size:12.5px;color:var(--tx3);flex:1;min-width:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d-top .btn2{height:32px;padding:0 13px;border-radius:var(--rad-m);background:var(--acc);color:#fff;
+  font-size:12.5px;font-weight:600;display:grid;place-items:center;flex:none}
+
 #probe{position:absolute;left:-9999px;top:0;width:420px;visibility:hidden;pointer-events:none}
 </style>
 </head>
@@ -96,13 +156,14 @@ body{background:var(--bg);color:var(--tx1);font:400 14px/1.55 var(--ui)}
 <p>Четыре токена. <code>--rad-xl</code> в прототипе сейчас не используется ни разу — оставлен в теме про запас.</p>
 <div class="d-rad" id="rad"></div>
 
-<h2>Название на заставке</h2>
-<p>Направление выбрано: сплошной wordmark со срезом 45° сверху-слева и снизу-справа. Три названия в одном решении.</p>
-<div class="d-grid" id="grid"></div>
+<h2>Бренд в контексте</h2>
+<p>Название выбрано — Тренерграм. Логотип — сплошной wordmark со срезом 45°. Ниже он и производный от него знак в местах, где бренд реально живёт: заставка, иконка среди чужих иконок, пуш, витрина стора и шапка веб-версии.</p>
+<div class="d-mocks" id="mocks"></div>
+<div class="d-mocks2" id="mocks2"></div>
 <div class="d-legend">
-  <span><i style="background:var(--acc)"></i>#FC5200 — фон заставки</span>
-  <span><i style="background:#fff;border:1px solid var(--line2)"></i>#FFFFFF — логотип</span>
-  <span><i style="background:var(--line2)"></i>срез — 0.34 от кегля</span>
+  <span><i style="background:var(--acc)"></i>#FC5200 — фон заставки и иконки</span>
+  <span><i style="background:#fff;border:1px solid var(--line2)"></i>#FFFFFF — логотип и знак</span>
+  <span><i style="background:var(--line2)"></i>срез — 0.34 от кегля в слове, 0.11 в знаке</span>
 </div>
 
 </div>
@@ -161,25 +222,73 @@ document.getElementById('rad').innerHTML =
     `<div><i style="border-radius:${tok(v)}"></i><s>${esc(v)} ${esc(tok(v))}</s></div>`).join('');
 
 /* ── заставки ── */
-const NAMES = [
-  {n:'Тренерграм', w:'ТРЕНЕРГРАМ'},
-  {n:'MFIT',      w:'MFIT'},
-  {n:'Trenix',    w:'TRENIX'},
-];
+const NAME = {n:'Тренерграм', w:'ТРЕНЕРГРАМ', ini:'Т'};
 const ICONS = `
 <span style="display:flex;align-items:center;gap:5px">
 <svg width="17" height="11" viewBox="0 0 17 11" fill="#fff"><rect x="0" y="7" width="3" height="4" rx=".7"/><rect x="4.5" y="5" width="3" height="6" rx=".7"/><rect x="9" y="2.5" width="3" height="8.5" rx=".7"/><rect x="13.5" y="0" width="3" height="11" rx=".7"/></svg>
 <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"><path d="M1 3.6a9.4 9.4 0 0 1 13 0"/><path d="M3.6 6.4a5.7 5.7 0 0 1 7.8 0"/><circle cx="7.5" cy="9.4" r=".9" fill="#fff" stroke="none"/></svg>
 <svg width="24" height="11" viewBox="0 0 24 11" fill="none"><rect x=".8" y=".8" width="19" height="9.4" rx="2.8" stroke="#fff" stroke-opacity=".5" stroke-width="1.1"/><rect x="2.4" y="2.4" width="15.8" height="6.2" rx="1.6" fill="#fff"/><path d="M21.6 4v3a2 2 0 0 0 0-3Z" fill="#fff" fill-opacity=".5"/></svg>
 </span>`;
-document.getElementById('grid').innerHTML = NAMES.map(name=>`
+const ico = size => `<span class="d-ico" style="--s:${size}px"><i>${esc(NAME.ini)}</i></span>`;
+const phone = (cls, inner, extra='') => `<div class="d-ph ${cls}">
+  <div class="d-bar"><span class="t">9:41</span>${ICONS}</div>${inner}${extra}</div>`;
+
+/* Чужие иконки — заглушки: на домашнем экране знак проверяется соседством,
+   в одиночку он всегда выглядит убедительно. */
+const OTHERS = ['Камера','Заметки','Часы','Погода','Карты','Музыка'];
+
+const MOCKS = [
+  ['Заставка', 'первый экран при запуске',
+    phone('', `<div class="d-mid"><div class="d-lg"><span>${esc(NAME.w)}</span></div></div>`)],
+
+  ['Домашний экран', 'знак среди чужих иконок',
+    phone('d-home', `<div class="d-mid"><div class="d-apps">
+      ${OTHERS.slice(0,3).map(n=>`<div class="d-app"><div class="ph2" style="--s:46px"></div><s>${esc(n)}</s></div>`).join('')}
+      <div class="d-app" style="--s:46px">${ico(46)}<s>${esc(NAME.n)}</s></div>
+      ${OTHERS.slice(3).map(n=>`<div class="d-app"><div class="ph2" style="--s:46px"></div><s>${esc(n)}</s></div>`).join('')}
+    </div></div>`,
+    `<div class="d-dock"><i></i><i></i><i></i><i></i></div>`)],
+
+  ['Уведомление', 'имя бренда в верхнем регистре мелким кеглем',
+    phone('d-lock', `<div class="d-mid">
+      <div class="d-clock"><b>9:41</b><s>среда, 26 августа</s></div>
+      <div class="d-push">
+        <div class="h">${ico(16)}<s>${esc(NAME.w)}</s><em>сейчас</em></div>
+        <b>Новый рекорд у Артёма</b>
+        <p>Присед 150 кг — было 145. Проценты в программе пересчитаны.</p>
+      </div>
+    </div>`)],
+];
+
+document.getElementById('mocks').innerHTML = MOCKS.map(([n,d,html])=>`
   <div class="d-item">
-    <div class="d-cap"><b>${esc(name.n)}</b><s>сплошной · срез 45°</s></div>
-    <div class="d-ph">
-      <div class="d-bar"><span class="t">9:41</span>${ICONS}</div>
-      <div class="d-mid"><div class="d-lg"><span>${esc(name.w)}</span></div></div>
-    </div>
+    <div class="d-cap"><b>${esc(n)}</b><s>${esc(d)}</s></div>
+    ${html}
   </div>`).join('');
+
+document.getElementById('mocks2').innerHTML = `
+  <div class="d-item">
+    <div class="d-cap"><b>Витрина стора</b><s>знак и название в списке</s></div>
+    <div class="d-card d-store">
+      ${ico(64)}
+      <div class="t">
+        <b>${esc(NAME.n)}</b>
+        <s>Тренировки с вашим тренером</s>
+        <div class="r">4,9 ★ · 1,2 тыс. оценок · Фитнес</div>
+      </div>
+      <div class="go">Загрузить</div>
+    </div>
+  </div>
+  <div class="d-item">
+    <div class="d-cap"><b>Шапка веб-версии</b><s>логотип в рабочем интерфейсе тренера</s></div>
+    <div class="d-card" style="padding:14px">
+      <div class="d-top">
+        <span class="wm">${esc(NAME.w)}</span>
+        <span class="cr">База программ / Сила + кроссфит / Неделя 4</span>
+        <span class="btn2">Создать тренировку</span>
+      </div>
+    </div>
+  </div>`;
 
 /* Подгонка кегля: имена от четырёх до девяти знаков, единый размер им не
    подходит. Срез — доля от кегля, иначе на коротком имени он съест букву. */
