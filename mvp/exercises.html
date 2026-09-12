@@ -38,24 +38,28 @@ function matchEX(e){
   return true;
 }
 
-function card(e){
-  return `<div class="excard" data-id="${e.id}">
-    <div class="top">
-      <div class="thumb ${e.m==='pending'?'pending':''}">${e.m==='pending'?'':initials(e)}</div>
-      <div style="flex:1;min-width:0">
-        <div class="nm">${esc(e.ru)}</div>
-        <div class="en">${esc(e.en)}</div>
-      </div>
-    </div>
-    <div class="met">
-      <span class="chip">${esc(e.g)}</span>
-      <span class="chip">${esc(e.eq)}</span>
-      ${e.pm?`<span class="chip acc">ПМ</span>`:''}
-      ${e.own?`<span class="chip ok">своё</span>`:''}
-      ${e.m==='pending'?`<span class="chip warn">без изображения</span>`:''}
-    </div>
-  </div>`;
-}
+/* Столбцы вместо карточек: упражнений 31 уже сейчас, а с выкупленным
+   датасетом будет больше тысячи (OQ-9) — плитками это не просматривается.
+   Показатели вынесены в отдельный столбец: по ним тренер и выбирает, чем
+   мерить упражнение (EX-3). */
+const EX_COLS = [
+  {k:'ru', n:'Упражнение', sort:byStr('ru'), cell:e=>
+    `<div class="cellname">
+       <span class="thumb ${e.m==='pending'?'pending':''}" style="width:30px;height:30px;font-size:10px">${e.m==='pending'?'':initials(e)}</span>
+       <div style="min-width:0">
+         <div class="n">${esc(e.ru)}</div>
+         <div class="sub">${esc(e.en)}</div>
+       </div>
+     </div>`},
+  {k:'g',  n:'Группа',     w:'120px', sort:byStr('g'),  cell:e=>esc(e.g)},
+  {k:'eq', n:'Оснащение',  w:'130px', sort:byStr('eq'), cell:e=>esc(e.eq)},
+  {k:'u',  n:'Показатели', w:'190px', sort:byNum(e=>(e.u||[]).length), cell:e=>
+    (e.u||[]).map(u=>`<span class="chip">${esc(u)}</span>`).join(' ')},
+  {k:'pm', n:'ПМ', w:'90px', sort:byNum(e=>e.pm?0:1), cell:e=>
+    e.pm ? `<span class="chip acc">${esc(PMNAMES[e.pm]||e.pm)}</span>` : '—'},
+  {k:'own',n:'Источник', w:'110px', sort:byNum(e=>e.own?0:1), cell:e=>
+    e.own ? `<span class="chip ok">своё</span>` : `<span class="chip ghost">общая</span>`},
+];
 
 function render(){
   const list = EX.filter(matchEX);
@@ -76,7 +80,7 @@ function render(){
       ${GROUPS.map(g=>`<button data-g="${esc(g)}" class="${V.g===g?'on':''}">${esc(g)}</button>`).join('')}
     </div>
 
-    ${list.length ? `<div class="exgrid">${list.map(card).join('')}</div>` : `<div class="empty"><div class="t">Ничего не нашли</div><div class="d">Измените поиск или фильтр</div></div>`}
+    ${list.length ? `<div class="card">${dataTable('ex', EX_COLS, list)}</div>` : `<div class="empty"><div class="t">Ничего не нашли</div><div class="d">Измените поиск или фильтр</div></div>`}
 
     <div class="cols3" style="margin-top:26px">
       <div class="kpi"><span class="k">${ICON.dumb} Стартовая база</span><div class="v">${EX.filter(e=>!e.own).length}</div><div class="d">упражнений с техникой и метриками</div></div>
@@ -84,7 +88,7 @@ function render(){
       <div class="kpi"><span class="k">${ICON.star} Расчёт от максимума</span><div class="v">${EX.filter(e=>e.pm).length}</div><div class="d">упражнений с процентовкой от ПМ</div></div>
     </div>`;
 
-  $$('.excard').forEach(c=>c.onclick=()=>openDetail(byId(c.dataset.id)));
+  bindTable('ex', render, id=>openDetail(byId(id)));
   $$('.filters [data-g]').forEach(b=>b.onclick=()=>{ V.g=b.dataset.g; render() });
   $('#eq').onchange=e=>{ V.eq=e.target.value; render() };
   $('#own').onchange=e=>{ V.own=e.target.checked; render() };

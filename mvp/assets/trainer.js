@@ -66,10 +66,14 @@ const blockOf = (title, items, note, kind) => ({
    названия тренировок. Если день наполнили, они не должны остаться в поле. */
 const REST_TITLES = new Set(['Отдых','—','']);
 
-const S = { cid:'c1', pid:'p1', wk:4, day:2, tab:'ex', q:'', compose:null };
-const WCACHE = {};
-const week = () => WCACHE[S.pid+':'+S.wk] ||= buildWeek(S.pid, S.wk);
-const day  = () => week().days[S.day];
+/* S.i — номер дня в плане программы, от нуля. Недели в модели нет, поэтому
+   и в состоянии её нет: раньше здесь лежали «неделя» и «день внутри недели»,
+   и любое действие приходилось переводить между двумя системами отсчёта. */
+const S = { cid:'c1', pid:'p1', i:0, tab:'ex', q:'', compose:null };
+S.i = Math.max(0, Math.min(composedDays(S.pid)-1, daysBetween(program(S.pid).start, TODAY)));
+const PCACHE = {};
+const plan = () => PCACHE[S.pid] ||= buildPlan(S.pid);
+const day  = () => plan()[S.i];
 const PM   = () => pmOf(S.cid);
 
 /* LOGO живёт в assets/nav.js — общий для обеих оболочек. */
@@ -150,51 +154,52 @@ function setTrainerMsg(date, text){
 /* Цель программы одинакова все восемь недель и на всех днях — на странице,
    где правят один день, она ни на что не влияет. Показываем то, что от
    недели к неделе меняется: сколько дней заполнено и чем они нагружены. */
-function wkStat(w){
-  const filled = w.days.filter(d=>d.blocks.some(b=>b.items.some(i=>i.exId))).length;
-  const n = w.days.reduce((a,d)=>a+d.blocks.reduce((x,b)=>x+b.items.filter(i=>i.exId).length,0),0);
-  if(!filled) return 'неделя пустая';
-  /* «из 7» не пишем: в неделе семь дней и без напоминания. */
-  return filled + ' ' + plural(filled,'день','дня','дней') +
+function planStat(){
+  const d = plan();
+  const filled = d.filter(x=>x.blocks.some(b=>b.items.some(i=>i.exId))).length;
+  const n = d.reduce((a,x)=>a+x.blocks.reduce((y,b)=>y+b.items.filter(i=>i.exId).length,0),0);
+  if(!filled) return 'план пустой';
+  return filled + ' ' + plural(filled,'тренировка','тренировки','тренировок') +
          ' · ' + n + ' ' + plural(n,'упражнение','упражнения','упражнений');
 }
 
 
-/* ─── полоса недели ─── */
-function renderWeek(){
-  const w = week(), p = program(S.pid);
+
+/* ─── дорожка плана ───
+   Раньше здесь была решётка из семи дней с листанием по неделям. Теперь это
+   непрерывная дорожка дней программы: тренер ставит тренировки в любом ритме,
+   а не заполняет семь ячеек. Полоса прокручивается, выбранный день в центре. */
+function renderStrip(){
+  const d = plan(), p = program(S.pid);
   $('#wk').innerHTML = `
     <div class="wkh">
       <span class="wkn">
-        <button id="wkPrev" title="Прошлая неделя" ${S.wk<2?'disabled':''}>${ICON.back}</button>
-        <button id="wkNext" title="Следующая неделя" ${S.wk>=p.weeks?'disabled':''}>${ICON.arr}</button>
+        <button id="dayPrev" title="Предыдущий день" ${S.i<1?'disabled':''}>${ICON.back}</button>
+        <button id="dayNext" title="Следующий день" ${S.i>=d.length-1?'disabled':''}>${ICON.arr}</button>
       </span>
-      <b>Неделя ${S.wk} из ${p.weeks}</b><s>${wkStat(w)}</s>
+      <b>День ${S.i+1} из ${p.days}</b><s>${planStat()}</s>
       <span class="sp"></span>
-      <button class="cp" id="weekSave">${ICON.star} Сохранить</button>
-      <button class="cp" id="weekTpl">${ICON.folder} Из шаблонов</button>
-      ${S.wk > 1 ? `<button class="cp" id="copyPrev">${ICON.copy} Копия прошлой недели</button>` : ''}
+      <button class="cp" id="daySave">${ICON.star} Сохранить день</button>
+      <button class="cp" id="repeatPrev">${ICON.copy} Повторить предыдущую</button>
+      <button class="cp" id="addDay">${ICON.plus} Добавить день</button>
     </div>
-    <div class="days">
-      ${w.days.map((d,i)=>{
-        const dt = new Date(d.date + 'T00:00:00');
-        /* Раньше здесь были цветные отрезки по блокам. Они ни к чему не
-           привязаны и ничего не сообщают — заменены на то, что тренер
-           действительно хочет знать, глядя на неделю: сколько работы в дне. */
-        const bl = d.blocks.filter(b=>b.items.some(x=>x.exId)).length;
-        const n  = d.blocks.reduce((a,b)=>a+b.items.filter(x=>x.exId).length, 0);
-        /* --load и полоса нагрузки нужны стилистикам, где неделя —
-           не сетка, а дорожка: там ширина дня пропорциональна объёму.
-           Сеточные варианты переменную игнорируют, а полосу прячут. */
-        return `<button class="day ${i===S.day?'on':''}${n?'':' rest'}"
+    <div class="days" id="strip">
+      ${d.map((x,i)=>{
+        const dt = new Date(x.date + 'T00:00:00');
+        const bl = x.blocks.filter(b=>b.items.some(y=>y.exId)).length;
+        const n  = x.blocks.reduce((a,b)=>a+b.items.filter(y=>y.exId).length, 0);
+        return `<button class="day ${i===S.i?'on':''}${n?'':' rest'}"
                         data-day="${i}" style="--load:${n||0}">
-          <span class="d">${RU[i]} ${dt.getDate()}</span>
-          ${d.title ? `<span class="t">${esc(d.title)}</span>` : '<span class="e">отдых</span>'}
+          <span class="d">${x.w} ${dt.getDate()}</span>
+          ${n ? `<span class="t">${esc(x.title)}</span>` : '<span class="e">отдых</span>'}
           ${n ? `<span class="k">${bl} ${plural(bl,'блок','блока','блоков')} · ${n} упр</span>` : ''}
           <span class="ld"><i style="flex:${n}"></i><u style="flex:${Math.max(1,10-n)}"></u><s>${n||''}</s></span>
         </button>`;
       }).join('')}
     </div>`;
+  /* Выбранный день подкручиваем в вид: дорожка длиной в 35+ дней не влезает. */
+  const cur = $('#strip .day.on');
+  if(cur) cur.scrollIntoView({block:'nearest', inline:'center'});
 }
 
 /* ─── документ дня ─── */
@@ -280,7 +285,7 @@ function emptyDay(){
           <s>Из заметок, таблицы или переписки</s>
         </button>
       </div>
-      ${S.wk > 1 ? `<div class="orelse">
+      ${S.i > 0 ? `<div class="orelse">
         или <button class="lnk" id="w-prev">возьмите копию прошлой недели</button>
       </div>` : ''}
     </div>`;
@@ -361,7 +366,7 @@ function renderSrc(){
       : 'Шаблон тренировки занимает день целиком (TPL-3).';
   }
 }
-function render(){ renderWeek(); renderDoc(); renderSrc(); }
+function render(){ renderStrip(); renderDoc(); renderSrc(); }
 
 /* ─── разбор текста на лету (CON-1 + CON-5) ─── */
 /* parseText разбирает МНОГО строк и возвращает массив записей вида
@@ -696,20 +701,33 @@ const addTpl = t => {
    а не открытый день. Копия глубокая, иначе правки поедут в обе недели. */
 const copyBlocks = bs => bs.map(b =>
   blockOf(b.title, b.items.map(i => ({...i, id:nid('i')})), b.note, b.kind));
-function copyPrev(){
-  if(S.wk < 2) return;
-  const prev = buildWeek(S.pid, S.wk-1), w = week();
-  let filled = 0;
-  prev.days.forEach((src, i) => {
-    if(!src.blocks.length) return;
-    w.days[i].title  = src.title;
-    w.days[i].blocks = copyBlocks(src.blocks);
-    filled++;
-  });
-  S.compose = null; render();
-  toast('Неделя ' + (S.wk-1) + ' скопирована · ' + filled + ' ' +
-        plural(filled,'день','дня','дней'));
+/* Продление плана: день добавляется в конец, и это единственный способ
+   расти — решётки, которую можно «открыть на неделю вперёд», больше нет. */
+function addDay(){
+  const p = program(S.pid);
+  if(plan().length >= p.days) return toast('План уже составлен до конца программы');
+  PLAN[S.pid].push(null);
+  PCACHE[S.pid] = buildPlan(S.pid);
+  S.i = plan().length - 1; S.compose = null; render();
+  toast('День ' + (S.i+1) + ' добавлен');
 }
+
+/* Повтор предыдущей тренировки вместо копии целой недели. Недели нет, и
+   копировать «семь дней назад» стало нечем: тренер повторяет нужный день. */
+function repeatPrev(){
+  const d = plan();
+  let j = -1;
+  for(let k=S.i-1; k>=0; k--){ if(d[k].blocks.some(b=>b.items.some(i=>i.exId))){ j=k; break } }
+  if(j < 0) return toast('Раньше в плане нет ни одной тренировки');
+  const src = d[j], cur = d[S.i];
+  cur.title  = src.title;
+  cur.rest   = false;
+  cur.blocks = copyBlocks(src.blocks);
+  S.compose = null; render();
+  const n = cur.blocks.reduce((a,b)=>a+b.items.filter(i=>i.exId).length,0);
+  toast('День ' + (j+1) + ' повторён · ' + n + ' ' + plural(n,'упражнение','упражнения','упражнений'));
+}
+
 /* ═══════════ НЕДЕЛЯ В ШАБЛОНЫ (TPL-2) ═══════════
    Сохранение недели порождает три уровня сразу: неделя → тренировки →
    блоки. Если складывать всё подряд, библиотека за три недели превращается
@@ -733,101 +751,13 @@ const sigDay    = d => d.blocks.filter(b=>b.items.some(i=>i.exId)).map(sigBlock)
 const sigTplWo  = t => (t.blocks||[]).map(id => { const b = tplById(id); return b ? sigTplBlk(b) : '' }).join('§');
 
 /* Что из недели уже лежит в библиотеке, а чего там нет. */
-function weekAudit(){
-  const w = week();
-  const days = w.days.map((d,i)=>({i, d, has: d.blocks.some(b=>b.items.some(x=>x.exId))}));
-  const blocks = [], wos = [];
-  days.filter(x=>x.has).forEach(({d})=>{
-    const match = TPL.find(t => t.lvl==='тренировка' && sigTplWo(t) === sigDay(d));
-    wos.push({d, match});
-    d.blocks.filter(b=>b.items.some(i=>i.exId)).forEach(b=>{
-      const mb = TPL.find(t => t.lvl==='блок' && sigTplBlk(t) === sigBlock(b));
-      blocks.push({b, match: mb});
-    });
-  });
-  return {days, wos, blocks,
-          newWos: wos.filter(x=>!x.match), newBlocks: blocks.filter(x=>!x.match)};
-}
+/* Недельные аудит, сохранение и раскладка удалены вместе с сущностью недели.
+   День сохраняется как шаблон тренировки через saveWorkout(), а вставляется
+   из панели источников — второго механизма под это больше не нужно. */
 
-function saveWeek(title, addNew){
-  const a = weekAudit();
-  const blockId = b => {
-    const hit = a.blocks.find(x => x.b === b);
-    if(hit && hit.match) return hit.match.id;
-    const t = {id:nid('t'), lvl:'блок', folder:FOLDER_OF(b), used:0, inline:!addNew,
-               title:b.title || 'Блок', fmt:fmtPart(b.title)||null,
-               items:b.items.filter(i=>i.exId).map(i =>
-                 i.pct!=null ? [i.exId, i.scheme||'', i.pct, '%']
-                             : [i.exId, i.scheme||'', i.val||'', i.unit||''])};
-    TPL.unshift(t); return t.id;
-  };
-  const dayId = d => {
-    const hit = a.wos.find(x => x.d === d);
-    if(hit && hit.match) return hit.match.id;
-    const t = {id:nid('t'), lvl:'тренировка', used:0, inline:!addNew,
-               title:d.title || 'Тренировка',
-               blocks:d.blocks.filter(b=>b.items.some(i=>i.exId)).map(blockId)};
-    TPL.unshift(t); return t.id;
-  };
-  const days = week().days.map(d => d.blocks.some(b=>b.items.some(i=>i.exId)) ? dayId(d) : null);
-  TPL.unshift({id:nid('t'), lvl:'неделя', used:0, title:title || ('Неделя ' + S.wk), days});
-  renderSrc();
-  toast('«' + (title || 'Неделя ' + S.wk) + '» сохранена' +
-        (addNew && (a.newWos.length || a.newBlocks.length) ? ' · новое добавлено в библиотеку' : ''));
-}
-
-function openWeekSave(){
-  const a = weekAudit();
-  const filled = a.days.filter(x=>x.has).length;
-  if(!filled) return toast('Неделя пустая — сохранять нечего');
-  const reusedW = a.wos.length - a.newWos.length, reusedB = a.blocks.length - a.newBlocks.length;
-  const isNew = a.newWos.length + a.newBlocks.length > 0;
-  const nm = 'Неделя ' + S.wk + ' · ' + program(S.pid).title;
-  /* Нового нет — спрашивать не о чем, сохраняем молча. */
-  if(!isNew){ saveWeek(nm, false); return }
-
-  const listOf = arr => arr.map(x => `<span>${esc((x.b||x.d).title || 'без названия')}</span>`).join('');
-  const ov = document.createElement('div');
-  ov.className = 'ov on';
-  ov.innerHTML = `<div class="md wsave">
-    <div class="mdh"><span class="dot"></span><h2>Сохранить неделю</h2>
-      <button class="cls">✕</button></div>
-    <div class="mdb">
-      <label class="fld nmf"><span class="k">Название</span>
-        <input id="ws-name" value="${esc(nm)}"></label>
-      ${reusedW || reusedB ? `<div class="audit">
-        <b>Уже в библиотеке — переиспользую, копий не создам</b>
-        <s>${reusedW ? reusedW + ' ' + plural(reusedW,'тренировка','тренировки','тренировок') : ''}${reusedW&&reusedB?' · ':''}${reusedB ? reusedB + ' ' + plural(reusedB,'блок','блока','блоков') : ''}</s>
-      </div>` : ''}
-      <div class="audit new">
-        <b>Этого в библиотеке нет</b>
-        <s>${a.newWos.length ? a.newWos.length + ' ' + plural(a.newWos.length,'тренировка','тренировки','тренировок') : ''}${a.newWos.length&&a.newBlocks.length?' · ':''}${a.newBlocks.length ? a.newBlocks.length + ' ' + plural(a.newBlocks.length,'блок','блока','блоков') : ''}</s>
-        <div class="names">${listOf(a.newWos)}${listOf(a.newBlocks)}</div>
-        <label class="chk"><input type="checkbox" id="ws-add" checked>
-          <span><b>Добавить их в библиотеку отдельно</b>
-          Пригодятся сами по себе: разминку можно будет вставить
-          в любой день, не доставая всю неделю.</span></label>
-      </div>
-    </div>
-    <div class="mdf"><span class="sp"></span>
-      <button class="btn gh cls">Отмена</button>
-      <button class="btn" id="ws-ok">Сохранить</button></div>
-  </div>`;
-  ov.addEventListener('click', e=>{
-    if(e.target === ov || e.target.closest('.cls')){ ov.remove(); return }
-    if(e.target.closest('#ws-ok')){
-      const t = ov.querySelector('#ws-name').value.trim();
-      const add = ov.querySelector('#ws-add').checked;
-      ov.remove(); saveWeek(t, add);
-    }
-  });
-  document.body.appendChild(ov);
-}
-
-/* tplStats возвращает объект — в подпись его надо разложить словами. */
 function tplLabel(t){
   const st = tplStats(t);
-  if(t.lvl==='программа')  return st.weeks + ' ' + plural(st.weeks,'неделя','недели','недель');
+  if(t.lvl==='программа')  return st.days + ' ' + plural(st.days,'день','дня','дней');
   if(t.lvl==='неделя')     return st.days  + ' ' + plural(st.days,'день','дня','дней') +
                                   ' · ' + st.n + ' упр';
   if(t.lvl==='тренировка') return st.blocks + ' ' + plural(st.blocks,'блок','блока','блоков');
@@ -835,220 +765,6 @@ function tplLabel(t){
 }
 
 /* Шаблон недели раскладывается по семи дням; null — день отдыха (TPL-2). */
-function applyWeekTpl(t){
-  const days = tplToWeekDays(t), w = week();
-  days.forEach((src, i) => {
-    if(!src){ w.days[i].title = ''; w.days[i].blocks = []; return }
-    w.days[i].title  = src.title || '';
-    w.days[i].blocks = copyBlocks(src.blocks);
-  });
-  S.compose = null; render();
-  toast('«' + t.title + '» разложена по неделе');
-}
-/* Шаблон недели — не строка в списке, а раскладка по семи дням. Тренер
-   выбирает не по названию, а по тому, как ложится нагрузка: где тяжёлый
-   день, где отдых. Поэтому показываем неделю целиком, а не «3 дня · 23 упр». */
-function openWeekTpl(){
-  closeSug();
-  const list = TPL.filter(t => t.lvl === 'неделя');
-  const card = t => {
-    const days = tplToWeekDays(t), st = tplStats(t);
-    return `<button class="wtpl" data-wtpl="${t.id}">
-      <b>${esc(t.title)}</b>
-      <s>${st.days} ${plural(st.days,'тренировка','тренировки','тренировок')} · ${st.n} ${plural(st.n,'упражнение','упражнения','упражнений')}</s>
-      <span class="wdays">${days.map((d,i)=>`
-        <span class="wd ${d?'on':''}">
-          <i>${RU[i]}</i>${d ? esc(d.title||'без названия') : '—'}
-        </span>`).join('')}</span>
-    </button>`;
-  };
-  const ov = document.createElement('div');
-  ov.className = 'ov on';
-  ov.innerHTML = `<div class="md wmd">
-    <div class="mdh"><span class="dot"></span><h2>Неделя из шаблона</h2>
-      <button class="cls">✕</button></div>
-    <div class="mdb">
-      <p class="warn">Заполнит все семь дней недели ${S.wk} — то, что стоит сейчас, будет заменено.</p>
-      ${list.length ? list.map(card).join('') : '<p class="warn">Шаблонов недели пока нет.</p>'}
-      <div class="foot-note">Неделя — уровень иерархии, а не папка: внутри лежат дни, внутри дней блоки</div>
-    </div>
-    <div class="mdf"><span class="sp"></span><button class="btn gh cls">Отмена</button></div>
-  </div>`;
-  ov.addEventListener('click', e=>{
-    if(e.target === ov || e.target.closest('.cls')){ ov.remove(); return }
-    const w = e.target.closest('[data-wtpl]');
-    if(w){ ov.remove(); applyWeekTpl(tplById(w.dataset.wtpl)) }
-  });
-  document.body.appendChild(ov);
-}
-
-/* ─── события ─── */
-document.addEventListener('click', e=>{
-  const d = e.target.closest('[data-day]');
-  if(d){ S.day = +d.dataset.day; S.compose = null; closeSug(); render(); return }
-  if(e.target.closest('#wkPrev')){ S.wk = Math.max(1, S.wk-1); S.compose = null; render(); renderHead(); return }
-  if(e.target.closest('#wkNext')){ S.wk = Math.min(program(S.pid).weeks, S.wk+1); S.compose = null; render(); renderHead(); return }
-  if(e.target.closest('#copyPrev')){ copyPrev(); return }
-  if(e.target.closest('#weekTpl')){ openWeekTpl(); return }
-  if(e.target.closest('#weekSave')){ openWeekSave(); return }
-
-  const tb = e.target.closest('[data-tab]');
-  if(tb){ S.tab = tb.dataset.tab;
-          $$('#tabs button').forEach(x=>x.classList.toggle('on', x===tb)); renderSrc(); return }
-
-  /* Кликается вся карточка, а не только «+»: маленькая кнопка была
-     единственным способом добавить, и по ней приходилось целиться. */
-  const ae = e.target.closest('[data-ex]');  if(ae){ addEx(ae.dataset.ex); return }
-  const at = e.target.closest('[data-tpl]'); if(at){ addTpl(tplById(at.dataset.tpl)); return }
-
-  const add = e.target.closest('[data-add]');
-  if(add){
-    const b = day().blocks.find(x=>x.id===add.dataset.add);
-    b.items.push(rawItem('')); render();
-    const last = $$(`[data-blk="${b.id}"] [data-edit]`).pop(); if(last) last.focus();
-    return;
-  }
-  if(e.target.closest('#w-hand')){
-    day().blocks.unshift(blockOf('', []));
-    S.compose = null; render();
-    const t = $('.blk .bt'); if(t) t.focus();
-    return;
-  }
-  if(e.target.closest('#w-ai')){ S.compose = 'text'; render(); $('#paste').focus(); return }
-  if(e.target.closest('#pt-back')){ S.compose = null; render(); return }
-  if(e.target.closest('#pt-go')){ applyText($('#paste').value); return }
-  if(e.target.closest('#w-prev')){ copyPrev(); return }
-  if(e.target.closest('#pd-yes')){ acceptPending(); return }
-  if(e.target.closest('#pd-no')){  cancelPending(); return }
-  if(e.target.closest('#pd-src')){ showSource();   return }
-  if(e.target.closest('#sav-wo')){ saveWorkout(); return }
-  if(e.target.closest('#clr-wo')){ askClear(); return }
-  const sb = e.target.closest('[data-savblk]');
-  if(sb){ openFolder(sb); return }
-  if(e.target.closest('#add-blk')){
-    /* Кнопка стоит сверху — значит и блок появляется сверху, под курсором,
-       а не улетает в конец длинного дня. */
-    day().blocks.unshift(mkBlock('strength','','',null,[]));
-    render();
-    const t = document.querySelector('.blk .bt'); if(t) t.focus();
-    return;
-  }
-  const db = e.target.closest('[data-delblk]');
-  if(db){ const d2 = day(); d2.blocks = d2.blocks.filter(b=>b.id!==db.dataset.delblk); render(); return }
-  const dl = e.target.closest('[data-del]');
-  if(dl){ const {b} = findItem(dl.dataset.del); b.items = b.items.filter(x=>x.id!==dl.dataset.del); render(); return }
-  const pc = e.target.closest('[data-pct]'); if(pc){ openPct(pc); return }
-  const pf = e.target.closest('[data-pickfor]');
-  if(pf){ const {i} = findItem(pf.dataset.pickfor);
-          showSug(pf, i.raw || '');
-          if(SUG){ SUG.dataset.forItem = pf.dataset.pickfor; SUG.dataset.text = i.raw || '' }
-          return; }
-
-  const pick = e.target.closest('[data-pick]');
-  if(pick && SUG){
-    const {i} = findItem(SUG.dataset.forItem);
-    if(i){ const cur = parseLine(SUG.dataset.text) || {};
-           Object.assign(i, {exId:pick.dataset.pick, scheme:cur.scheme||'', pct:cur.pct??null,
-                             unit:cur.unit||'', val:cur.val||'', raw:''}) }
-    closeSug(); render(); return;
-  }
-  if(e.target.closest('#assign')){ openAssign(); return }
-  if(e.target.closest('#md-cancel') || e.target.closest('#md-x') ||
-     e.target === $('#ov') || e.target.closest('#md-ok')){
-    $('#ov').classList.remove('on'); return }
-  const cl = e.target.closest('[data-cl]');
-  if(cl){ const id = cl.dataset.cl;
-          PICK.has(id) ? PICK.delete(id) : PICK.add(id);
-          cl.classList.toggle('on', PICK.has(id)); paintPick(); return }
-  if(e.target.closest('#md-all')){
-    PICK = PICK.size === CLIENTS.length ? new Set() : new Set(CLIENTS.map(c=>c.id));
-    $$('.md .cl').forEach(x=>x.classList.toggle('on', PICK.has(x.dataset.cl)));
-    paintPick(); return;
-  }
-  if(!e.target.closest('.sug')) closeSug();
-});
-
-/* Вставка многострочного текста — куда бы её ни сделали. Одна строка
-   проходит обычным путём, без подтверждения: там нечего проверять. */
-document.addEventListener('paste', e=>{
-  const t = (e.clipboardData || window.clipboardData).getData('text') || '';
-  if(!/\n/.test(t.trim())) return;
-  const into = e.target.closest('#paste, [data-edit]');
-  if(!into) return;
-  e.preventDefault();
-  closeSug();
-  applyText(t);
-});
-/* В пустом дне то же поле работает и на набор: Ctrl/⌘+Enter разбирает. */
-document.addEventListener('keydown', e=>{
-  if(e.target.id === 'paste' && e.key === 'Enter' && (e.metaKey || e.ctrlKey)){
-    e.preventDefault(); applyText(e.target.value);
-  }
-});
-
-document.addEventListener('input', e=>{
-  const ed = e.target.closest('[data-edit]');
-  if(ed){
-    ed.closest('.line').classList.add('edit');
-    showSug(ed, ed.textContent);
-    if(SUG){ SUG.dataset.forItem = ed.dataset.edit; SUG.dataset.text = ed.textContent }
-    return;
-  }
-  const f = e.target.closest('[data-f]');
-  if(f){
-    const b = day().blocks.find(x=>x.id === f.closest('[data-blk]').dataset.blk);
-    b[f.dataset.f] = f.value;
-    if(f.dataset.f === 'title'){
-      /* Формат — не отдельное поле, а то, что парсер нашёл в названии
-         (TMR-1). Пересобираем на лету и сразу показываем расшифровку. */
-      b.fmt = fmtPart(f.value);
-      renderWeek();
-    }
-    return;
-  }
-  if(e.target.id === 'd-title'){ day().title = e.target.value; renderWeek(); return }
-  if(e.target.id === 'w-msg'){ setTrainerMsg(day().date, e.target.value); return }
-  if(e.target.id === 'q'){ S.q = e.target.value; renderSrc(); return }
-});
-document.addEventListener('change', e=>{
-  if(e.target.id === 'cli'){ S.cid = e.target.value; renderDoc(); }   /* сообщение — тоже своё у каждого */
-});
-document.addEventListener('keydown', e=>{
-  const ed = e.target.closest('[data-edit]');
-  if(e.target.id === 'w-msg' && e.key === 'Enter'){
-    /* Поле пишет в модель на каждый символ, так что Enter ничего не «сохраняет».
-       Но тренеру нужен сигнал, что он закончил мысль, — Enter снимает фокус
-       и подтверждает галочкой. Подсказка висит только пока поле активно. */
-    e.preventDefault();
-    const k = e.target.closest('.wmsg').querySelector('.ent');
-    k.textContent = '✓ Записано'; k.classList.add('done');
-    e.target.blur();
-    setTimeout(()=>{ k.textContent = '↵ Enter'; k.classList.remove('done') }, 1400);
-    return;
-  }
-  if(ed && e.key === 'Enter'){ e.preventDefault();
-    const id = ed.dataset.edit, txt = ed.textContent; closeSug(); commitLine(id, txt); return }
-  if(e.key === 'Escape'){ closeSug(); $('#ov').classList.remove('on') }
-});
-document.addEventListener('focusout', e=>{
-  const ed = e.target.closest('[data-edit]');
-  if(ed) setTimeout(()=>{ if(!SUG) commitLine(ed.dataset.edit, ed.textContent) }, 120);
-});
-
-/* ═══════════ ПЕРЕТАСКИВАНИЕ (CON-8, CON-13) ═══════════
-   Три уровня, одна механика: упражнение таскается между блоками, блок —
-   между блоками и на другой день, тренировка целиком — только на день.
-   Тащить можно лишь за ручку: строка редактируемая, и если сделать
-   draggable всю, в ней перестанет выделяться текст. Поэтому draggable
-   включается по нажатию на ручку и снимается по окончании. */
-let DRAG = null;
-const dayOf = i => week().days[i];
-
-document.addEventListener('mousedown', e=>{
-  const gr = e.target.closest('.gr'); if(!gr) return;
-  const host = gr.closest('.line') || gr.closest('.blk') || gr.closest('.doc');
-  if(host) host.draggable = true;
-});
 function clearDrag(){
   DRAG = null;
   $$('[draggable="true"]').forEach(x=>x.draggable = false);
@@ -1198,7 +914,7 @@ function openAssign(){
   const dt = new Date(d.date + 'T00:00:00');
   PICK = new Set([S.cid]);
   $('#md-title').textContent = d.title || 'Без названия';
-  $('#md-sub').textContent = `неделя ${S.wk} из ${program(S.pid).weeks} · ` +
+  $('#md-sub').textContent = `день ${S.i+1} из ${program(S.pid).days} · ` +
     `${DOW[S.day].toLowerCase()}, ${dt.getDate()} ${MON[dt.getMonth()]} · ` +
     `${d.blocks.length} ${plural(d.blocks.length,'блок','блока','блоков')} · ` +
     `${n} ${plural(n,'упражнение','упражнения','упражнений')}`;
@@ -1240,10 +956,8 @@ function openAssign(){
 
 /* В данных формат лежал отдельным полем — переносим в название один раз,
    чтобы источник остался один. */
-[1,2,3,4,5,6,7,8].forEach(n=>{
-  const w = buildWeek(S.pid, n); WCACHE[S.pid+':'+n] = w;
-  w.days.forEach(d=>d.blocks.forEach(fmtIntoTitle));
-});
+PCACHE[S.pid] = buildPlan(S.pid);
+plan().forEach(d=>d.blocks.forEach(fmtIntoTitle));
 renderNav('constructor.html'); renderTop(); renderHead(); render();
 
 /* Сворачивание панели источников — состояние переживает перезагрузку,

@@ -28,6 +28,7 @@
 <script src="assets/ui.js"></script>
 <script>
 /* ═══════════ КЛИЕНТЫ — рабочий список тренера ═══════════ */
+const CS = {k:null, dir:1};
 const V = {q:'', f:'all'};
 const unread = c => c.comments.filter((cm,i)=>!cm.reply && !STATE.replied[c.id+':'+i]).length;
 const needsAttention = c => unread(c)>0 || (c.prog && c.last && daysBetween(c.last,TODAY)>=3);
@@ -42,7 +43,16 @@ function match(c){
 }
 
 function render(){
-  const list = CLIENTS.filter(match);
+  let list = CLIENTS.filter(match);
+  /* Сортировка по столбцу: на шести клиентах не нужна, на полусотне — основной
+     способ найти нужного. Ключи те же, что в шапке таблицы. */
+  const SORTS = {
+    n:    (a,b)=>a.n.localeCompare(b.n),
+    prog: (a,b)=>String((program(a.prog)||{}).title||'').localeCompare(String((program(b.prog)||{}).title||'')),
+    done: (a,b)=>(a.done/a.plan||0)-(b.done/b.plan||0),
+    last: (a,b)=>String(a.last||'').localeCompare(String(b.last||'')),
+  };
+  if(CS.k && SORTS[CS.k]) list = [...list].sort((a,b)=>SORTS[CS.k](a,b)*CS.dir);
   const FILTERS = [['all','Все'],['ind','Индивидуально'],['grp','Группа'],['noprog','Без программы'],['attn','Требуют внимания']];
 
   $('#page').innerHTML = `
@@ -52,8 +62,12 @@ function render(){
     </div>
 
     <div class="card">
-      ${list.length ? `<table class="tbl"><thead><tr>
-        <th>Клиент</th><th>Программа</th><th>Прогресс</th><th>Последняя активность</th><th>Динамика приседа</th>
+      ${list.length ? `<table class="tbl" data-tbl="cli"><thead><tr>
+        <th class="srt ${CS.k==='n'?(CS.dir>0?'up':'dn'):''}" data-sort="n">Клиент</th>
+        <th class="srt ${CS.k==='prog'?(CS.dir>0?'up':'dn'):''}" data-sort="prog">Программа</th>
+        <th class="srt ${CS.k==='done'?(CS.dir>0?'up':'dn'):''}" data-sort="done">Прогресс</th>
+        <th class="srt ${CS.k==='last'?(CS.dir>0?'up':'dn'):''}" data-sort="last">Последняя активность</th>
+        <th>Динамика приседа</th>
       </tr></thead><tbody>
         ${list.map(c=>{
           const u = unread(c), pr = program(c.prog);
@@ -77,6 +91,10 @@ function render(){
     </div>
     <div class="hint">Клиент попадает в этот список сам, как только перейдёт по <a href="brand.html" style="color:var(--tx3)">пригласительной ссылке</a> и войдёт по номеру телефона.</div>`;
 
+  $$('[data-tbl="cli"] th[data-sort]').forEach(th=>th.onclick=()=>{
+    if(CS.k === th.dataset.sort) CS.dir = -CS.dir; else { CS.k = th.dataset.sort; CS.dir = 1 }
+    render();
+  });
   $$('tr[data-id]').forEach(r=>r.onclick=()=>location.href='client.html?id='+r.dataset.id);
   $$('.filters button').forEach(b=>b.onclick=()=>{ V.f=b.dataset.f; render() });
   $('#q').oninput=e=>{ V.q=e.target.value; render() };

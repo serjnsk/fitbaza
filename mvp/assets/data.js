@@ -1,7 +1,7 @@
 /* ============================================================
    Тренерграм · доменная модель (общая для всех страниц)
    Сущности по 02 — Функциональные требования:
-   упражнение → блок → тренировка → неделя → программа → шаблон
+   упражнение → блок → тренировка → программа → шаблон
    ============================================================ */
 const TODAY = '2026-08-26';                 /* среда — фиксируем для детерминизма */
 const D = s => new Date(s + 'T00:00:00');
@@ -131,7 +131,7 @@ const ALIAS = {
    Две независимые оси, которые нельзя смешивать:
 
    УРОВЕНЬ (TPL-2) — место в иерархии сущностей:
-     упражнение → блок → тренировка → неделя → программа
+     упражнение → блок → тренировка → программа
    ПАПКА (TPL-1) — способ разложить БЛОКИ, потому что разминок
      у тренера много: «Разминки», «Силовые блоки», «Комплексы»,
      «Заминки». К остальным уровням папки не относятся.
@@ -140,7 +140,7 @@ const ALIAS = {
    в тренировке — блоки, в блоке — упражнения. Иначе «достать из
    шаблона сразу неделю» физически невозможно.
    ──────────────────────────────────────────────────────────── */
-const TPL_LEVELS = ['блок','тренировка','неделя','программа'];
+const TPL_LEVELS = ['блок','тренировка','программа'];
 const TPL_FOLDERS = ['Разминки','Силовые блоки','Комплексы','Заминки'];
 
 const TPL = [
@@ -171,17 +171,15 @@ const TPL = [
  {id:'w2', lvl:'тренировка', own:true, at:'2026-07-16', title:'День ТА + метком', used:5, blocks:['b3','b9']},
  {id:'w3', lvl:'тренировка', own:true, at:'2026-08-20', title:'Становая + гимнастика', used:6, blocks:['b1','b6','b8','b10']},
 
- /* ── уровень: неделя — внутри семь дней, null = отдых ── */
- {id:'k1', lvl:'неделя', own:true, at:'2026-07-01', title:'Силовая неделя · база', used:4,
-  days:['w1', null, 'w3', null, 'w2', null, null]},
- {id:'k2', lvl:'неделя', own:true, at:'2026-08-14', title:'Объёмная неделя · 5 дней', used:2,
-  days:['w1','w2','w3', null,'w1','w2', null]},
-
  /* ── уровень: программа — последовательность недель ── */
- {id:'p1t', lvl:'программа', own:true, at:'2026-07-05', title:'Сила + кроссфит · 8 недель', used:3,
-  goal:'Рост силовых при сохранении метконовой формы', weeks:8, base:'k1'},
- {id:'p2t', lvl:'программа', own:true, at:'2026-08-22', title:'Возвращение после травмы · 6 недель', used:1,
-  goal:'Аккуратный возврат к базовым движениям', weeks:6, base:'k2'},
+ /* seq — последовательность дней: id шаблона тренировки или null (отдых).
+    Ритм задаёт тренер, длина цикла произвольная — недели в модели нет. */
+ {id:'p1t', lvl:'программа', own:true, at:'2026-07-05', title:'Сила + кроссфит · 56 дней', used:3,
+  goal:'Рост силовых при сохранении метконовой формы', days:56,
+  seq:['w1', null,'w3', null,'w2', null, null]},
+ {id:'p2t', lvl:'программа', own:true, at:'2026-08-22', title:'Возвращение после травмы · 42 дня', used:1,
+  goal:'Аккуратный возврат к базовым движениям', days:42,
+  seq:['w1','w2', null,'w3', null]},
 
  /* ── общая база сервиса: приходит из коробки, тренер её не создавал ──
     Делится тем же полем own, что и упражнения (EX): личное — own:true. ── */
@@ -204,17 +202,15 @@ const TPL = [
  {id:'sw2', lvl:'тренировка', own:false, title:'Кроссфит · классический метком', used:0, blocks:['sb2','sb5','sb7']},
  {id:'sw3', lvl:'тренировка', own:false, title:'Смешанный день · сила + Helen', used:0, blocks:['sb1','sb3','sb6','sb7']},
 
- {id:'sk1', lvl:'неделя', own:false, title:'Стартовая неделя · 3 дня', used:0,
-  days:['sw1', null,'sw2', null,'sw3', null, null]},
- {id:'sk2', lvl:'неделя', own:false, title:'Кроссфит-неделя · 5 дней', used:0,
-  days:['sw2','sw1','sw3', null,'sw2','sw1', null]},
-
- {id:'sp1', lvl:'программа', own:false, title:'Линейная прогрессия · 12 недель', used:0,
-  goal:'Базовая сила для новичка: присед, жим, тяга по линейной схеме', weeks:12, base:'sk1'},
- {id:'sp2', lvl:'программа', own:false, title:'Кроссфит база · 8 недель', used:0,
-  goal:'Общая физическая подготовка с классическими комплексами', weeks:8, base:'sk2'},
- {id:'sp3', lvl:'программа', own:false, title:'Гипертрофия верх/низ · 10 недель', used:0,
-  goal:'Набор мышечной массы, сплит верх/низ четыре раза в неделю', weeks:10, base:'sk1'},
+ {id:'sp1', lvl:'программа', own:false, title:'Линейная прогрессия · 84 дня', used:0,
+  goal:'Базовая сила для новичка: присед, жим, тяга по линейной схеме', days:84,
+  seq:['sw1', null,'sw2', null,'sw3', null, null]},
+ {id:'sp2', lvl:'программа', own:false, title:'Кроссфит база · 56 дней', used:0,
+  goal:'Общая физическая подготовка с классическими комплексами', days:56,
+  seq:['sw2','sw1','sw3', null,'sw2','sw1', null]},
+ {id:'sp3', lvl:'программа', own:false, title:'Гипертрофия верх/низ · 70 дней', used:0,
+  goal:'Набор мышечной массы, сплит верх/низ четыре раза в неделю', days:70,
+  seq:['sw1','sw2', null,'sw1','sw3', null]},
 ];
 const tplById = id => TPL.find(t=>t.id===id);
 
@@ -228,8 +224,8 @@ function tplKind(t){
     const inner = (t.blocks||[]).map(tplById).filter(Boolean);
     return (inner.find(b=>b.kind && b.kind!=='warmup' && b.kind!=='cooldown') || inner[0] || {}).kind || 'strength';
   }
-  if(t.lvl==='неделя'){
-    const first = (t.days||[]).filter(Boolean).map(tplById).filter(Boolean)[0];
+  if(t.lvl==='программа'){
+    const first = (t.seq||[]).filter(Boolean).map(tplById).filter(Boolean)[0];
     return first ? tplKind(first) : 'strength';
   }
   return 'strength';
@@ -247,8 +243,9 @@ const tplToBlock = t => ({id:nid('b'), kind:t.kind||'strength', title:t.title.re
 function tplToWorkout(t){
   return {title:t.title, blocks:(t.blocks||[]).map(id=>tplToBlock(tplById(id))).filter(Boolean)};
 }
-function tplToWeekDays(t){
-  return (t.days||[]).map(id=>{
+/* Последовательность дней шаблона программы в рабочем виде. */
+function tplToSeq(t){
+  return (t.seq||[]).map(id=>{
     if(!id) return null;
     const w = tplById(id);
     return w ? tplToWorkout(w) : null;
@@ -259,10 +256,8 @@ function tplStats(t){
   if(t.lvl==='блок') return {n:(t.items||[]).length};
   if(t.lvl==='тренировка'){ const w=tplToWorkout(t);
     return {n:w.blocks.reduce((a,b)=>a+b.items.length,0), blocks:w.blocks.length} }
-  if(t.lvl==='неделя'){ const d=tplToWeekDays(t);
-    return {days:d.filter(Boolean).length, n:d.filter(Boolean).reduce((a,w)=>a+w.blocks.reduce((x,b)=>x+b.items.length,0),0)} }
-  if(t.lvl==='программа'){ const b=tplById(t.base);
-    return {weeks:t.weeks, days:b?tplToWeekDays(b).filter(Boolean).length:0} }
+  if(t.lvl==='программа'){ const q=tplToSeq(t);
+    return {days:t.days, cycle:q.length, workouts:q.filter(Boolean).length} }
   return {n:0};
 }
 
@@ -325,11 +320,11 @@ const PROGRAMS = [
  /* time — час занятия. Поле у программы, а не у клиента: групповое занятие
     идёт одно на всех, и в таймлайне дня оно обязано быть одной строкой. */
  {id:'p1', title:'Сила + кроссфит', goal:'Рост силовых при сохранении метконовой формы',
-  weeks:8, cur:4, clients:['c1'], start:'2026-08-03', kind:'individual', time:'07:30'},
+  days:56, clients:['c1'], start:'2026-08-03', kind:'individual', time:'07:30'},
  {id:'p2', title:'Командная подготовка', goal:'Общая база для группы, индивидуальные проценты',
-  weeks:12, cur:6, clients:['c3','c4','c5'], start:'2026-07-20', kind:'group', time:'18:30'},
+  days:84, clients:['c3','c4','c5'], start:'2026-07-20', kind:'group', time:'18:30'},
  {id:'p3', title:'Возвращение после травмы', goal:'Аккуратный возврат к приседу после колена',
-  weeks:6, cur:3, clients:['c2'], start:'2026-08-10', kind:'individual', time:'11:00'},
+  days:42, clients:['c2'], start:'2026-08-10', kind:'individual', time:'11:00'},
 ];
 const program = id => PROGRAMS.find(p=>p.id===id);
 
@@ -392,7 +387,12 @@ const TALK = {
   }
 };
 
-const PATTERN = {
+/* ═══════ Заготовки дней программы ═══════
+   Раньше это был «недельный рисунок» — семь ячеек по дням недели. Недели в
+   модели больше нет: здесь просто набор дней, из которых собирается план
+   (см. PLAN ниже). У разных программ их разное число — семидневность больше
+   ничего не значит. */
+const DAYS = {
  p1:[
   {t:'Сила · присед + жим', b:[
     ['warmup','Разминка','Темп спокойный, без отказа',null,[['rom','2×',null,'сек','60'],['pvc','2×10'],['row',null,null,'м','500']]],
@@ -449,20 +449,37 @@ const PATTERN = {
   null,null],
 };
 /* Докуда программа реально составлена (дальше — пустые недели, сигнал на дашборде) */
-const COMPOSED_WEEKS = {p1:5, p2:6, p3:4};
+/* ═══════ План программы: упорядоченная последовательность дней ═══════
+   Ключевое отличие от прежней модели: недели нет. Программа — плоский список
+   дней, каждый либо тренировка, либо отдых. Длина списка и есть «докуда
+   составлено», а порядок задаёт тренер: нужный набор тренировок в любой
+   последовательности, а не заполнение жёсткой решётки по семь дней.
 
-const weekStartDate = (pid,n) => addDays(program(pid).start, (n-1)*7);
-function buildWeek(pid, n){
-  const pat = PATTERN[pid] || [];
-  const start = weekStartDate(pid,n);
-  const composed = n <= (COMPOSED_WEEKS[pid]||0);
-  return {pid, n, days: RU.map((w,i)=>{
-    const d = pat[i];
-    const date = addDays(start,i);
-    if(!d || !composed) return {w, date, d:dm(date), title: d?'—':'Отдых', rest:true, blocks:[]};
-    return {w, date, d:dm(date), title:d.t, rest:false, blocks:d.b.map(b=>mkBlock(b[0],b[1],b[2],b[3],b[4]))};
-  })};
+   Планы ниже собраны из заготовок DAYS, чтобы наполнение демо-данных не
+   потерялось при переходе. p3 намеренно нерегулярный — так видно, что ритм
+   больше не обязан быть семидневным. */
+const rep = (seq, times) => Array.from({length:times}, () => seq).flat();
+const PLAN = {
+  p1: rep(DAYS.p1, 5),
+  p2: rep(DAYS.p2, 6),
+  /* Возврат после травмы: нагрузка через день, паузы длиннее — цикл не равен
+     неделе, и в старой модели это было невыразимо. */
+  p3: [...rep(DAYS.p3, 4), DAYS.p3[0], null, null, DAYS.p3[1], null, null],
+};
+
+/* Дата дня плана: отсчёт от старта программы, без всякой недельной арифметики. */
+const dayDate = (pid, i) => addDays(program(pid).start, i);
+const composedDays = pid => (PLAN[pid] || []).length;
+
+/* Один день плана в рабочем виде — для конструктора. */
+function buildDay(pid, i){
+  const d = (PLAN[pid] || [])[i];
+  const date = dayDate(pid, i);
+  const base = {i, date, w: RU[dowMon(date)], d: dm(date)};
+  if(!d) return {...base, title:'Отдых', rest:true, blocks:[]};
+  return {...base, title:d.t, rest:false, blocks:d.b.map(b=>mkBlock(b[0],b[1],b[2],b[3],b[4]))};
 }
+const buildPlan = pid => (PLAN[pid] || []).map((_,i)=>buildDay(pid,i));
 
 /* ═══════ Расчёт нагрузки (CON-16): проценты → рабочий вес ═══════ */
 /* Схема назначения превращается в подходы: «3×5» — три по пять,
@@ -607,23 +624,17 @@ function parseText(txt){
 /* ═══════ Расписание клиента для календаря (CAL-1) ═══════ */
 function scheduleFor(cid, from, to){
   const c = client(cid); if(!c || !c.prog) return [];
-  const p = program(c.prog), pat = PATTERN[c.prog] || [];
+  const plan = PLAN[c.prog] || [];
   const out = [];
-  for(let n=1; n<=p.weeks; n++){
-    const start = weekStartDate(c.prog, n);
-    if(addDays(start,6) < from) continue;
-    if(start > to) break;
-    if(n > (COMPOSED_WEEKS[c.prog]||0)) continue;
-    pat.forEach((d,i)=>{
-      if(!d) return;
-      const date = addDays(start,i);
-      if(date < from || date > to) return;
-      const past = date < TODAY;
-      const missed = past && c.streak===0 && daysBetween(date, TODAY) <= 5;
-      out.push({cid, date, week:n, title:d.t, kind:d.b[d.b.length-1][0],
-        status: past ? (missed?'missed':'done') : (date===TODAY?'today':'planned')});
-    });
-  }
+  plan.forEach((d,i)=>{
+    if(!d) return;                              /* день отдыха */
+    const date = dayDate(c.prog, i);
+    if(date < from || date > to) return;
+    const past = date < TODAY;
+    const missed = past && c.streak===0 && daysBetween(date, TODAY) <= 5;
+    out.push({cid, date, day:i+1, title:d.t, kind:d.b[d.b.length-1][0],
+      status: past ? (missed?'missed':'done') : (date===TODAY?'today':'planned')});
+  });
   return out;
 }
 function scheduleAll(from,to){ return CLIENTS.flatMap(c=>scheduleFor(c.id,from,to)) }
@@ -642,11 +653,12 @@ const hhmm = t => +t.slice(0,2)*60 + +t.slice(3,5);
    отрицательный запас значит, что клиенты уже без тренировок. */
 function composeQueue(){
   return PROGRAMS.map(p=>{
-    const composed = COMPOSED_WEEKS[p.id] || 0;
-    const lastDay = composed ? addDays(weekStartDate(p.id, composed), 6) : addDays(p.start,-1);
+    const composed = composedDays(p.id);
+    const lastDay = composed ? dayDate(p.id, composed-1) : addDays(p.start,-1);
     return {p, composed, lastDay, runway: daysBetween(TODAY, lastDay), athletes: p.clients.length};
   }).sort((a,b)=>a.runway-b.runway);
 }
+
 
 /* ═══════ Сводка дня для месяца-обзора ═══════
    Месяц намеренно не показывает ни одной фамилии: при полусотне клиентов
@@ -655,20 +667,18 @@ function composeQueue(){
    где дырки в составлении и где перегруз. Имена — уровнем ниже, в дне. */
 function dayStats(date){
   const ses = sessionsOn(date);
-  let gaps = 0;                              /* назначения, чья неделя ещё не составлена */
+  let gaps = 0;                                 /* назначения, чей день не составлен */
   CLIENTS.forEach(c=>{
     if(!c.prog) return;
-    const p = program(c.prog), pat = PATTERN[c.prog] || [];
-    for(let n=1; n<=p.weeks; n++){
-      const start = weekStartDate(c.prog, n);
-      if(date < start || date > addDays(start,6)) continue;
-      if(n <= (COMPOSED_WEEKS[c.prog]||0)) break;
-      if(pat[dowMon(date)]) gaps++;
-      break;
-    }
+    const p = program(c.prog);
+    const i = daysBetween(p.start, date);       /* номер дня в плане, от нуля */
+    if(i < 0 || i >= p.days) return;            /* вне срока программы */
+    if(i < composedDays(c.prog)) return;        /* уже составлен */
+    gaps++;
   });
   return {ses, gaps, n:ses.length, athletes:ses.reduce((a,s)=>a+s.who.length,0)};
 }
+
 
 function sessionsOn(date){
   const by = new Map();

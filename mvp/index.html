@@ -38,7 +38,8 @@ function unanswered(){
 }
 const recentPRs = () => CLIENTS.filter(c=>c.pr && daysBetween(c.pr.at,TODAY)<=7);
 const idle       = () => CLIENTS.filter(c=>c.prog && c.last && daysBetween(c.last,TODAY)>=3);
-const gaps        = () => PROGRAMS.filter(p=>(COMPOSED_WEEKS[p.id]||0) < p.cur);
+/* Дырка — программа, чей план уже кончился или кончается в пределах недели. */
+const gaps        = () => composeQueue().filter(x=>x.runway <= 7).map(x=>x.p);
 const noProg       = () => CLIENTS.filter(c=>!c.prog);
 
 function render(){
@@ -89,7 +90,7 @@ function render(){
               return `<div class="r">
                 <span class="c">
                   <a class="t" href="constructor.html">${esc(x.p.title)}</a>
-                  <span class="s">составлено ${x.composed} из ${x.p.weeks} ${plural(x.p.weeks,'недели','недель','недель')} · ${x.athletes} ${plural(x.athletes,'атлет','атлета','атлетов')}</span>
+                  <span class="s">составлено ${x.composed} из ${x.p.days} ${plural(x.p.days,'дня','дней','дней')} · ${x.athletes} ${plural(x.athletes,'атлет','атлета','атлетов')}</span>
                 </span>
                 <span class="chip ${cls}">${lbl}</span>
                 <a class="btn gh sm" href="constructor.html">Составить</a>
@@ -134,7 +135,7 @@ function render(){
                 <span class="av s">${ICON.prog}</span>
                 <div class="c">
                   <div class="h"><b>${esc(p.title)}</b></div>
-                  <div class="tx">Неделя ${p.cur} ещё не составлена</div>
+                  <div class="tx">План составлен не до конца — дальше пусто</div>
                   <a class="btn gh sm" href="constructor.html" style="margin-top:8px;display:inline-flex">Открыть в конструкторе</a>
                 </div>
               </div>`).join('')}

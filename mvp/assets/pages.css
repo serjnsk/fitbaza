@@ -313,3 +313,16 @@ select.inp{-webkit-appearance:none;appearance:none;cursor:pointer;padding-right:
 .q .r .t{display:block;font-size:13px;font-weight:600;color:var(--tx1);text-decoration:none}
 .q .r .t:hover{color:var(--acc)}
 .q .r .s{display:block;font-size:11.5px;color:var(--tx4);margin-top:3px}
+
+/* ─── сортировка по столбцам ───
+   Карточная сетка годится на десяток элементов. В базе упражнений их 31, у
+   реального тренера будут сотни — тогда нужны столбцы, по которым можно
+   отсортировать и сравнить, а не плитки, которые только листаются. */
+.tbl th.srt{cursor:pointer;user-select:none}
+.tbl th.srt:hover{color:var(--tx2)}
+.tbl th.srt::after{content:"↕";margin-left:5px;opacity:.3;font-weight:400}
+.tbl th.srt.up::after{content:"↑";opacity:1;color:var(--acc)}
+.tbl th.srt.dn::after{content:"↓";opacity:1;color:var(--acc)}
+.tbl td .sub{font-size:11.5px;color:var(--tx3);margin-top:2px}
+.tbl td.num{font-family:var(--mono);font-size:12.5px;color:var(--tx2);font-variant-numeric:tabular-nums}
+.tblwrap{overflow-x:auto}

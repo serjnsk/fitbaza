@@ -180,31 +180,44 @@ function libLines(t){
   if(t.lvl==='тренировка')
     return (t.blocks||[]).map(id=>`<span>${esc((tplById(id)||{}).title || id)}</span>`).join('');
   if(t.lvl==='программа'){
-    const b = tplById(t.base);
-    return `<span>${esc(t.goal||'')}</span>${b?`<span>основа — ${esc(b.title)}</span>`:''}`;
+    const q = (t.seq||[]).map(id=>id ? (tplById(id)||{}).title || id : 'отдых');
+    return `<span>${esc(t.goal||'')}</span>`
+      + `<span>цикл: ${esc(q.join(' → '))}</span>`;
   }
   return '';
 }
 
-function libCard(t){
-  const st = tplStats(t);
-  const meta = t.lvl==='блок'       ? `${st.n} ${plural(st.n,'упражнение','упражнения','упражнений')}`
-             : t.lvl==='тренировка' ? `${st.blocks} ${plural(st.blocks,'блок','блока','блоков')} · ${st.n} ${plural(st.n,'упражнение','упражнения','упражнений')}`
-             : t.lvl==='неделя'     ? `${st.days} ${plural(st.days,'день','дня','дней')} с тренировками`
-             :                        `${st.weeks} ${plural(st.weeks,'неделя','недели','недель')} · ${st.days} ${plural(st.days,'тренировка','тренировки','тренировок')} в неделю`;
-  const week = t.lvl==='неделя' ? `<div class="tweek">${(t.days||[]).map((d,i)=>{
-      const w = d ? tplById(d) : null;
-      return `<div class="td ${w?'on':''}"><i>${RU[i]}</i>${w?esc(w.title.split(' · ')[0]):'отдых'}</div>`;
-    }).join('')}</div>` : '';
-  return `<div class="tcard" data-id="${t.id}">
-    <div class="h">
-      <span class="nm">${esc(t.title)}</span>
-      ${t.own?`<span class="chip ok">своё</span>`:`<span class="chip ghost">общая</span>`}
-    </div>
-    <div class="ls">${libLines(t)}</div>
-    ${week}
-    <div class="foot">${ICON.folder} ${meta}${t.used?` · использован ${t.used}×`:''}</div>
-  </div>`;
+/* Столбцы зависят от уровня: у блока — папка и состав, у тренировки —
+   блоки, у программы — длина и цикл. Общее у всех — название, «своё/общая»
+   и частота использования: по ней тренер и выбирает. */
+function libCols(level){
+  const nameCol = {k:'title', n:'Название', sort:byStr('title'), cell:t=>
+    `<div class="cellname"><div style="min-width:0">
+       <div class="n">${esc(t.title)}</div>
+       <div class="sub">${libLines(t).replace(/<\/span><span>/g,' · ').replace(/<\/?span>/g,'')}</div>
+     </div></div>`};
+  const ownCol = {k:'own', n:'Источник', w:'110px', sort:byNum(t=>t.own?0:1), cell:t=>
+    t.own ? `<span class="chip ok">своё</span>` : `<span class="chip ghost">общая</span>`};
+  const usedCol = {k:'used', n:'Исп.', w:'70px', r:true, num:true, sort:byNum(t=>t.used),
+    cell:t=>t.used ? t.used+'×' : '—'};
+  if(level==='блок') return [nameCol,
+    {k:'folder', n:'Папка', w:'140px', sort:byStr('folder'), cell:t=>esc(t.folder||'—')},
+    {k:'n', n:'Упр.', w:'70px', r:true, num:true, sort:byNum(t=>tplStats(t).n),
+      cell:t=>tplStats(t).n},
+    ownCol, usedCol];
+  if(level==='тренировка') return [nameCol,
+    {k:'blocks', n:'Блоков', w:'80px', r:true, num:true, sort:byNum(t=>tplStats(t).blocks),
+      cell:t=>tplStats(t).blocks},
+    {k:'n', n:'Упр.', w:'70px', r:true, num:true, sort:byNum(t=>tplStats(t).n),
+      cell:t=>tplStats(t).n},
+    ownCol, usedCol];
+  return [nameCol,
+    {k:'days', n:'Дней', w:'80px', r:true, num:true, sort:byNum(t=>t.days), cell:t=>t.days},
+    {k:'cycle', n:'Цикл', w:'80px', r:true, num:true, sort:byNum(t=>tplStats(t).cycle),
+      cell:t=>tplStats(t).cycle},
+    {k:'wo', n:'Трен.', w:'75px', r:true, num:true, sort:byNum(t=>tplStats(t).workouts),
+      cell:t=>tplStats(t).workouts},
+    ownCol, usedCol];
 }
 
 /* cfg: {level, add, tabs:[{n,level}]} — tabs только у базы программ (Программы / Недели) */
@@ -219,8 +232,9 @@ function renderLib(cfg){
     return true;
   }).sort(libSort);
 
+  const cols = libCols(level);
   const grid = list.length
-    ? `<div class="exgrid">${list.map(libCard).join('')}</div>`
+    ? `<div class="card">${dataTable('lib-'+level, cols, list)}</div>`
     : `<div class="empty"><div class="t">Ничего не нашли</div><div class="d">Измените поиск или фильтр</div></div>`;
 
   $('#page').innerHTML = `
@@ -253,7 +267,7 @@ function renderLib(cfg){
   $('#own').onchange=e=>{ LIB.own=e.target.checked; renderLib(cfg) };
   $('#q').oninput=e=>{ LIB.q=e.target.value; renderLib(cfg) };
   $('#btnAdd').onclick=()=>toast('В конструкторе: соберите и нажмите «Сохранить в библиотеку»');
-  $$('.tcard').forEach(c=>c.onclick=()=>libDetail(tplById(c.dataset.id)));
+  bindTable('lib-'+level, ()=>renderLib(cfg), id=>libDetail(tplById(id)));
   const qEl=$('#q'); if(qEl){ qEl.focus({preventScroll:true}); qEl.setSelectionRange(LIB.q.length,LIB.q.length) }
 }
 
@@ -325,3 +339,33 @@ const weekDays = (anchor=TODAY) => {
   const start = addDays(anchor, -dowMon(anchor));
   return Array.from({length:7},(_,i)=>addDays(start,i));
 };
+
+
+/* ═══════════ ТАБЛИЦА СО СОРТИРОВКОЙ — одна на все списки ═══════════
+   cols: [{k, n, w, r, sort(a,b), cell(row)}]. Состояние сортировки живёт в
+   TSORT по идентификатору таблицы: при перерисовке порядок не сбрасывается,
+   иначе сортировать было бы бессмысленно — любой фильтр обнулял бы её. */
+const TSORT = {};
+function dataTable(id, cols, rows){
+  const st = TSORT[id] ||= {k:null, dir:1};
+  const col = cols.find(c=>c.k===st.k);
+  const list = col && col.sort ? [...rows].sort((a,b)=>col.sort(a,b)*st.dir) : rows;
+  return `<div class="tblwrap"><table class="tbl" data-tbl="${id}"><thead><tr>
+    ${cols.map(c=>`<th class="${c.r?'r ':''}${c.sort?'srt ':''}${st.k===c.k?(st.dir>0?'up':'dn'):''}"
+      ${c.sort?`data-sort="${esc(c.k)}"`:''}${c.w?` style="width:${c.w}"`:''}>${esc(c.n)}</th>`).join('')}
+  </tr></thead><tbody>
+    ${list.map(r=>`<tr class="click" data-row="${esc(r.id)}">
+      ${cols.map(c=>`<td class="${c.r?'r ':''}${c.num?'num':''}">${c.cell(r)}</td>`).join('')}
+    </tr>`).join('')}
+  </tbody></table></div>`;
+}
+function bindTable(id, redraw, onRow){
+  $$(`[data-tbl="${id}"] th[data-sort]`).forEach(th=>th.onclick=()=>{
+    const st = TSORT[id];
+    if(st.k === th.dataset.sort) st.dir = -st.dir; else { st.k = th.dataset.sort; st.dir = 1 }
+    redraw();
+  });
+  if(onRow) $$(`[data-tbl="${id}"] tr[data-row]`).forEach(tr=>tr.onclick=()=>onRow(tr.dataset.row));
+}
+const byStr = k => (a,b) => String(a[k]||'').localeCompare(String(b[k]||''));
+const byNum = f => (a,b) => (f(a)||0) - (f(b)||0);

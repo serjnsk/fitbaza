@@ -118,7 +118,12 @@ button{cursor:pointer}
   white-space:nowrap}
 .wkh .cp:hover{color:var(--acc)}
 .wkh .cp svg{width:14px;height:14px}
-.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+/* Лента, а не сетка: раскладка по семь в ряд визуально возвращала неделю,
+   которой в модели больше нет. План идёт подряд и прокручивается. */
+.days{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity}
+.days .day{flex:0 0 132px;scroll-snap-align:center}
+.days::-webkit-scrollbar{height:6px}
+.days::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
 .day{border-radius:var(--rad-m);background:var(--s1);padding:9px 9px 10px;text-align:left;min-height:76px;
   display:flex;flex-direction:column;gap:4px;transition:.14s;border:1.5px solid transparent}
 .day:hover{background:var(--s2)}
