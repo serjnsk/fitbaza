@@ -80,7 +80,14 @@
 
 /* ─── тренер: та же плоскость ─── */
 .app .wk,.app .doc,.app .rail,.app .card{border-radius:var(--rad-l);box-shadow:none}
-.app .blk{background:none;padding:0;margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+/* Блок — ограниченная область, а не отрезок списка. Одной верхней линии не
+   хватало: заметка, строки упражнений и строка «добавить» сливались с соседним
+   блоком, и было не понять, где кончается один и начинается другой. Граница и
+   подложка заголовка держат иерархию, оставаясь в плоском языке — без теней. */
+.app .blk{background:none;padding:0 12px 10px;margin-top:14px;border:1px solid var(--line);
+  border-radius:var(--rad-l);overflow:hidden}
+.app .blk .blkh{margin:0 -12px 8px;padding:8px 12px;background:var(--s2);border-bottom:1px solid var(--line)}
+.app .blk.pending{border-style:dashed;border-color:var(--acc)}
 .app .line{background:none;border-radius:0;margin:0;padding:9px 2px;
   border:0;box-shadow:inset 0 -1px 0 0 var(--line)}
 .app .line:hover{background:var(--s2)}
