@@ -1,10 +1,11 @@
-site_name: Внутренняя документация
+site_name: Документация
 site_url: https://serjnsk.github.io/trenergram/docs/
 repo_url: https://github.com/serjnsk/trenergram
 docs_dir: docs
 
 theme:
   name: material
+  custom_dir: overrides      # wordmark в шапке и шрифт Montserrat
   language: ru
   logo: assets/logo.svg
   favicon: assets/logo.svg

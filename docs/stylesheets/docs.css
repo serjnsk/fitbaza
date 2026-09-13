@@ -18,7 +18,7 @@
   --line:#e3e6ec; --line2:#c9cedb;
   --band:#f6f7fa;
   --acc:#FC5200; --acc-bg:#FFF1EA; --acc-br:#FFD6C2;
-  --uih:56px;
+  --uih:60px;
 
   /* Проброс в переменные Material — продублирован ниже на
      [data-md-color-scheme], иначе палитра темы перебивает по специфичности. */
@@ -49,35 +49,49 @@
   --md-code-bg-color:var(--band);
 }
 
-/* ── Каркас: сетка на всю ширину ──────────────────────────────
-   Сводным таблицам требований (02) нужен экран, поэтому потолок
-   высокий — как .shell в lovix-docs. */
-.md-grid{max-width:1780px}
-.md-sidebar{width:264px;padding:0}
-.md-sidebar--secondary{width:252px}
-.md-content{max-width:1520px}
-.md-main__inner{margin-top:0}
+/* ── Каркас: во всю ширину, как GitBook ──────────────────────
+   Меню прижато к левому краю, оглавление — к правому, текст —
+   в колонке до 920px посередине. Ничего не центрируется «в целом»:
+   на 1920 пустых полей по бокам нет, на ноутбуке ничего не теснится. */
+.md-grid{max-width:none}
+.md-main__inner{margin:0;display:flex}
+.md-sidebar{width:272px;padding:0;top:var(--uih)}
+.md-sidebar--secondary{width:236px}
+.md-sidebar__scrollwrap{max-height:calc(100vh - var(--uih))}
+.md-content{max-width:none;flex:1;min-width:0}
+.md-content__inner,
+[dir=ltr] .md-sidebar--primary:not([hidden])~.md-content>.md-content__inner,
+[dir=ltr] .md-sidebar--secondary:not([hidden])~.md-content>.md-content__inner{
+  max-width:920px;margin:0 auto;padding:6px 48px 56px}
+.md-content__inner::before{display:none}
 
 /* ── Шапка ────────────────────────────────────────────────── */
 .md-header{height:var(--uih);background:#fff;color:var(--text);
   border-bottom:1px solid var(--line);box-shadow:none!important}
-.md-header__inner{height:var(--uih);padding:0 18px;gap:14px}
+.md-header__inner{height:var(--uih);padding:0 22px;gap:12px}
 .md-header__button{color:var(--muted)}
-/* Ссылка на репозиторий — одной иконкой, как .uih-gh в lovix-docs:
-   счётчики звёзд и обрезанное название в шапке доки — шум. */
 .md-source__facts,.md-source__repository{display:none}
 .md-source{font-size:0}
-.md-header__source{width:auto;max-width:none;margin-left:8px}
+.md-header__source{width:auto;max-width:none;margin-left:4px}
 .md-header__source .md-source__icon svg{width:20px;height:20px}
 .md-header__button:hover{color:#000;opacity:1}
-.md-header__title{font-size:.675rem;color:var(--dim);font-weight:600;margin-left:0}
-.md-header__topic{font-weight:600}
-.md-header__button.md-logo img,.md-header__button.md-logo svg{height:18px;width:auto}
-.md-header__button.md-logo{padding:0;margin:0 4px 0 0}
+/* Логотип — wordmark со срезом 45°, Т и М акцентом; название сайта —
+   тихая подпись «Документация» рядом. Заголовок страницы в шапку не
+   переезжает: он и так первый на экране. */
+.md-header__button.md-logo{padding:0;margin:0 2px 0 0;display:flex;align-items:center}
+.md-header__button.md-logo:hover{opacity:1}
+.tg-wm{display:inline-block;font:900 19px/1 "Montserrat",var(--md-text-font-family,sans-serif);
+  letter-spacing:-.035em;color:#141414;text-transform:uppercase;
+  clip-path:polygon(6px 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%,0 6px)}
+.tg-wm b{color:var(--acc);font-weight:inherit}
+.md-header__title{font-size:.65rem;color:var(--dim);font-weight:600;margin-left:0;flex:0 0 auto;width:auto;height:auto;line-height:1}
+.md-header__ellipsis{position:static;height:auto}
+.md-header__topic{position:static;transform:none!important;opacity:1!important;font-weight:600;transition:none}
+.md-header__topic[data-md-component=header-topic]{display:none}
 
-/* Поиск по центру шапки — как .uih-search */
-.md-search{margin:0 auto}
-.md-search__form{height:34px;border-radius:9px;background:var(--band);
+/* Поиск — по центру шапки */
+.md-search{margin:0 auto;flex:0 1 480px}
+.md-search__form{height:36px;border-radius:10px;background:var(--band);
   border:1px solid var(--line);color:var(--dim)}
 .md-search__form:hover{background:var(--band);border-color:var(--line2)}
 .md-search__input{font-size:.65rem}
@@ -92,13 +106,13 @@
 
 /* ── Левое меню ───────────────────────────────────────────── */
 .md-sidebar--primary .md-sidebar__scrollwrap{border-right:1px solid var(--line);
-  margin:0;padding:22px 16px 30px}
+  margin:0;padding:18px 14px 30px 18px}
 .md-nav{font-size:.675rem}
 .md-nav__title{display:none}
 .md-nav__list{padding:0}
 .md-nav__item{padding:0}
-.md-nav__link{display:flex;align-items:center;gap:9px;padding:6px 10px;border-radius:7px;
-  color:var(--muted);font-size:.675rem;line-height:1.4;font-weight:500;margin:1px 0}
+.md-nav__link{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:8px;
+  color:var(--muted);font-size:.7rem;line-height:1.4;font-weight:500;margin:1px 0}
 .md-nav__link:hover,.md-nav__link:focus{color:#000;background:var(--band)}
 .md-nav__item .md-nav__link--active,
 .md-nav__item .md-nav__link--active:hover,
@@ -111,8 +125,8 @@
   color:var(--dim);margin:20px 10px 6px;padding:0;background:none;pointer-events:none}
 
 /* ── Оглавление справа ────────────────────────────────────── */
-.md-sidebar--secondary .md-sidebar__scrollwrap{border-left:1px solid var(--line);
-  margin:0;padding:26px 20px 26px 6px}
+.md-sidebar--secondary .md-sidebar__scrollwrap{border-left:0;
+  margin:0;padding:24px 22px 26px 6px}
 /* Material переводит заголовок TOC как «Содержание»; в lovix-docs он
    называется «На этой странице» — отдельной настройки для строки нет,
    поэтому подменяем текст. */
@@ -128,9 +142,9 @@
 .md-nav--secondary .md-nav__link--active{color:var(--acc);background:var(--acc-bg);font-weight:600}
 
 /* ── Типографика контента ─────────────────────────────────── */
-.md-typeset{font-size:.775rem;line-height:1.65;color:var(--text)}
-.md-typeset h1{font-size:1.6rem;letter-spacing:-.4px;margin:34px 0 6px;
-  color:var(--text);font-weight:700;line-height:1.25}
+.md-typeset{font-size:.8rem;line-height:1.65;color:var(--text)}
+.md-typeset h1{font-size:1.75rem;letter-spacing:-.5px;margin:28px 0 8px;
+  color:var(--text);font-weight:700;line-height:1.2}
 /* Линия над h2 — главный разделитель разделов в lovix-docs */
 .md-typeset h2{font-size:1.1rem;margin:46px 0 12px;padding-top:22px;
   border-top:1px solid var(--line);letter-spacing:-.2px;font-weight:700;line-height:1.3}
