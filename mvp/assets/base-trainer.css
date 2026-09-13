@@ -199,7 +199,7 @@ button{cursor:pointer}
 .line .txt:focus{outline:0}
 .line .nm{font-weight:600;letter-spacing:-.01em}
 .line .sc{color:var(--tx2);font-weight:500}
-.line .pct{height:25px;padding:0 9px;border-radius:var(--rad-s);background:var(--acc-a);color:var(--acc-d);
+.line .pct{height:25px;padding:0 9px;border-radius:var(--rad-s);background:var(--acc-a);color:var(--acc-d);white-space:nowrap;
   font-size:11.5px;font-weight:700;flex:none}
 .line .pct.none{background:var(--s1);color:var(--tx4);font-weight:500}
 .line .kg{font-size:12px;color:var(--tx3);white-space:nowrap;font-weight:500;flex:none;min-width:56px;text-align:right}
@@ -528,7 +528,7 @@ button{cursor:pointer}
 .nh .logo em{display:none;font-style:normal;font:900 22px/1 "Montserrat",var(--ui);
   letter-spacing:-.04em;color:var(--ink)}
 .navtog{margin-left:auto;width:26px;height:26px;border-radius:var(--rad-s);flex:none;
-  display:grid;place-items:center;color:var(--tx4);opacity:0;transition:opacity .12s}
+  display:grid;place-items:center;color:var(--tx4);opacity:.75;transition:opacity .12s}
 .nav:hover .navtog{opacity:1}
 .navtog:hover{background:var(--s1);color:var(--tx1)}
 .navtog svg{width:15px;height:15px}
@@ -558,7 +558,7 @@ body.navmin .nh .logo{cursor:pointer}
 /* .rail остаётся sticky: он и так позиционирован, absolute-кнопке этого достаточно. */
 .railtog{position:absolute;top:10px;right:10px;width:26px;height:26px;z-index:2;
   border-radius:var(--rad-s);display:grid;place-items:center;color:var(--tx4);
-  background:var(--bg);opacity:0;transition:opacity .12s}
+  background:var(--bg);opacity:.75;transition:opacity .12s}
 .rail:hover .railtog{opacity:1}
 .railtog:hover{background:var(--s1);color:var(--tx1)}
 .railtog::before{content:"›";font-size:17px;line-height:1;font-weight:600}
@@ -637,3 +637,86 @@ body.railmin .rail::after{content:"Источники";position:absolute;top:46p
 .wkh .iact{width:32px;height:32px;border-radius:var(--rad-m);display:grid;place-items:center;color:var(--tx3);background:var(--s1)}
 .wkh .iact:hover{background:var(--s2);color:var(--ink)}
 .wkh .iact svg{width:15px;height:15px}
+
+/* ─── кнопка шапки со списком ─── */
+.tsplit{position:relative;display:inline-flex}
+.tsplit .btn:first-child{border-radius:var(--rad-m) 0 0 var(--rad-m)}
+.tsplit .btn.arrow{width:34px;padding:0;border-radius:0 var(--rad-m) var(--rad-m) 0;border-left:1px solid rgba(255,255,255,.28)}
+.tsplit .btn{text-decoration:none;font:600 13.5px/1 var(--ui);letter-spacing:-.01em}
+.tsplit .btn.arrow svg{width:14px;height:14px}
+.dd{display:none;position:absolute;right:0;top:calc(100% + 6px);min-width:300px;background:var(--bg);
+  border:1px solid var(--line);border-radius:var(--rad-l);padding:6px;z-index:60}
+.dd.on{display:block}
+.dd-i{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border-radius:var(--rad-m);text-decoration:none;color:inherit}
+.dd-i:hover{background:var(--s1)}
+.dd-i svg{width:16px;height:16px;flex:none;margin-top:2px;color:var(--acc)}
+.dd-i b{display:block;font-size:13px;font-weight:600}
+.dd-i s{display:block;text-decoration:none;font-size:11.5px;color:var(--tx3);margin-top:2px;line-height:1.4}
+/* ─── визард ─── */
+.wz-steps{display:flex;gap:18px;padding:0 18px 12px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--tx4)}
+.wz-steps span{display:flex;align-items:center;gap:7px}
+.wz-steps i{font-style:normal;width:20px;height:20px;border-radius:50%;background:var(--s1);display:grid;place-items:center;font-size:11px;font-weight:700}
+.wz-steps .on{color:var(--ink);font-weight:600}
+.wz-steps .on i{background:var(--acc);color:#fff}
+.wz-steps .done i{background:var(--ok-a);color:var(--ok)}
+.wz .mdb{max-height:52vh;overflow:auto}
+.wz-list{display:flex;flex-direction:column}
+.wz-it{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--rad-m);cursor:pointer;border-bottom:1px solid var(--line)}
+.wz-it:hover{background:var(--s2)}
+.wz-it.on{background:var(--acc-a)}
+.wz-it input{display:none}
+.wz-it .tick{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--line2);display:grid;place-items:center;flex:none;background:var(--bg)}
+.wz-it .tick svg{width:12px;height:12px;color:#fff;opacity:0}
+.wz-it.on .tick{background:var(--acc);border-color:var(--acc)}
+.wz-it.on .tick svg{opacity:1}
+.wz-it .t b{display:block;font-size:13.5px;font-weight:600}
+.wz-it .t s{display:block;text-decoration:none;font-size:11.5px;color:var(--tx3)}
+.wz-it.static{cursor:default}
+.wz-n{text-decoration:none;font-size:12.5px;color:var(--tx3)}
+.wz-pub{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12.5px;color:var(--tx2)}
+
+/* ─── панель настройки упражнения ─── */
+.sug.setup{width:360px;padding:6px 10px 10px}
+.sug.setup .cap{padding-left:0;padding-right:0}
+.st-row{display:flex;align-items:center;gap:8px}
+.st-row b{color:var(--tx3);font-weight:600}
+.st-n{width:64px;height:32px;border:1px solid var(--line2);border-radius:var(--rad-s);padding:0 8px;font:inherit;font-size:13.5px;font-weight:600;background:var(--bg);text-align:center}
+.st-n.wide{width:90px}
+.st-n:focus{outline:0;border-color:var(--acc)}
+.st-free{width:100%;height:28px;margin-top:6px;border:1px dashed var(--line2);border-radius:var(--rad-s);padding:0 8px;font:inherit;font-size:12.5px;background:none}
+.st-free:focus{outline:0;border-style:solid;border-color:var(--acc)}
+.st-pre{display:flex;gap:4px;margin-left:auto}
+.st-pre button{height:24px;padding:0 8px;border-radius:20px;font-size:11.5px;font-weight:600;background:var(--s1);color:var(--tx2)}
+.st-pre button:hover{background:var(--s2);color:var(--ink)}
+.st-pre button.on{background:var(--acc);color:#fff}
+.st-pre.pcts{margin:8px 0 0;flex-wrap:wrap}
+.st-units{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+.st-units button{height:26px;padding:0 10px;border-radius:20px;font-size:12px;font-weight:600;background:var(--s1);color:var(--tx2)}
+.st-units button.on{background:var(--acc);color:#fff}
+.st-u{font-size:13px;font-weight:600;color:var(--tx2)}
+.st-kg{text-decoration:none;font-size:12.5px;color:var(--tx3);margin-left:auto}
+.st-foot{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:8px}
+.st-foot .sp{flex:1}
+.st-foot .lnk{font-size:12.5px;color:var(--tx3)}
+.st-foot .btn.sm{height:30px;padding:0 12px;font-size:12.5px}
+/* ─── текст → структура: фото ─── */
+.ptphoto{display:inline-flex;align-items:center;gap:5px;cursor:pointer}
+.ptphoto svg{width:14px;height:14px}
+.ptname{font-size:12px;color:var(--tx3)}
+/* ─── визард: вкладки и форма ─── */
+.wz-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.wz-tabs button{height:28px;padding:0 12px;border-radius:20px;font-size:12.5px;color:var(--tx3);background:var(--s1);font-weight:500}
+.wz-tabs button:hover{color:var(--ink)}
+.wz-tabs button.on{background:var(--acc);color:#fff;font-weight:600}
+.wz-row{display:flex;gap:14px;margin-bottom:14px}
+.wz-f{display:flex;flex-direction:column;gap:5px;flex:1}
+.wz-f span{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tx4)}
+.wz-f select,.wz-f input{height:36px;border:1px solid var(--line2);border-radius:var(--rad-m);padding:0 10px;font:inherit;font-size:13.5px;background:var(--bg)}
+.wz-h{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tx4);margin-bottom:8px}
+
+/* ─── заголовок конструктора в строке ленты ─── */
+.wkh .wkttl{font-family:var(--disp);font-size:18px;font-weight:700;letter-spacing:-.02em;margin:0 6px 0 0;white-space:nowrap}
+.wkh .wkrange{text-decoration:none;font-size:12.5px;color:var(--tx3);white-space:nowrap}
+.bnote .x{width:22px;height:22px;border-radius:var(--rad-s);display:grid;place-items:center;color:var(--tx4);flex:none}
+.bnote .x:hover{background:var(--s1);color:var(--acc)}
+.bnote .x svg{width:12px;height:12px}

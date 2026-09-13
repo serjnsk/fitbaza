@@ -69,7 +69,8 @@ const ICON = {
 function renderTop(){
   $('#topbar').innerHTML = `
     <span class="sp"></span>
-    <a class="btn" href="constructor.html">${ICON.build} Создать тренировку</a>`;
+    ${topButton()}`;
+  bindTopButton();
 }
 
 /* ─── заголовок рабочей зоны ───

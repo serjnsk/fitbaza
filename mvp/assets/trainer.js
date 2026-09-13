@@ -136,6 +136,7 @@ const ICON = {
  grip:'<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="6" cy="4" r="1.1"/><circle cx="10" cy="4" r="1.1"/><circle cx="6" cy="8" r="1.1"/><circle cx="10" cy="8" r="1.1"/><circle cx="6" cy="12" r="1.1"/><circle cx="10" cy="12" r="1.1"/></svg>',
  x:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg>',
  chat:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 7.6a5.2 5.2 0 0 1-7.4 4.7L2.5 13.2l1-3.6A5.2 5.2 0 1 1 13.5 7.6z"/></svg>',
+ photo:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 5.5A1.5 1.5 0 0 1 4 4h1.5l1-1.5h3l1 1.5H12a1.5 1.5 0 0 1 1.5 1.5v6A1.5 1.5 0 0 1 12 13H4a1.5 1.5 0 0 1-1.5-1.5z"/><circle cx="8" cy="8.5" r="2.3"/></svg>',
  ai:'<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M8 1.8 9.5 6 13.7 7.5 9.5 9 8 13.2 6.5 9 2.3 7.5 6.5 6z"/><path d="M12.8 11.4l.5 1.4 1.4.5-1.4.5-.5 1.4-.5-1.4-1.4-.5 1.4-.5z"/></svg>',
  /* Отдельная папка для кнопок: у навигационной ICON.tpl другой viewBox
     и не задана толщина обводки — рядом со «Сохранить» и «Копией» она
@@ -154,14 +155,10 @@ function renderTop(){
      относятся к тренировке, а не к приложению. */
   $('#topbar').innerHTML = `
     <span class="sp"></span>
-    <a class="btn" href="constructor.html">${ICON.build} Создать тренировку</a>`;
+    ${topButton()}`;
+  bindTopButton();
 }
 
-function renderHead(){
-  /* Ни крошки, ни названия программы: конструктор открывают на клиента и
-     дату, программа — свойство клиента, а не адрес, по которому пришли. */
-  $('#pagehead').innerHTML = `<div class="ph-row"><h1>Конструктор</h1></div>`;
-}
 
 
 
@@ -210,13 +207,14 @@ function renderStrip(){
   });
   $('#wk').innerHTML = `
     <div class="wkh">
+      <h1 class="wkttl">Создать тренировку</h1>
       <select class="cliSel" id="cli" title="Клиент">${CLIENTS.filter(c=>c.prog).map(c=>
         `<option value="${c.id}" ${c.id===S.cid?'selected':''}>${esc(c.n)}</option>`).join('')}</select>
       <span class="wkn">
-        <button id="dayPrev" title="Предыдущий день" ${S.i<1?'disabled':''}>${ICON.back}</button>
-        <button id="dayNext" title="Следующий день" ${S.i>=p.days-1?'disabled':''}>${ICON.arr}</button>
+        <button id="dayPrev" title="Предыдущая неделя" ${cells[0].i<1?'disabled':''}>${ICON.back}</button>
+        <button id="dayNext" title="Следующая неделя" ${cells[6].i>=p.days-1?'disabled':''}>${ICON.arr}</button>
       </span>
-      ${S.sel||S.paste ? '' : `<button class="iact" id="selStart" title="Выбрать несколько дней — скопировать или перенести">${ICON.chk}</button>`}
+      <s class="wkrange">${dm(cells[0].date)} – ${dm(cells[6].date)}</s>
       <span class="sp"></span>
       ${S.sel ? `
         <b class="seln">Выбрано ${S.sel.size}</b>
@@ -271,15 +269,20 @@ function lineHTML(it){
     <button class="x" data-del="${it.id}">${ICON.x}</button>
   </div>`;
   const kg = workKg(it, PM());
-  const tail = [it.scheme, it.pct ? '' : (it.val ? it.val+' '+it.unit : '')].filter(Boolean).join(' ');
+  /* Подходы, повторы и нагрузка живут в чипе, а не в тексте: текст — это
+     название, которое можно перепечатать; чип открывает панель настройки.
+     Набранное «как в тетради» («Присед 5×3 80%») парсер раскладывает туда же. */
   return `<div class="line" data-item="${it.id}">
     <span class="gr">${ICON.grip}</span>
-    <span class="txt" contenteditable data-edit="${it.id}"><span class="nm">${esc(ex.ru)}</span>${tail?` <span class="sc">${esc(tail)}</span>`:''}</span>
-    ${ex.pm ? `<button class="pct ${it.pct?'':'none'}" data-pct="${it.id}">${it.pct? fmtN(it.pct)+' %' : 'от ПМ'}</button>` : ''}
+    <span class="txt" contenteditable data-edit="${it.id}"><span class="nm">${esc(ex.ru)}</span></span>
+    <button class="pct ${itemChip(it)?'':'none'}" data-setup="${it.id}" title="Подходы, повторы, нагрузка">${esc(itemChip(it) || 'настроить')}</button>
     <span class="kg">${kg!=null ? fmtN(kg)+' кг' : ''}</span>
     <button class="x" data-del="${it.id}">${ICON.x}</button>
   </div>`;
 }
+/* Подпись чипа: «5×3 · 80 %», «500 м», «3×12 · RPE 8». */
+const itemLoad = it => it.pct ? fmtN(it.pct)+' %' : (it.val ? (it.unit==='RPE' ? 'RPE '+it.val : it.val+' '+it.unit) : '');
+const itemChip = it => [it.scheme, itemLoad(it)].filter(Boolean).join(' · ');
 function blockHTML(b){
   const f = findFmt(b.title);
   return `<div class="blk ${PENDING && PENDING.ids.has(b.id) ? 'pending' : ''}" data-blk="${b.id}">
@@ -293,6 +296,7 @@ function blockHTML(b){
     </div>
     ${b.note || b.noteOpen ? `<label class="bnote"><span>${ICON.chat}</span>
         <input data-f="note" value="${esc(b.note||'')}" placeholder="Заметка к блоку — увидит клиент">
+        <button class="x" data-notedel="${b.id}" title="Удалить заметку">${ICON.x}</button>
       </label>` : ''}
     ${b.items.map(lineHTML).join('')}
     <button class="addl" data-add="${b.id}">${ICON.plus} Упражнение — печатайте как в тетради: «Присед 5×3 80%»</button>
@@ -313,7 +317,10 @@ function emptyDay(){
 Присед 5×3 80%
 Жим лёжа 5×5"></textarea>
     <div class="pastef">
-      <button class="lnk" id="pt-back">← Собрать вручную</button>
+      <button class="lnk" id="pt-back">← ${day().blocks.some(b=>b.items.length) ? 'Отмена' : 'Собрать вручную'}</button>
+      <label class="lnk ptphoto" title="Фото тетради или скриншот — распознавание подключим вместе с ИИ-модулем">
+        ${ICON.photo} Из фото<input type="file" accept="image/*" id="pt-photo" hidden></label>
+      <span id="pt-photo-name" class="ptname"></span>
       <span class="sp"></span>
       <button class="btn" id="pt-go">${ICON.ai} Распознать</button>
     </div>`;
@@ -344,7 +351,9 @@ function renderDoc(){
   if(!d.blocks.length && S.compose !== 'text') d.blocks.push(mkBlock('strength','','',null,[]));
   const n   = d.blocks.reduce((a,b)=>a+b.items.filter(x=>x.exId).length,0);
   const raw = d.blocks.reduce((a,b)=>a+b.items.filter(x=>!x.exId).length,0);
-  const empty = !d.blocks.length;
+  /* Пустой — без содержимого, а не без блоков: заготовка пустого блока
+     появляется на каждом открытом дне и пустоты не отменяет. */
+  const empty = !d.blocks.some(b => b.items.length || b.title || b.note);
   /* Полоса стоит вплотную над блоками, которыми управляет: заголовок и
      сообщение клиенту к разбору отношения не имеют, а блоки ниже — это
      ровно то, что она предлагает принять или отменить. */
@@ -376,9 +385,9 @@ function renderDoc(){
       <kbd class="ent">↵ Enter</kbd>
     </label>
     ${propose}
-    ${empty && S.compose==='text' ? emptyDay() : ''}
-    ${d.blocks.map(blockHTML).join('')}
-    ${empty ? '' : `<button class="addb" id="add-blk">${ICON.plus} Добавить блок</button>`}
+    ${S.compose==='text' ? emptyDay() : ''}
+    ${S.compose==='text' && empty ? '' : d.blocks.map(blockHTML).join('')}
+    ${S.compose==='text' && empty ? '' : `<button class="addb" id="add-blk">${ICON.plus} Добавить блок</button>`}
     ${!empty && isDraft(d) ? `<div class="pubbar">
         <s>Черновик сохраняется сам. Клиент увидит тренировку после добавления в календарь.</s>
         <button class="btn" id="publish">${ICON.chk} Добавить тренировку</button>
@@ -445,6 +454,128 @@ function publishDay(){
 addEventListener('beforeunload', persist);
 document.addEventListener('visibilitychange', ()=>{ if(document.hidden) persist() });
 function render(){ persist(); renderStrip(); renderDoc(); renderSrc(); }
+
+/* ═══════════ ВИЗАРД «СОЗДАТЬ НЕСКОЛЬКО ТРЕНИРОВОК» (CON-4) ═══════════
+   Три шага: что копируем (шаблоны или существующие дни, любой набор) →
+   кому и с какого дня → проверка и создание. Набор ложится по правилу
+   промежутков: подряд, через день или как в источнике. */
+const WZ = {step:1, tab:'tpl', src:null, picked:new Map(), cid:null, start:null, gap:'daily', publish:true};
+function openWizard(){
+  Object.assign(WZ, {step:1, tab:'tpl', src:S.cid, picked:new Map(), cid:S.cid, gap:'daily', publish:true});
+  const n = composedDays(S.pid);                     /* по умолчанию — первый несоставленный день */
+  WZ.start = n < program(S.pid).days ? dayDate(S.pid, n) : S.date;
+  const ov = document.createElement('div'); ov.className = 'ov on'; ov.id = 'wz';
+  document.body.appendChild(ov);
+  const draw = () => { ov.innerHTML = wizardHTML(); wireWizard(ov, draw) };
+  draw();
+}
+const wzKey = it => it.kind==='tpl' ? 'tpl:'+it.id : 'day:'+it.pid+':'+it.i;
+function wizardHTML(){
+  const steps = ['Что копируем','Кому и когда','Проверка'];
+  const head = `<div class="wz-steps">${steps.map((n,i)=>`<span class="${WZ.step===i+1?'on':WZ.step>i+1?'done':''}"><i>${i+1}</i>${n}</span>`).join('')}</div>`;
+  let body = '', foot = '';
+  if(WZ.step===1){
+    const src = client(WZ.src);
+    const list = WZ.tab==='tpl'
+      ? TPL.filter(t=>t.lvl==='тренировка' && !t.inline).map(t=>({kind:'tpl', id:t.id, title:t.title, sub:(t.own?'своё':'общая база')+' · '+tplStats(t).blocks+' '+plural(tplStats(t).blocks,'блок','блока','блоков')}))
+      : (src && src.prog ? planOf(src.prog).filter(x=>!x.rest && x.blocks.some(b=>b.items.length)).map(x=>({kind:'day', pid:src.prog, i:x.i, title:x.title, sub:x.w+' '+dm(x.date)+' · '+x.blocks.length+' '+plural(x.blocks.length,'блок','блока','блоков')})) : []);
+    body = `
+      <div class="wz-tabs">
+        <button data-wtab="tpl" class="${WZ.tab==='tpl'?'on':''}">Из шаблонов</button>
+        <button data-wtab="day" class="${WZ.tab==='day'?'on':''}">Из существующих</button>
+      </div>
+      ${WZ.tab==='day' ? `<label class="pk-src"><span>Чьи тренировки</span>
+        <select id="wz-src">${CLIENTS.filter(c=>c.prog).map(c=>`<option value="${c.id}" ${c.id===WZ.src?'selected':''}>${esc(c.n)}</option>`).join('')}</select></label>` : ''}
+      <div class="wz-list">${list.length ? list.map(it=>{ const on = WZ.picked.has(wzKey(it));
+        return `<label class="wz-it ${on?'on':''}"><input type="checkbox" data-wzpick="${wzKey(it)}" ${on?'checked':''}>
+          <span class="tick">${ICON.chk}</span><span class="t"><b>${esc(it.title)}</b><s>${esc(it.sub)}</s></span></label>`; }).join('')
+        : '<p class="warn">Здесь пока пусто.</p>'}</div>`;
+    foot = `<s class="wz-n">Выбрано: ${WZ.picked.size} · порядок — как отмечаете</s><span class="sp"></span><button class="btn" id="wz-next" ${WZ.picked.size?'':'disabled'}>Дальше ${ICON.arr}</button>`;
+  }
+  if(WZ.step===2){
+    const hasDays = [...WZ.picked.values()].some(it=>it.kind==='day');
+    body = `
+      <div class="wz-row">
+        <label class="wz-f"><span>Кому</span>
+          <select id="wz-cid">${CLIENTS.filter(c=>c.prog).map(c=>`<option value="${c.id}" ${c.id===WZ.cid?'selected':''}>${esc(c.n)}</option>`).join('')}</select></label>
+        <label class="wz-f"><span>Начиная с</span><input type="date" id="wz-start" value="${WZ.start}"></label>
+      </div>
+      <div class="wz-h">Промежутки между тренировками</div>
+      <div class="wz-tabs">
+        <button data-gap="daily" class="${WZ.gap==='daily'?'on':''}">Подряд, день за днём</button>
+        <button data-gap="alt" class="${WZ.gap==='alt'?'on':''}">Через день</button>
+        ${hasDays?`<button data-gap="src" class="${WZ.gap==='src'?'on':''}">Как в источнике</button>`:''}
+      </div>`;
+    foot = `<button class="btn gh" id="wz-back">${ICON.back} Назад</button><span class="sp"></span><button class="btn" id="wz-next">Дальше ${ICON.arr}</button>`;
+  }
+  if(WZ.step===3){
+    const plan3 = wizardPlan();
+    body = plan3.error ? `<p class="warn">${esc(plan3.error)}</p>` : `
+      <div class="wz-list">${plan3.rows.map(r=>`<div class="wz-it static"><span class="t"><b>${esc(r.title)}</b><s>${r.w} ${dm(r.date)}${r.busy?' · заменит существующую':''}</s></span></div>`).join('')}</div>
+      <label class="wz-pub"><input type="checkbox" id="wz-pub" ${WZ.publish?'checked':''}> Сразу добавить в календарь — клиент увидит. Иначе останутся черновиками.</label>`;
+    foot = `<button class="btn gh" id="wz-back">${ICON.back} Назад</button><span class="sp"></span><button class="btn" id="wz-go" ${plan3.error?'disabled':''}>${ICON.chk} Создать ${plan3.rows?plan3.rows.length:''} ${plural(plan3.rows?plan3.rows.length:0,'тренировку','тренировки','тренировок')}</button>`;
+  }
+  return `<div class="md wmd wz"><div class="mdh"><span class="dot"></span><h2>Создать несколько тренировок</h2><button class="cls" id="wz-x">✕</button></div>
+    ${head}<div class="mdb">${body}</div><div class="mdf">${foot}</div></div>`;
+}
+/* Раскладка набора по дням: индекс = старт + смещение по правилу промежутков. */
+function wizardPlan(){
+  const c = client(WZ.cid); if(!c || !c.prog) return {error:'У клиента нет программы'};
+  const p = program(c.prog); const start = daysBetween(p.start, WZ.start);
+  if(isNaN(start) || start < 0 || start >= p.days) return {error:'Дата вне срока программы клиента'};
+  let items = [...WZ.picked.values()];
+  /* «Как в источнике»: дни идут с теми же промежутками, что были у клиента-
+     источника; шаблоны, у которых даты нет, встают следом за последним. */
+  if(WZ.gap==='src') items = items.slice().sort((a,b)=>(a.kind==='day'?a.i:1e9)-(b.kind==='day'?b.i:1e9));
+  const base = Math.min(...items.filter(i=>i.kind==='day').map(i=>i.i));
+  const rows = []; let next = 0;
+  items.forEach((it,idx)=>{
+    const off = WZ.gap==='alt' ? idx*2 : WZ.gap==='src' ? (it.kind==='day' ? it.i - base : next) : idx;
+    next = Math.max(next, off + 1);
+    const i = start + off;
+    if(i >= p.days) return;
+    const date = dayDate(c.prog, i);
+    const existing = (planOf(c.prog)[i]||{});
+    rows.push({it, i, date, w:RU[dowMon(date)], title: it.kind==='tpl' ? tplById(it.id).title : it.title, busy: !!(existing.blocks||[]).some(b=>b.items.some(x=>x.exId))});
+  });
+  if(!rows.length) return {error:'Набор не влезает в программу'};
+  return {rows, pid:c.prog};
+}
+function wizardApply(){
+  const pl = wizardPlan(); if(pl.error) return toast(pl.error);
+  bindClient(WZ.cid, WZ.start);
+  pl.rows.forEach(r=>{
+    extendPlan(r.i);
+    const d = plan()[r.i];
+    const src = r.it.kind==='tpl' ? tplToWorkout(tplById(r.it.id)) : planOf(r.it.pid)[r.it.i];
+    d.title = src.title; d.rest = false; d.blocks = copyBlocks(src.blocks);
+    if(WZ.publish){ d.pub = serializeDay(d); d.draft = false; ((STATE.days ||= {})[S.pid] ||= {})[r.i] = {c:d.pub, draft:false}; }
+    else d.draft = true;
+  });
+  persist(); saveState(); render();
+  history.replaceState(null,'',`constructor.html?client=${S.cid}&date=${S.date}`);
+  toast('Создано ' + pl.rows.length + ' ' + plural(pl.rows.length,'тренировка','тренировки','тренировок') + (WZ.publish?' — в календаре':' — черновиками'));
+}
+function wireWizard(ov, draw){
+  ov.querySelector('#wz-x').onclick = () => ov.remove();
+  ov.addEventListener('click', e => { if(e.target === ov) ov.remove() });
+  ov.querySelectorAll('[data-wtab]').forEach(b => b.onclick = () => { WZ.tab = b.dataset.wtab; draw() });
+  const src = ov.querySelector('#wz-src'); if(src) src.onchange = e => { WZ.src = e.target.value; draw() };
+  ov.querySelectorAll('[data-wzpick]').forEach(cb => cb.onchange = () => {
+    const key = cb.dataset.wzpick, [kind, a, b] = key.split(':');
+    if(cb.checked){ WZ.picked.set(key, kind==='tpl' ? {kind, id:a} : {kind, pid:a, i:+b, title:(planOf(a)[+b]||{}).title||''}); }
+    else WZ.picked.delete(key);
+    draw();
+  });
+  const cid = ov.querySelector('#wz-cid'); if(cid) cid.onchange = e => { WZ.cid = e.target.value };
+  const st = ov.querySelector('#wz-start'); if(st) st.onchange = e => { WZ.start = e.target.value || WZ.start };
+  ov.querySelectorAll('[data-gap]').forEach(b => b.onclick = () => { WZ.gap = b.dataset.gap; draw() });
+  const pub = ov.querySelector('#wz-pub'); if(pub) pub.onchange = e => { WZ.publish = e.target.checked };
+  const nx = ov.querySelector('#wz-next'); if(nx) nx.onclick = () => { WZ.step++; draw() };
+  const bk = ov.querySelector('#wz-back'); if(bk) bk.onclick = () => { WZ.step--; draw() };
+  const go = ov.querySelector('#wz-go'); if(go) go.onclick = () => { ov.remove(); wizardApply() };
+}
+if(Q.get('wizard')) addEventListener('load', openWizard);
 
 /* ═══════════ ИЗ ШАБЛОНА / КОПИЯ СУЩЕСТВУЮЩЕЙ ═══════════
    Две кнопки в строке дорожки. Составление «с нуля» отдельной кнопки не
@@ -679,31 +810,94 @@ const findItem = id => {
 function commitLine(id, text){
   const {i} = findItem(id); if(!i) return;
   const p = parseLine(text);
-  if(p) Object.assign(i, {exId:p.exId, scheme:p.scheme||'', pct:p.pct??null,
-                          unit:p.unit||'', val:p.val||'', raw:''});
+  /* В тексте теперь только название, поэтому «Присед» без цифр — это
+     переименование, а не сброс схемы: параметры берём из текста, если они
+     там есть, иначе оставляем прежние. */
+  const hasParams = p && (p.scheme || p.pct != null || p.val);
+  if(p) Object.assign(i, {exId:p.exId, raw:'', ...(hasParams ? {scheme:p.scheme||'', pct:p.pct??null, unit:p.unit||'', val:p.val||''} : {})});
   else { i.exId = null; i.raw = (text||'').trim() }
   render();
 }
 
 /* ─── проценты от ПМ (CON-16): сразу с весом под каждым ─── */
 const PCTS = [60,65,70,75,80,85,90,95];
-function openPct(btn){
+/* Одна панель на всё: подходы × повторы, лесенка, нагрузка в нужной единице.
+   Меняется на лету — строка и вес пересчитываются без перерисовки документа,
+   чтобы панель не пропадала под руками. Enter/Готово/клик мимо закрывают. */
+const LOAD_UNITS = ['кг','сек','м','кал'];
+function openSetup(btn){
   closeSug();
-  const {i} = findItem(btn.dataset.pct);
+  const {i} = findItem(btn.dataset.setup); if(!i) return;
+  const ex = byId(i.exId);
+  const units = [...(ex.pm ? ['%'] : []), ...(ex.u||[]).filter(u=>LOAD_UNITS.includes(u))];
+  if(!units.length) units.push('кг');
+  if(i.unit && !units.includes(i.unit) && i.unit!=='RPE') units.push(i.unit);
+  units.push('RPE');
+  let cur = i.pct != null ? '%' : (i.unit || units[0]);
   const box = document.createElement('div');
-  box.className = 'sug';
+  box.className = 'sug setup';
   const r = btn.getBoundingClientRect();
-  box.style.left = Math.max(12, r.right - 290) + 'px';
+  box.style.left = Math.max(12, Math.min(r.left, innerWidth - 372)) + 'px';
   box.style.top  = (r.bottom + window.scrollY + 6) + 'px';
-  box.innerHTML = '<div class="cap">Процент от максимума</div>' +
-    PCTS.map(p=>`<button class="row" data-setpct="${p}"><b>${p} %</b>
-      <s>${fmtN(workKg({...i, pct:p}, PM()))} кг</s></button>`).join('') +
-    '<div class="ok"><button class="row" data-setpct="0"><b>Убрать процент</b></button></div>';
   document.body.appendChild(box); SUG = box;
-  box.addEventListener('click', ev=>{
-    const s = ev.target.closest('[data-setpct]'); if(!s) return;
-    i.pct = +s.dataset.setpct || null; closeSug(); render();
+  const simple = () => (i.scheme||'').match(/^(\d+)×(\d*)$/);
+  const draw = () => {
+    const m = simple(), kg = workKg(i, PM());
+    box.innerHTML = `
+      <div class="cap">Подходы × повторы</div>
+      <div class="st-row">
+        <input class="st-n" id="st-sets" type="number" min="1" max="99" placeholder="подх." value="${m ? m[1] : ''}">
+        <b>×</b>
+        <input class="st-n" id="st-reps" type="number" min="1" max="999" placeholder="повт." value="${m ? m[2] : ''}">
+        <span class="st-pre">${['3×10','4×8','5×5','5×3'].map(s=>`<button data-st-pre="${s}" class="${i.scheme===s?'on':''}">${s}</button>`).join('')}</span>
+      </div>
+      <input class="st-free" id="st-scheme" placeholder="или лесенка: 5-5-3-3-1" value="${m ? '' : esc(i.scheme||'')}">
+      <div class="cap">Нагрузка</div>
+      <div class="st-units">${units.map(u=>`<button data-st-u="${u}" class="${cur===u?'on':''}">${u==='%'?'% от ПМ':u}</button>`).join('')}</div>
+      <div class="st-row">
+        <input class="st-n wide" id="st-val" type="number" min="0" step="${cur==='RPE'?'0.5':cur==='%'?'5':'any'}" placeholder="${cur==='%'?'80':cur==='RPE'?'8':'0'}"
+               value="${cur==='%' ? (i.pct ?? '') : (i.unit===cur ? esc(i.val||'') : '')}">
+        <span class="st-u">${cur==='%'?'%':cur}</span>
+        <s class="st-kg" id="st-kg">${kg!=null ? '→ '+fmtN(kg)+' кг' : (cur==='%' && !PM()[ex.pm] ? 'ПМ не задан' : '')}</s>
+      </div>
+      ${cur==='%' ? `<div class="st-pre pcts">${PCTS.map(p=>`<button data-st-pct="${p}" class="${i.pct===p?'on':''}">${p}</button>`).join('')}</div>` : ''}
+      <div class="ok st-foot"><button class="lnk" data-st-clear>Убрать параметры</button><span class="sp"></span><button class="btn sm" data-st-ok>Готово ↵</button></div>`;
+  };
+  const sync = () => {                       /* строка и вес — без render() */
+    const chip = itemChip(i), el = $(`[data-setup="${i.id}"]`);
+    if(el){ el.textContent = chip || 'настроить'; el.classList.toggle('none', !chip);
+            const kg = workKg(i, PM()); el.parentElement.querySelector('.kg').textContent = kg!=null ? fmtN(kg)+' кг' : '' }
+    const k = $('#st-kg'); if(k){ const kg = workKg(i, PM()); k.textContent = kg!=null ? '→ '+fmtN(kg)+' кг' : '' }
+  };
+  const setLoad = v => {
+    const num = v === '' ? null : +v;
+    if(cur==='%'){ i.pct = num || null; i.unit=''; i.val=''; }
+    else { i.pct = null; i.unit = num==null ? '' : cur; i.val = num==null ? '' : String(v); }
+    sync();
+  };
+  box.addEventListener('input', e=>{
+    const id = e.target.id;
+    if(id==='st-sets' || id==='st-reps'){
+      const s = $('#st-sets').value.trim(), rp = $('#st-reps').value.trim();
+      i.scheme = s && rp ? `${s}×${rp}` : s ? `${s}×` : ''; $('#st-scheme').value = ''; sync(); return }
+    if(id==='st-scheme'){ i.scheme = e.target.value.trim(); $('#st-sets').value = ''; $('#st-reps').value = ''; sync(); return }
+    if(id==='st-val'){ setLoad(e.target.value.trim()); return }
   });
+  /* Клик внутри панели не должен дойти до общего обработчика: тот закрывает
+     всплывашки по клику «мимо», а после перерисовки панели нажатая кнопка
+     уже отвязана от DOM и выглядит как клик мимо. */
+  box.addEventListener('click', e=>{
+    e.stopPropagation();
+    const pre = e.target.closest('[data-st-pre]'); if(pre){ i.scheme = pre.dataset.stPre; draw(); sync(); return }
+    const u = e.target.closest('[data-st-u]');
+    if(u){ const v = $('#st-val').value.trim(); cur = u.dataset.stU; setLoad(v); draw(); return }
+    const pc = e.target.closest('[data-st-pct]'); if(pc){ i.pct = +pc.dataset.stPct; i.unit=''; i.val=''; draw(); sync(); return }
+    if(e.target.closest('[data-st-clear]')){ Object.assign(i, {scheme:'', pct:null, unit:'', val:''}); cur = units[0]; draw(); sync(); return }
+    if(e.target.closest('[data-st-ok]')){ closeSug(); render(); return }
+  });
+  box.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); closeSug(); render() } });
+  draw();
+  const f = $('#st-sets'); if(f) f.focus();
 }
 
 /* ─── вставка из панели источников ─── */
@@ -960,8 +1154,13 @@ document.addEventListener('click', e=>{
     extendPlan(i);
     S.i = i; S.compose = null; closeSug(); render(); return;
   }
-  if(e.target.closest('#dayPrev')){ S.i = Math.max(0, S.i-1); S.compose = null; render(); return }
-  if(e.target.closest('#dayNext')){ const i = Math.min(program(S.pid).days-1, S.i+1); extendPlan(i); S.i = i; S.compose = null; render(); return }
+  /* Стрелки листают неделями: лента — это неделя, день внутри неё выбирают
+     кликом. Встаём на тот же день недели, если он в сроке программы. */
+  if(e.target.closest('#dayPrev')){ S.i = Math.max(0, S.i-7); S.compose = null; render(); return }
+  if(e.target.closest('#dayNext')){ const i = Math.min(program(S.pid).days-1, S.i+7); extendPlan(i); S.i = i; S.compose = null; render(); return }
+  const nd = e.target.closest('[data-notedel]');
+  if(nd){ e.preventDefault(); const b = day().blocks.find(x=>x.id===nd.dataset.notedel);
+          if(b){ b.note = ''; b.noteOpen = false; render() } return }
   const nt = e.target.closest('[data-notetog]');
   if(nt){
     /* Заметки к блокам пишут редко, поэтому поле спрятано за иконкой: открыл —
@@ -1001,7 +1200,7 @@ document.addEventListener('click', e=>{
     const t = $('.blk .bt'); if(t) t.focus();
     return;
   }
-  if(e.target.closest('#w-ai')){ S.compose = 'text'; render(); $('#paste').focus(); return }
+  if(e.target.closest('#w-ai')){ S.compose = 'text'; render(); const p = $('#paste'); if(p) p.focus(); return }
   if(e.target.closest('#pt-back')){ S.compose = null; render(); return }
   if(e.target.closest('#pt-go')){ applyText($('#paste').value); return }
   if(e.target.closest('#w-prev')){ copyPrev(); return }
@@ -1024,7 +1223,7 @@ document.addEventListener('click', e=>{
   if(db){ const d2 = day(); d2.blocks = d2.blocks.filter(b=>b.id!==db.dataset.delblk); render(); return }
   const dl = e.target.closest('[data-del]');
   if(dl){ const {b} = findItem(dl.dataset.del); b.items = b.items.filter(x=>x.id!==dl.dataset.del); render(); return }
-  const pc = e.target.closest('[data-pct]'); if(pc){ openPct(pc); return }
+  const st = e.target.closest('[data-setup]'); if(st){ openSetup(st); return }
   const pf = e.target.closest('[data-pickfor]');
   if(pf){ const {i} = findItem(pf.dataset.pickfor);
           showSug(pf, i.raw || '');
@@ -1051,7 +1250,11 @@ document.addEventListener('click', e=>{
     $$('.md .cl').forEach(x=>x.classList.toggle('on', PICK.has(x.dataset.cl)));
     paintPick(); return;
   }
-  if(!e.target.closest('.sug')) closeSug();
+  if(!e.target.closest('.sug')){
+    const wasSetup = SUG && SUG.classList.contains('setup');
+    closeSug();
+    if(wasSetup && !(document.activeElement && document.activeElement.closest('#doc'))) render();
+  }
 });
 
 /* Вставка многострочного текста — куда бы её ни сделали. Одна строка
@@ -1097,6 +1300,11 @@ document.addEventListener('input', e=>{
   if(e.target.id === 'q'){ S.q = e.target.value; renderSrc(); return }
 });
 document.addEventListener('change', e=>{
+  if(e.target.id === 'pt-photo'){
+    const f = e.target.files && e.target.files[0];
+    if(f){ $('#pt-photo-name').textContent = f.name; toast('Фото прикреплено. Распознавание с фото появится вместе с ИИ-модулем — пока разбираем текст') }
+    return;
+  }
   if(e.target.id === 'cli'){
     /* Смена клиента — это смена плана: у каждого своя программа. Дату держим,
        чтобы тренер не терял место, где стоял. */
@@ -1120,7 +1328,7 @@ document.addEventListener('keydown', e=>{
   }
   if(ed && e.key === 'Enter'){ e.preventDefault();
     const id = ed.dataset.edit, txt = ed.textContent; closeSug(); commitLine(id, txt); return }
-  if(e.key === 'Escape'){ closeSug(); $('#ov').classList.remove('on') }
+  if(e.key === 'Escape'){ closeSug(); $('#ov').classList.remove('on'); const w = $('#wz'); if(w) w.remove() }
 });
 document.addEventListener('focusout', e=>{
   const ed = e.target.closest('[data-edit]');
@@ -1284,7 +1492,7 @@ function clientRow(c, key, needsPm){
 
 /* В данных формат лежал отдельным полем — переносим в название один раз,
    чтобы источник остался один. */
-renderNav('constructor.html'); renderTop(); renderHead(); render();
+renderNav('constructor.html'); renderTop(); render();
 
 /* Сворачивание панели источников — состояние переживает перезагрузку,
    как и у левого меню. */

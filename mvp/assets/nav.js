@@ -74,3 +74,28 @@ try{ if(localStorage.getItem('tg.navmin')) document.documentElement.classList.ad
 addEventListener('DOMContentLoaded', ()=>{
   if(document.documentElement.classList.contains('navmin-boot')) setNavMin(true);
 });
+
+
+/* ═══════════ ГЛАВНАЯ КНОПКА ШАПКИ — С РАСКРЫВАЮЩИМСЯ СПИСКОМ ═══════════
+   Основной клик создаёт тренировку; стрелка справа открывает дополнительные
+   действия. Пока одно — «Создать несколько тренировок» (визард массового
+   копирования, CON-4). На конструкторе визард открывается на месте, с других
+   страниц — переходом на конструктор с ?wizard=1. */
+function topButton(){
+  return `<span class="tsplit">
+    <a class="btn" href="constructor.html">Создать тренировку</a>
+    <button class="btn arrow" id="topmore" title="Ещё действия" aria-label="Ещё действия"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5l4 4 4-4"/></svg></button>
+    <div class="dd" id="topdd">
+      <a class="dd-i" href="constructor.html?wizard=1" data-wizard>${ICON.copy}<span><b>Создать несколько тренировок</b><s>Выбрать из шаблонов или существующих и скопировать клиенту в нужные дни</s></span></a>
+    </div>
+  </span>`;
+}
+function bindTopButton(){
+  const b = document.getElementById('topmore'), dd = document.getElementById('topdd');
+  if(!b || !dd) return;
+  b.onclick = e => { e.stopPropagation(); dd.classList.toggle('on') };
+  document.addEventListener('click', e => { if(!e.target.closest('#topdd')) dd.classList.remove('on') });
+  /* На конструкторе визард открывается без перехода — функция определена там. */
+  const w = dd.querySelector('[data-wizard]');
+  if(w && typeof openWizard === 'function') w.onclick = e => { e.preventDefault(); dd.classList.remove('on'); openWizard() };
+}
