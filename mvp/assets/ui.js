@@ -291,7 +291,9 @@ function libDetail(t){
    Строка — занятие, а не клиент (см. sessionsOn в data.js). Держим в одном
    месте: экран дня в календаре показывает ровно то же, что дашборд, и
    расхождение между ними было бы багом, а не вариантом. */
-function timelineHTML(ses, gaps){
+/* date нужна ссылкам: конструктор открывается на клиента и дату (?client=&date=).
+   У группового занятия программа одна на всех — ведём на первого атлета. */
+function timelineHTML(ses, gaps, date){
   if(!ses.length && !gaps) return `<div class="empty"><div class="t">Занятий нет</div></div>`;
   const rows = ses.map((s,i)=>{
     const prev = ses[i-1];
@@ -301,7 +303,7 @@ function timelineHTML(ses, gaps){
     const p = program(s.pid);
     const many = s.who.length > 3;
     return `${nowHere?nowRow():''}
-      <a class="r ${s.state}" href="constructor.html">
+      <a class="r ${s.state}" href="constructor.html?client=${s.who[0].id}&date=${date||TODAY}">
         <span class="tm">${s.time}</span>
         <span class="sp"><span class="dot"></span></span>
         <span class="bd">

@@ -56,7 +56,7 @@ function render(){
           <span>${esc(C.phone)}</span>
         </div>
       </div>
-      <a class="btn gh" href="constructor.html">${ICON.build} ${P?'Открыть в конструкторе':'Назначить программу'}</a>
+      <a class="btn gh" href="${P?`constructor.html?client=${C.id}&date=${TODAY}`:'programs.html'}">${ICON.build} ${P?'Открыть в конструкторе':'Назначить программу'}</a>
     </div>
 
     <div class="facts" style="margin-top:14px">

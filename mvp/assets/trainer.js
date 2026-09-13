@@ -69,12 +69,36 @@ const REST_TITLES = new Set(['Отдых','—','']);
 /* S.i — номер дня в плане программы, от нуля. Недели в модели нет, поэтому
    и в состоянии её нет: раньше здесь лежали «неделя» и «день внутри недели»,
    и любое действие приходилось переводить между двумя системами отсчёта. */
-const S = { cid:'c1', pid:'p1', i:0, tab:'ex', q:'', compose:null,
+/* Конструктор отталкивается от клиента и даты, а не от программы: программа —
+   то, что у клиента назначено, а не то, куда заходят. Без параметров в адресе
+   открывается пустой конструктор с выбором даты и клиента (режим new);
+   ?client=&date= ведёт сразу в редактор нужного дня. */
+const Q = new URLSearchParams(location.search);
+const S = { cid: Q.get('client') || 'c1', pid:'p1', i:0, date: Q.get('date') || TODAY,
+            tab:'ex', q:'', compose:null,
             sel:null,    /* Set выбранных дней или null — режим выключен */
             paste:null   /* 'copy' | 'move' — ждём, куда вставить набор */ };
-S.i = Math.max(0, Math.min(composedDays(S.pid)-1, daysBetween(program(S.pid).start, TODAY)));
 const PCACHE = {};
-const plan = () => PCACHE[S.pid] ||= buildPlan(S.pid);
+/* planOf строит план один раз на программу и сразу переносит формат блока в
+   название (fmtIntoTitle): раньше это делалось только для стартовой
+   программы, и после смены клиента чужие блоки приходили без формата. */
+const planOf = pid => PCACHE[pid] ||= (b => { b.forEach(d=>d.blocks.forEach(fmtIntoTitle)); return b })(buildPlan(pid));
+const plan = () => planOf(S.pid);
+/* Привязка клиента к плану: программа берётся у клиента, день — из даты. */
+function bindClient(cid, date){
+  const c = client(cid); if(!c) return false;
+  S.cid = cid; S.pid = c.prog || null;
+  if(!S.pid) return false;
+  S.date = date || S.date;
+  const i = daysBetween(program(S.pid).start, S.date);
+  if(i < 0 || i >= program(S.pid).days) return false;
+  extendPlan(i);
+  S.i = i; S.compose = null; S.sel = null; S.paste = null;
+  return true;
+}
+/* Если из адреса пришло что-то негодное — откатываемся на клиента по умолчанию
+   и сегодня, редактор должен открыться в любом случае. */
+if(!bindClient(S.cid, S.date)) bindClient('c1', TODAY);
 const day  = () => plan()[S.i];
 const PM   = () => pmOf(S.cid);
 
@@ -121,21 +145,11 @@ function renderTop(){
 }
 
 function renderHead(){
-  const p = program(S.pid);
-  $('#pagehead').innerHTML = `
-    <nav class="crumb">
-      <a href="programs.html">База программ</a>
-    </nav>
-    <div class="ph-row">
-      <h1>${esc(p.title)}</h1>
-      <span class="sp"></span>
-      <label class="forw"><span>веса для</span>
-        <select id="cli">${CLIENTS.map(c=>
-          `<option value="${c.id}" ${c.id===S.cid?'selected':''}>${esc(c.n)}</option>`).join('')}</select>
-      </label>
-      <button class="btn" id="assign">${ICON.chk} Назначить</button>
-    </div>`;
+  /* Ни крошки, ни названия программы: конструктор открывают на клиента и
+     дату, программа — свойство клиента, а не адрес, по которому пришли. */
+  $('#pagehead').innerHTML = `<div class="ph-row"><h1>Конструктор</h1></div>`;
 }
+
 
 
 /* COM-4 — обращение тренера ко всей тренировке. На экране клиента оно
@@ -175,11 +189,13 @@ function renderStrip(){
   const d = plan(), p = program(S.pid);
   $('#wk').innerHTML = `
     <div class="wkh">
+      <select class="cliSel" id="cli" title="Клиент">${CLIENTS.filter(c=>c.prog).map(c=>
+        `<option value="${c.id}" ${c.id===S.cid?'selected':''}>${esc(c.n)}</option>`).join('')}</select>
       <span class="wkn">
         <button id="dayPrev" title="Предыдущий день" ${S.i<1?'disabled':''}>${ICON.back}</button>
         <button id="dayNext" title="Следующий день" ${S.i>=d.length-1?'disabled':''}>${ICON.arr}</button>
       </span>
-      <b>День ${S.i+1} из ${p.days}</b><s>${S.paste
+      <b>День ${S.i+1} из ${p.days} · ${dm(d[S.i].date)}</b><s>${S.paste
         ? (S.paste==='copy'?'выберите день, куда скопировать':'выберите день, куда перенести')
         : planStat()}</s>
       <span class="sp"></span>
@@ -189,8 +205,9 @@ function renderStrip(){
         <button class="cp" id="selMove" ${S.sel.size?'':'disabled'}>${ICON.arr} Перенести</button>
         <button class="cp" id="selCancel">${ICON.x} Отмена</button>
       ` : `
+        <button class="cp" id="fromTpl">${ICON.tpl} Из шаблона</button>
+        <button class="cp" id="copyFrom">${ICON.copy} Скопировать существующую</button>
         <button class="cp" id="daySave">${ICON.star} Сохранить день</button>
-        <button class="cp" id="repeatPrev">${ICON.copy} Повторить предыдущую</button>
         <button class="cp" id="selStart">${ICON.chk} Выбрать несколько</button>
         <button class="cp" id="addDay">${ICON.plus} Добавить день</button>
       `}
@@ -381,6 +398,53 @@ function renderSrc(){
   }
 }
 function render(){ renderStrip(); renderDoc(); renderSrc(); }
+
+/* ═══════════ ИЗ ШАБЛОНА / КОПИЯ СУЩЕСТВУЮЩЕЙ ═══════════
+   Две кнопки в строке дорожки. Составление «с нуля» отдельной кнопки не
+   требует: пустой день уже есть, блоки накидываются из панели или текстом. */
+function pickTemplate(){
+  const list = TPL.filter(t=>t.lvl==='тренировка');
+  openPick('Тренировка из шаблона', list.map(t=>`
+    <button class="pk" data-tpl="${t.id}"><b>${esc(t.title)}</b>
+      <s>${t.own?'своё':'общая база'} · ${tplStats(t).blocks} ${plural(tplStats(t).blocks,'блок','блока','блоков')}</s></button>`).join(''),
+    el => { const t = tplById(el.dataset.tpl); const w = tplToWorkout(t); const d = day();
+      d.title = w.title; d.rest = false; d.blocks = copyBlocks(w.blocks); render();
+      toast('«' + t.title + '» вставлена в день ' + (S.i+1)); });
+}
+
+function pickExisting(){
+  let srcId = S.cid;
+  const draw = () => {
+    const c = client(srcId); const days = c.prog ? planOf(c.prog).filter(x=>!x.rest) : [];
+    return `
+      <label class="pk-src"><span>Чья тренировка</span>
+        <select id="pk-src">${CLIENTS.filter(x=>x.prog).map(x=>`<option value="${x.id}" ${x.id===srcId?'selected':''}>${esc(x.n)}${x.id===S.cid?' — этот клиент':''}</option>`).join('')}</select>
+      </label>
+      ${days.length ? days.map(x=>`<button class="pk" data-src="${c.id}" data-i="${x.i}"><b>${esc(x.title)}</b>
+        <s>${x.w} ${dm(x.date)} · ${x.blocks.length} ${plural(x.blocks.length,'блок','блока','блоков')}</s></button>`).join('')
+      : '<p class="warn">У клиента пока нет составленных тренировок.</p>'}`;
+  };
+  openPick('Скопировать тренировку', draw(), el => {
+    const src = planOf(client(el.dataset.src).prog)[+el.dataset.i]; const d = day();
+    d.title = src.title; d.rest = false; d.blocks = copyBlocks(src.blocks); render();
+    toast('Скопировано: «' + src.title + '» → день ' + (S.i+1));
+  }, wire);
+  function wire(box){ box.querySelector('#pk-src').onchange = e => { srcId = e.target.value; box.querySelector('.mdb').innerHTML = draw(); wire(box) } }
+}
+
+/* Общая модалка выбора: список кнопок .pk, клик по одной — выбор. */
+function openPick(title, body, onPick, after){
+  const ov = document.createElement('div'); ov.className = 'ov on';
+  ov.innerHTML = `<div class="md wmd"><div class="mdh"><span class="dot"></span><h2>${esc(title)}</h2>
+    <button class="cls">✕</button></div><div class="mdb">${body}</div></div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => {
+    const pk = e.target.closest('.pk');
+    if(pk){ ov.remove(); onPick(pk); return }
+    if(e.target === ov || e.target.closest('.cls')) ov.remove();
+  });
+  if(after) after(ov);
+}
 
 /* ─── разбор текста на лету (CON-1 + CON-5) ─── */
 /* parseText разбирает МНОГО строк и возвращает массив записей вида
@@ -846,7 +910,8 @@ document.addEventListener('click', e=>{
   }
   if(e.target.closest('#dayPrev')){ S.i = Math.max(0, S.i-1); S.compose = null; render(); return }
   if(e.target.closest('#dayNext')){ S.i = Math.min(plan().length-1, S.i+1); S.compose = null; render(); return }
-  if(e.target.closest('#repeatPrev')){ repeatPrev(); return }
+  if(e.target.closest('#fromTpl')){ pickTemplate(); return }
+  if(e.target.closest('#copyFrom')){ pickExisting(); return }
   if(e.target.closest('#daySave')){ saveWorkout(); return }
   if(e.target.closest('#addDay')){ addDay(); return }
   if(e.target.closest('#selStart')){ S.sel = new Set(); S.paste = null; render(); return }
@@ -914,7 +979,6 @@ document.addEventListener('click', e=>{
                              unit:cur.unit||'', val:cur.val||'', raw:''}) }
     closeSug(); render(); return;
   }
-  if(e.target.closest('#assign')){ openAssign(); return }
   if(e.target.closest('#md-cancel') || e.target.closest('#md-x') ||
      e.target === $('#ov') || e.target.closest('#md-ok')){
     $('#ov').classList.remove('on'); return }
@@ -973,7 +1037,13 @@ document.addEventListener('input', e=>{
   if(e.target.id === 'q'){ S.q = e.target.value; renderSrc(); return }
 });
 document.addEventListener('change', e=>{
-  if(e.target.id === 'cli'){ S.cid = e.target.value; renderDoc(); }   /* сообщение — тоже своё у каждого */
+  if(e.target.id === 'cli'){
+    /* Смена клиента — это смена плана: у каждого своя программа. Дату держим,
+       чтобы тренер не терял место, где стоял. */
+    const date = plan()[S.i].date;
+    if(!bindClient(e.target.value, date)) { toast('У клиента нет программы или дата вне её'); return }
+    render();
+  }
 });
 document.addEventListener('keydown', e=>{
   const ed = e.target.closest('[data-edit]');
@@ -1149,62 +1219,11 @@ function clientRow(c, key, needsPm){
     <span class="pmv"><b>${pm[key]!=null?fmtN(pm[key]):'—'}</b><s>${esc(PMNAMES[key])}</s></span>
   </button>`;
 }
-function paintPick(){
-  const k = PICK.size;
-  $('#md-ok').textContent = k ? 'Назначить' + (k>1 ? ' · '+k : '') : 'Выберите клиента';
-  $('#md-ok').disabled = !k;
-  $('#md-all').textContent = k === CLIENTS.length ? 'Снять всех' : 'Назначить всем';
-}
-function openAssign(){
-  const d = day();
-  const n = d.blocks.reduce((a,b)=>a+b.items.filter(x=>x.exId).length,0);
-  const dt = new Date(d.date + 'T00:00:00');
-  PICK = new Set([S.cid]);
-  $('#md-title').textContent = d.title || 'Без названия';
-  $('#md-sub').textContent = `день ${S.i+1} из ${program(S.pid).days} · ` +
-    `${DOW[dowMon(day().date)].toLowerCase()}, ${dt.getDate()} ${MON[dt.getMonth()]} · ` +
-    `${d.blocks.length} ${plural(d.blocks.length,'блок','блока','блоков')} · ` +
-    `${n} ${plural(n,'упражнение','упражнения','упражнений')}`;
-  /* Граница простая: программа едет, переписка остаётся. Всё, что
-     описывает выполнение — блоки, схемы, проценты, заметки о технике, —
-     это программа. Всё, что адресовано человеку, — переписка, и она
-     привязана к паре «клиент + объект», а не к тренировке. */
-  const notes = d.blocks.filter(b=>b.note).length;
-  const me    = gen(client(S.cid).n);
-  const msg   = trainerMsg(d.date) ? 1 : 0;
-  /* Упражнение может стоять в тренировке дважды (3×5 и 2×3 становой),
-     но переписка у него одна — собираем по упражнениям, а не по строкам.
-     Пока их одно-два, называем: «обсуждение: становая тяга» понятнее,
-     чем «1 ветка» — тренер сразу видит, о чём именно речь. */
-  const talked = [...new Set(d.blocks.flatMap(b=>b.items).map(i=>i.exId).filter(Boolean))]
-    .filter(id => (TALK.item[talkKey(S.cid, id)]||[]).length);
-  const threads = talked.length <= 2
-    ? talked.map(id => byId(id).ru).join(', ')
-    : talked.length + ' упражнениям';
-  $('#md-carry').textContent = [
-    d.blocks.length + ' ' + plural(d.blocks.length,'блок','блока','блоков'),
-    n + ' ' + plural(n,'упражнение','упражнения','упражнений'),
-    'проценты от ПМ — пересчитаются под нового атлета',
-    notes ? notes + ' ' + plural(notes,'заметка','заметки','заметок') + ' к блокам' : null,
-  ].filter(Boolean).join(' · ');
-  $('#md-stay').textContent = [
-    msg ? 'сообщение к тренировке' : null,
-    talked.length ? (talked.length <= 2 ? 'обсуждение: ' + threads
-                                       : 'обсуждение по ' + threads) : null,
-    'записанные результаты',
-  ].filter(Boolean).join(' · ');
-  const key = mainPm(d);
-  const needsPm = d.blocks.flatMap(b=>b.items).some(i=>i.pct != null);
-  $('#md-clients').innerHTML = CLIENTS.map(c=>clientRow(c, key, needsPm)).join('');
-  $('#md-stayt').textContent = 'Останется у ' + me;
-  paintPick();
-  $('#ov').classList.add('on');
-}
+/* Модалка «Назначить» удалена: назначение теперь неявное — тренировка стоит
+   у клиента на дате. Массовое назначение (CON-10) переезжает из конструктора. */
 
 /* В данных формат лежал отдельным полем — переносим в название один раз,
    чтобы источник остался один. */
-PCACHE[S.pid] = buildPlan(S.pid);
-plan().forEach(d=>d.blocks.forEach(fmtIntoTitle));
 renderNav('constructor.html'); renderTop(); renderHead(); render();
 
 /* Сворачивание панели источников — состояние переживает перезагрузку,

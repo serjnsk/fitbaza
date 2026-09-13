@@ -59,7 +59,7 @@ function render(){
       <div>
         <div class="sechead"><span class="t">Таймлайн дня</span><span class="ln"></span><span class="n">${ses.length}</span></div>
         <div class="card cb">
-          ${timelineHTML(ses, 0)}
+          ${timelineHTML(ses, 0, TODAY)}
         </div>
 
         <div class="sechead"><span class="t">Неделя одним взглядом</span><span class="ln"></span></div>
@@ -89,11 +89,11 @@ function render(){
               const cls = x.runway < 0 ? 'rm' : x.runway <= 7 ? 'warn' : 'ok';
               return `<div class="r">
                 <span class="c">
-                  <a class="t" href="constructor.html">${esc(x.p.title)}</a>
+                  <a class="t" href="constructor.html?client=${x.p.clients[0]}&date=${addDays(x.lastDay,1)}">${esc(x.p.title)}</a>
                   <span class="s">составлено ${x.composed} из ${x.p.days} ${plural(x.p.days,'дня','дней','дней')} · ${x.athletes} ${plural(x.athletes,'атлет','атлета','атлетов')}</span>
                 </span>
                 <span class="chip ${cls}">${lbl}</span>
-                <a class="btn gh sm" href="constructor.html">Составить</a>
+                <a class="btn gh sm" href="constructor.html?client=${x.p.clients[0]}&date=${addDays(x.lastDay,1)}">Составить</a>
               </div>`; }).join('')}
           </div>
         </div>
@@ -136,7 +136,7 @@ function render(){
                 <div class="c">
                   <div class="h"><b>${esc(p.title)}</b></div>
                   <div class="tx">План составлен не до конца — дальше пусто</div>
-                  <a class="btn gh sm" href="constructor.html" style="margin-top:8px;display:inline-flex">Открыть в конструкторе</a>
+                  <a class="btn gh sm" href="constructor.html?client=${p.clients[0]}&date=${addDays(composeQueue().find(x=>x.p.id===p.id).lastDay,1)}" style="margin-top:8px;display:inline-flex">Открыть в конструкторе</a>
                 </div>
               </div>`).join('')}
             ${np.map(c=>`
