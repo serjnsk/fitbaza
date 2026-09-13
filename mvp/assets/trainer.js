@@ -836,7 +836,10 @@ function openSetup(btn){
   const units = [...(weighted ? ['%','кг'] : []), ...(ex.u||[]).filter(u=>VOL_UNITS.includes(u))];
   if(i.unit && i.val && i.unit!=='RPE' && !units.includes(i.unit)) units.push(i.unit);
   const hasLoad = units.length > 0;
-  let cur = i.pct != null ? '%' : (i.unit || 'none');
+  /* Пустое поле — и есть «без нагрузки»: отдельного состояния нет. Если
+     нагрузка не задана, переключатель стоит на % (когда максимум известен)
+     или на первой единице, поле пустое. */
+  let cur = i.pct != null ? '%' : (i.val && i.unit ? i.unit : (weighted && PM()[key] ? '%' : units[0]));
   const ui = {ladder: !!(i.scheme && !/^\d+×\d*$/.test(i.scheme)), pm:false};
   const box = document.createElement('div');
   box.className = 'sug setup';
@@ -854,7 +857,7 @@ function openSetup(btn){
   const readout = () => {
     const kg = workKg(i, PM());
     if(cur==='%') return kg!=null ? `% → <b>${fmtN(kg)} кг</b>` : (pmVal() ? '%' : '% · <i>ПМ не задан</i>');
-    return cur==='none' ? '' : esc(cur);
+    return esc(cur);
   };
   const headPM = () => weighted ? `${pmVal() ? 'ПМ '+fmtN(pmVal())+' кг' : 'ПМ не задан'} · <a class="st-lnk" data-st-pm>${pmVal() ? 'изменить' : 'ввести'}</a>` : '';
   let draw = () => {
@@ -875,10 +878,10 @@ function openSetup(btn){
         ${hasLoad ? `
         <span class="st-l">${weighted ? 'Вес' : 'Объём'}</span>
         <span class="st-v">
-          <span class="st-seg">${[...units,'none'].map(u=>`<button data-st-u="${u}" class="${cur===u?'on':''}">${u==='%'?'% от ПМ':u==='none'?(weighted?'без веса':'нет'):u}</button>`).join('')}</span>
-          ${cur==='none' ? '' : `<input class="st-n" id="st-val" type="number" min="0" step="${cur==='%'?'5':cur==='кг'?'2.5':cur==='м'?'50':'1'}" placeholder="${cur==='%'?'80':'0'}"
+          <span class="st-seg">${units.map(u=>`<button data-st-u="${u}" class="${cur===u?'on':''}">${u==='%'?'% от ПМ':u}</button>`).join('')}</span>
+          <input class="st-n" id="st-val" type="number" min="0" step="${cur==='%'?'5':cur==='кг'?'2.5':cur==='м'?'50':'1'}" placeholder="—"
                  value="${cur==='%' ? (i.pct ?? '') : (i.unit===cur ? esc(i.val||'') : '')}">
-          <s class="st-res" id="st-res">${readout()}</s>`}
+          <s class="st-res" id="st-res">${readout()}</s>
         </span>` : ''}
       </div>
       <div class="st-foot"><button class="lnk" data-st-clear>Убрать параметры</button><span class="sp"></span><button class="btn sm" data-st-ok>Готово ↵</button></div>`;
@@ -892,8 +895,7 @@ function openSetup(btn){
   };
   const setLoad = v => {
     const num = v === '' ? null : +v;
-    if(cur==='none'){ i.pct = null; i.unit = ''; i.val = ''; }
-    else if(cur==='%'){ i.pct = num || null; i.unit=''; i.val=''; }
+    if(cur==='%'){ i.pct = num || null; i.unit=''; i.val=''; }
     else { i.pct = null; i.unit = num==null ? '' : cur; i.val = num==null ? '' : String(v); }
     sync();
   };
@@ -916,7 +918,7 @@ function openSetup(btn){
     if(e.target.closest('[data-st-ladder]')){ ui.ladder = true; draw(); $('#st-scheme').focus(); return }
     if(e.target.closest('[data-st-noladder]')){ ui.ladder = false; if(!/^\d+×\d*$/.test(i.scheme||'')) i.scheme = ''; draw(); sync(); return }
     if(e.target.closest('[data-st-pm]')){ ui.pm = !ui.pm; draw(); const f = $('#st-pm'); if(f) f.focus(); return }
-    if(e.target.closest('[data-st-clear]')){ Object.assign(i, {scheme:'', pct:null, unit:'', val:''}); cur = 'none'; ui.ladder = false; draw(); sync(); return }
+    if(e.target.closest('[data-st-clear]')){ Object.assign(i, {scheme:'', pct:null, unit:'', val:''}); cur = weighted && PM()[key] ? '%' : units[0]; ui.ladder = false; draw(); sync(); return }
     if(e.target.closest('[data-st-ok]')){ closeSug(); render(); return }
   });
   box.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); if(e.target.id==='st-pm'){ ui.pm = false; draw(); sync(); return } closeSug(); render() } });
