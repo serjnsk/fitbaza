@@ -610,7 +610,30 @@ body.railmin .rail::after{content:"Источники";position:absolute;top:46p
 .day.empty:hover{border-color:var(--acc);color:var(--acc-d)}
 .wkh .hint{text-decoration:none;font-size:12.5px;color:var(--acc-d);font-weight:600}
 /* действия тренировки — под названием, над блоками */
-.docacts{display:flex;gap:4px;flex-wrap:wrap;padding:0 0 8px}
+.docacts{display:flex;gap:6px;flex-wrap:wrap;padding:2px 0 10px}
+.docacts .btn.sm{height:30px;padding:0 11px;font-size:12.5px}
+.docacts .btn svg{width:14px;height:14px}
 
 /* заголовок панели источников */
 .railttl{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tx4);margin:0 0 9px 2px}
+
+/* ─── черновик и публикация ─── */
+.day .dr{display:inline-block;margin-top:3px;font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--warn);background:#FBF1DE;border-radius:4px;padding:1px 5px;width:fit-content}
+.pubbar{display:flex;align-items:center;gap:14px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.pubbar s{text-decoration:none;flex:1;font-size:12.5px;color:var(--tx3);line-height:1.45}
+.pubbar .btn{height:40px;padding:0 20px;font-size:14px}
+
+/* ─── заметка к блоку: за иконкой, компактной строкой ───
+   Заметки пишут к 5–10 % блоков; постоянная полоса под каждым заголовком
+   давала им вес, которого у них нет. */
+.blkh .x.note-on{color:var(--acc)}
+.bnote{display:flex;align-items:center;gap:7px;padding:2px 2px 6px;color:var(--tx3)}
+.bnote span{display:flex;flex:none}
+.bnote span svg{width:13px;height:13px}
+.bnote input{flex:1;min-width:0;font-size:12.5px;color:var(--tx2);background:none;padding:3px 0}
+.bnote input::placeholder{color:var(--tx4)}
+.bnote input:focus{outline:0;color:var(--tx1)}
+.wkh .iact{width:32px;height:32px;border-radius:var(--rad-m);display:grid;place-items:center;color:var(--tx3);background:var(--s1)}
+.wkh .iact:hover{background:var(--s2);color:var(--ink)}
+.wkh .iact svg{width:15px;height:15px}

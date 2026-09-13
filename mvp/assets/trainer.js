@@ -82,7 +82,14 @@ const PCACHE = {};
 /* planOf строит план один раз на программу и сразу переносит формат блока в
    название (fmtIntoTitle): раньше это делалось только для стартовой
    программы, и после смены клиента чужие блоки приходили без формата. */
-const planOf = pid => PCACHE[pid] ||= (b => { b.forEach(d=>d.blocks.forEach(fmtIntoTitle)); return b })(buildPlan(pid));
+const planOf = pid => PCACHE[pid] ||= (b => {
+  b.forEach(d=>{
+    d.blocks.forEach(fmtIntoTitle);
+    /* fmtIntoTitle меняет названия блоков после снятия слепка — без обновления
+       любой день с форматом («For time», EMOM) считался бы черновиком. */
+    if(!d.draft) d.pub = serializeDay(d);
+  });
+  return b })(buildPlan(pid));
 const plan = () => planOf(S.pid);
 /* Привязка клиента к плану: программа берётся у клиента, день — из даты. */
 function bindClient(cid, date){
@@ -209,6 +216,7 @@ function renderStrip(){
         <button id="dayPrev" title="Предыдущий день" ${S.i<1?'disabled':''}>${ICON.back}</button>
         <button id="dayNext" title="Следующий день" ${S.i>=p.days-1?'disabled':''}>${ICON.arr}</button>
       </span>
+      ${S.sel||S.paste ? '' : `<button class="iact" id="selStart" title="Выбрать несколько дней — скопировать или перенести">${ICON.chk}</button>`}
       <span class="sp"></span>
       ${S.sel ? `
         <b class="seln">Выбрано ${S.sel.size}</b>
@@ -232,6 +240,7 @@ function renderStrip(){
           ${S.sel ? `<span class="tick">${picked?ICON.chk:''}</span>` : ''}
           ${head}
           ${n ? `<span class="t">${esc(REST_TITLES.has(x.title) ? 'Без названия' : x.title)}</span>` : '<span class="e">отдых</span>'}
+          ${isDraft(x) && (n || x.title) ? `<span class="dr">черновик</span>` : ''}
           ${n ? `<span class="k">${bl} ${plural(bl,'блок','блока','блоков')} · ${n} упр</span>` : ''}
           ${n ? `<span class="bl">${x.blocks.filter(b=>b.items.some(y=>y.exId)).map(b=>`<i>${esc(b.title||'блок')}</i>`).join('')}</span>` : ''}
           <span class="ld"><i style="flex:${n}"></i><u style="flex:${Math.max(1,10-n)}"></u><s>${n||''}</s></span>
@@ -278,14 +287,13 @@ function blockHTML(b){
       <span class="gr" title="Перетащить блок">${ICON.grip}</span>
       <input class="bt" data-f="title" value="${esc(b.title)}"
              placeholder="Введите название блока">
+      <button class="x ${b.note?'note-on':''}" data-notetog="${b.id}" title="${b.note?'Заметка к блоку':'Добавить заметку к блоку'}">${ICON.chat}</button>
       <button class="x" data-savblk="${b.id}" title="Сохранить блок в библиотеку">${ICON.star}</button>
       <button class="x" data-delblk="${b.id}">${ICON.x}</button>
     </div>
-    <div class="bmeta">
-      <label class="fld"><span class="k">Заметка</span>
-        <input data-f="note" value="${esc(b.note||'')}" placeholder="Увидит клиент над этим блоком">
-      </label>
-    </div>
+    ${b.note || b.noteOpen ? `<label class="bnote"><span>${ICON.chat}</span>
+        <input data-f="note" value="${esc(b.note||'')}" placeholder="Заметка к блоку — увидит клиент">
+      </label>` : ''}
     ${b.items.map(lineHTML).join('')}
     <button class="addl" data-add="${b.id}">${ICON.plus} Упражнение — печатайте как в тетради: «Присед 5×3 80%»</button>
   </div>`;
@@ -331,6 +339,9 @@ function emptyDay(){
 
 function renderDoc(){
   const d = day(), dt = new Date(d.date + 'T00:00:00');
+  /* Пустой день открывается как ручной ввод: сразу пустой блок со строкой
+     упражнения, без карточек-подсказок — они дублировали кнопки под названием. */
+  if(!d.blocks.length && S.compose !== 'text') d.blocks.push(mkBlock('strength','','',null,[]));
   const n   = d.blocks.reduce((a,b)=>a+b.items.filter(x=>x.exId).length,0);
   const raw = d.blocks.reduce((a,b)=>a+b.items.filter(x=>!x.exId).length,0);
   const empty = !d.blocks.length;
@@ -349,14 +360,15 @@ function renderDoc(){
       <input id="d-title" value="${esc(REST_TITLES.has(d.title) ? '' : (d.title||''))}"
              placeholder="${DOW[dowMon(day().date)]}, ${dt.getDate()} ${MON[dt.getMonth()]}">
       ${empty ? '' : `
+        ${isDraft(d) ? `<span class="chip warn">черновик</span>` : (n ? `<span class="chip ok">в календаре</span>` : '')}
         <span class="stat">${d.blocks.length} ${plural(d.blocks.length,'блок','блока','блоков')} · ${n} ${plural(n,'упражнение','упражнения','упражнений')}${raw?` · ${raw} остались текстом`:''}</span>
         <button class="x" id="sav-wo" title="Сохранить тренировку в библиотеку">${ICON.star}</button>
         <button class="x rm" id="clr-wo" title="Очистить день">${ICON.x}</button>`}
     </div>
     <div class="docacts">
-      <button class="cp" id="fromTpl">${ICON.tpl} Из шаблона</button>
-      <button class="cp" id="copyFrom">${ICON.copy} Скопировать существующую</button>
-      <button class="cp" id="selStart">${ICON.chk} Выбрать несколько</button>
+      <button class="btn gh sm" id="fromTpl">${ICON.tpl} Из шаблона</button>
+      <button class="btn gh sm" id="copyFrom">${ICON.copy} Скопировать существующую</button>
+      <button class="btn gh sm" id="w-ai">${ICON.ai} Текстом — ИИ разберёт</button>
     </div>
     <label class="fld wmsg"><span class="k">${ICON.chat} Клиенту</span>
       <input id="w-msg" value="${esc(trainerMsg(d.date))}"
@@ -364,11 +376,13 @@ function renderDoc(){
       <kbd class="ent">↵ Enter</kbd>
     </label>
     ${propose}
-    ${empty ? emptyDay()
-      : PENDING ? ''    /* пока не принято, добавлять блоки рано */
-      : ''}
+    ${empty && S.compose==='text' ? emptyDay() : ''}
     ${d.blocks.map(blockHTML).join('')}
-    ${empty ? '' : `<button class="addb" id="add-blk">${ICON.plus} Добавить блок</button>`}`;
+    ${empty ? '' : `<button class="addb" id="add-blk">${ICON.plus} Добавить блок</button>`}
+    ${!empty && isDraft(d) ? `<div class="pubbar">
+        <s>Черновик сохраняется сам. Клиент увидит тренировку после добавления в календарь.</s>
+        <button class="btn" id="publish">${ICON.chk} Добавить тренировку</button>
+      </div>` : ''}`;
 }
 
 /* ─── панель источников: три уровня, которыми наполняют день ─── */
@@ -410,7 +424,27 @@ function renderSrc(){
       : 'Шаблон тренировки занимает день целиком (TPL-3).';
   }
 }
-function render(){ renderStrip(); renderDoc(); renderSrc(); }
+const isDraft = x => x.draft || serializeDay(x) !== x.pub;
+/* Автосохранение: всё, что расходится со слепком публикации, уходит в STATE
+   при каждой перерисовке и при уходе со страницы. Дни без правок не пишем. */
+function persist(){
+  const bag = (STATE.days ||= {}); const mine = (bag[S.pid] ||= {});
+  plan().forEach((x,i)=>{
+    const dirty = serializeDay(x) !== x.pub;
+    if(dirty || x.draft){ x.draft = true; mine[i] = {c: serializeDay(x), pub: x.pub, draft: true}; }
+  });
+  saveState();
+}
+function publishDay(){
+  const x = day();
+  x.pub = serializeDay(x); x.draft = false;
+  ((STATE.days ||= {})[S.pid] ||= {})[S.i] = {c: x.pub, draft: false};
+  saveState(); render();
+  toast('Тренировка добавлена в календарь — клиент её видит');
+}
+addEventListener('beforeunload', persist);
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) persist() });
+function render(){ persist(); renderStrip(); renderDoc(); renderSrc(); }
 
 /* ═══════════ ИЗ ШАБЛОНА / КОПИЯ СУЩЕСТВУЮЩЕЙ ═══════════
    Две кнопки в строке дорожки. Составление «с нуля» отдельной кнопки не
@@ -840,7 +874,11 @@ function extendPlan(upto){
   while(plan().length <= upto){
     const i = plan().length;
     PLAN[S.pid].push(null);
-    plan().push(buildDay(S.pid, i));
+    const x = buildDay(S.pid, i);
+    /* Слепок публикации ставим сразу: buildDay его не знает, а день без pub
+       считался бы изменённым и помечался черновиком до первого ввода. */
+    x.pub = serializeDay(x); x.draft = false;
+    plan().push(x);
   }
 }
 
@@ -924,6 +962,16 @@ document.addEventListener('click', e=>{
   }
   if(e.target.closest('#dayPrev')){ S.i = Math.max(0, S.i-1); S.compose = null; render(); return }
   if(e.target.closest('#dayNext')){ const i = Math.min(program(S.pid).days-1, S.i+1); extendPlan(i); S.i = i; S.compose = null; render(); return }
+  const nt = e.target.closest('[data-notetog]');
+  if(nt){
+    /* Заметки к блокам пишут редко, поэтому поле спрятано за иконкой: открыл —
+       пиши, закрыл пустым — исчезло. Заполненная заметка держит поле видимым. */
+    const b = day().blocks.find(x=>x.id===nt.dataset.notetog);
+    if(b){ if(b.note){ b.note = ''; b.noteOpen = false; } else b.noteOpen = !b.noteOpen; render();
+      const inp = $(`[data-blk="${b.id}"] .bnote input`); if(inp) inp.focus(); }
+    return;
+  }
+  if(e.target.closest('#publish')){ publishDay(); return }
   if(e.target.closest('#fromTpl')){ pickTemplate(); return }
   if(e.target.closest('#copyFrom')){ pickExisting(); return }
   if(e.target.closest('#selStart')){ S.sel = new Set(); S.paste = null; render(); return }

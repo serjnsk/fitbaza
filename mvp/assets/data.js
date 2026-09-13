@@ -482,7 +482,36 @@ function buildDay(pid, i){
   if(!d) return {...base, title:'Отдых', rest:true, blocks:[]};
   return {...base, title:d.t, rest:false, blocks:d.b.map(b=>mkBlock(b[0],b[1],b[2],b[3],b[4]))};
 }
-const buildPlan = pid => (PLAN[pid] || []).map((_,i)=>buildDay(pid,i));
+/* ═══════ Черновики и публикация ═══════
+   День, который тренер правил в конструкторе и не «добавил», — черновик: он
+   лежит в STATE.days[pid][i] и переживает уход со страницы. У каждого дня есть
+   pub — слепок опубликованного содержимого; расхождение с ним и есть
+   «незаконченная тренировка». Дни из заготовок программы считаются
+   опубликованными: их видит клиент. */
+/* Пустые блоки без названия и заметки в слепок не входят: конструктор заводит
+   такой блок на каждом открытом пустом дне, и без этого правила любой клик
+   по дню помечал бы его черновиком. */
+const serializeDay = x => JSON.stringify({t: x.title||'', b: (x.blocks||[]).filter(b=>(b.items||[]).length || b.title || b.note).map(b=>({k:b.kind, t:b.title||'', n:b.note||'', f:b.fmt||null,
+  i:(b.items||[]).map(it=>({e:it.exId||null, r:it.raw||null, s:it.scheme||'', p:it.pct??null, u:it.unit||'', v:it.val||''}))}))});
+const restoreBlocks = rec => (rec.b||[]).map(b=>({id:nid('b'), kind:b.k||'strength', title:b.t||'', note:b.n||'', fmt:b.f||null,
+  items:(b.i||[]).map(it=>({id:nid('i'), exId:it.e||null, raw:it.r||null, scheme:it.s||'', pct:it.p??null, unit:it.u||'', val:it.v||''}))}));
+const savedDay = (pid,i) => ((STATE.days||{})[pid]||{})[i] || null;
+/* Черновики могут лежать за концом заготовок — план дотягиваем до них. */
+function planLength(pid){
+  const saved = Object.keys((STATE.days||{})[pid]||{}).map(Number);
+  return Math.max((PLAN[pid]||[]).length, saved.length ? Math.max(...saved)+1 : 0);
+}
+function buildPlan(pid){
+  const n = planLength(pid);
+  while((PLAN[pid] ||= []).length < n) PLAN[pid].push(null);
+  return PLAN[pid].map((_,i)=>{
+    const x = buildDay(pid,i), rec = savedDay(pid,i);
+    if(rec && rec.c){ const c = JSON.parse(rec.c); x.title = c.t; x.blocks = restoreBlocks(c); x.rest = !x.blocks.length; }
+    x.pub = rec && !rec.draft ? rec.c : (rec ? (rec.pub||'') : serializeDay(x));
+    x.draft = !!(rec && rec.draft);
+    return x;
+  });
+}
 
 /* ═══════ Расчёт нагрузки (CON-16): проценты → рабочий вес ═══════ */
 /* Схема назначения превращается в подходы: «3×5» — три по пять,
@@ -629,15 +658,20 @@ function scheduleFor(cid, from, to){
   const c = client(cid); if(!c || !c.prog) return [];
   const plan = PLAN[c.prog] || [];
   const out = [];
-  plan.forEach((d,i)=>{
-    if(!d) return;                              /* день отдыха */
+  const n = planLength(c.prog);
+  for(let i=0;i<n;i++){
+    const rec = savedDay(c.prog, i);
+    let d = plan[i];
+    /* Сохранённый день перекрывает заготовку; пустой черновик — не тренировка. */
+    if(rec && rec.c){ const cc = JSON.parse(rec.c); d = cc.b.some(b=>b.i.some(it=>it.e)) ? {t: cc.t||'Тренировка', b: cc.b.map(b=>[b.k]), draft: rec.draft} : null; }
+    if(!d) continue;                            /* день отдыха */
     const date = dayDate(c.prog, i);
-    if(date < from || date > to) return;
+    if(date < from || date > to) continue;   /* был return из forEach — в цикле он обрывал функцию */
     const past = date < TODAY;
     const missed = past && c.streak===0 && daysBetween(date, TODAY) <= 5;
-    out.push({cid, date, day:i+1, title:d.t, kind:d.b[d.b.length-1][0],
+    out.push({cid, date, day:i+1, title:d.t, kind:d.b[d.b.length-1][0], draft:!!d.draft,
       status: past ? (missed?'missed':'done') : (date===TODAY?'today':'planned')});
-  });
+  }
   return out;
 }
 function scheduleAll(from,to){ return CLIENTS.flatMap(c=>scheduleFor(c.id,from,to)) }
@@ -688,7 +722,7 @@ function sessionsOn(date){
   scheduleAll(date,date).forEach(e=>{
     const c = client(e.cid);
     const key = c.prog + '|' + e.title;
-    if(!by.has(key)) by.set(key,{pid:c.prog, title:e.title, kind:e.kind,
+    if(!by.has(key)) by.set(key,{pid:c.prog, title:e.title, kind:e.kind, draft:!!e.draft,
       time:(program(c.prog)||{}).time || '12:00', who:[]});
     by.get(key).who.push(c);
   });
@@ -707,7 +741,7 @@ function sessionsOn(date){
 /* ═══════ Состояние приложения (общее между страницами) ═══════ */
 const STATE = (function(){
   const def = {online:true, queue:0, ids:false, navc:false, curClient:'c1', curProg:'p1', curWeek:4,
-               pm:Object.fromEntries(CLIENTS.map(c=>[c.id, {...c.pm}])), replied:{}};
+               pm:Object.fromEntries(CLIENTS.map(c=>[c.id, {...c.pm}])), replied:{}, days:{}};
   let s = def;
   try{ const raw = localStorage.getItem('fitbaza.state'); if(raw) s = Object.assign({}, def, JSON.parse(raw)) }catch(_){}
   return s;

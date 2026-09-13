@@ -309,7 +309,7 @@ function timelineHTML(ses, gaps, date){
         <span class="bd">
           <span class="t">${esc(s.title)}</span>
           <span class="sub">
-            <span>${esc(p?p.title:'')}</span>
+            <span>${esc(p?p.title:'')}</span>${s.draft?`<span class="chip warn">черновик</span>`:''}
             ${s.state==='done'?`<span class="chip ok">Результаты записаны</span>`
               :s.state==='nores'?`<span class="chip warn">${s.done?`${s.done} из ${s.who.length} записали`:'Без результата'}</span>`
               :`<span class="chip">${s.who.length} ${plural(s.who.length,'атлет','атлета','атлетов')}</span>`}
