@@ -69,7 +69,9 @@ const REST_TITLES = new Set(['Отдых','—','']);
 /* S.i — номер дня в плане программы, от нуля. Недели в модели нет, поэтому
    и в состоянии её нет: раньше здесь лежали «неделя» и «день внутри недели»,
    и любое действие приходилось переводить между двумя системами отсчёта. */
-const S = { cid:'c1', pid:'p1', i:0, tab:'ex', q:'', compose:null };
+const S = { cid:'c1', pid:'p1', i:0, tab:'ex', q:'', compose:null,
+            sel:null,    /* Set выбранных дней или null — режим выключен */
+            paste:null   /* 'copy' | 'move' — ждём, куда вставить набор */ };
 S.i = Math.max(0, Math.min(composedDays(S.pid)-1, daysBetween(program(S.pid).start, TODAY)));
 const PCACHE = {};
 const plan = () => PCACHE[S.pid] ||= buildPlan(S.pid);
@@ -177,19 +179,31 @@ function renderStrip(){
         <button id="dayPrev" title="Предыдущий день" ${S.i<1?'disabled':''}>${ICON.back}</button>
         <button id="dayNext" title="Следующий день" ${S.i>=d.length-1?'disabled':''}>${ICON.arr}</button>
       </span>
-      <b>День ${S.i+1} из ${p.days}</b><s>${planStat()}</s>
+      <b>День ${S.i+1} из ${p.days}</b><s>${S.paste
+        ? (S.paste==='copy'?'выберите день, куда скопировать':'выберите день, куда перенести')
+        : planStat()}</s>
       <span class="sp"></span>
-      <button class="cp" id="daySave">${ICON.star} Сохранить день</button>
-      <button class="cp" id="repeatPrev">${ICON.copy} Повторить предыдущую</button>
-      <button class="cp" id="addDay">${ICON.plus} Добавить день</button>
+      ${S.sel ? `
+        <b class="seln">Выбрано ${S.sel.size}</b>
+        <button class="cp" id="selCopy" ${S.sel.size?'':'disabled'}>${ICON.copy} Скопировать</button>
+        <button class="cp" id="selMove" ${S.sel.size?'':'disabled'}>${ICON.arr} Перенести</button>
+        <button class="cp" id="selCancel">${ICON.x} Отмена</button>
+      ` : `
+        <button class="cp" id="daySave">${ICON.star} Сохранить день</button>
+        <button class="cp" id="repeatPrev">${ICON.copy} Повторить предыдущую</button>
+        <button class="cp" id="selStart">${ICON.chk} Выбрать несколько</button>
+        <button class="cp" id="addDay">${ICON.plus} Добавить день</button>
+      `}
     </div>
     <div class="days" id="strip">
       ${d.map((x,i)=>{
         const dt = new Date(x.date + 'T00:00:00');
         const bl = x.blocks.filter(b=>b.items.some(y=>y.exId)).length;
         const n  = x.blocks.reduce((a,b)=>a+b.items.filter(y=>y.exId).length, 0);
-        return `<button class="day ${i===S.i?'on':''}${n?'':' rest'}"
+        const picked = S.sel && S.sel.has(i);
+        return `<button class="day ${i===S.i&&!S.sel?'on':''}${n?'':' rest'}${picked?' picked':''}${S.paste?' target':''}"
                         data-day="${i}" style="--load:${n||0}">
+          ${S.sel ? `<span class="tick">${picked?ICON.chk:''}</span>` : ''}
           <span class="d">${x.w} ${dt.getDate()}</span>
           ${n ? `<span class="t">${esc(x.title)}</span>` : '<span class="e">отдых</span>'}
           ${n ? `<span class="k">${bl} ${plural(bl,'блок','блока','блоков')} · ${n} упр</span>` : ''}
@@ -309,7 +323,7 @@ function renderDoc(){
     <div class="doch">
       <span class="gr" title="Перетащить тренировку на другой день">${ICON.grip}</span>
       <input id="d-title" value="${esc(REST_TITLES.has(d.title) ? '' : (d.title||''))}"
-             placeholder="${DOW[S.day]}, ${dt.getDate()} ${MON[dt.getMonth()]}">
+             placeholder="${DOW[dowMon(day().date)]}, ${dt.getDate()} ${MON[dt.getMonth()]}">
       ${empty ? '' : `
         <span class="stat">${d.blocks.length} ${plural(d.blocks.length,'блок','блока','блоков')} · ${n} ${plural(n,'упражнение','упражнения','упражнений')}${raw?` · ${raw} остались текстом`:''}</span>
         <button class="x" id="sav-wo" title="Сохранить тренировку в библиотеку">${ICON.star}</button>
@@ -454,7 +468,7 @@ function askClear(){
       <button class="cls">✕</button></div>
     <div class="mdb">
       <p class="lead">Тренировка <b>«${esc(d.title || 'без названия')}»</b> будет стёрта
-        из ${DOW_GEN[S.day]}, ${dt.getDate()} ${MON[dt.getMonth()]}.</p>
+        из ${DOW_GEN[dowMon(day().date)]}, ${dt.getDate()} ${MON[dt.getMonth()]}.</p>
       <p class="sub">${d.blocks.length} ${plural(d.blocks.length,'блок','блока','блоков')} ·
         ${n} ${plural(n,'упражнение','упражнения','упражнений')} — всё вместе с заметками.</p>
       <div class="foot-note">Программа и остальные дни не изменятся. Если тренировка
@@ -701,13 +715,64 @@ const addTpl = t => {
    а не открытый день. Копия глубокая, иначе правки поедут в обе недели. */
 const copyBlocks = bs => bs.map(b =>
   blockOf(b.title, b.items.map(i => ({...i, id:nid('i')})), b.note, b.kind));
+/* ═══════════ ПРОИЗВОЛЬНЫЙ НАБОР ТРЕНИРОВОК (CON-4, CON-14) ═══════════
+   Копия недели была частным случаем: отметить семь подряд и вставить семью
+   днями позже. Здесь набор произвольный — подряд или вразбивку. */
+
+const hasWork = d => d.blocks.some(b=>b.items.some(i=>i.exId));
+
+function toggleSel(i){
+  if(!hasWork(plan()[i])) return toast('В этом дне нечего копировать');
+  S.sel.has(i) ? S.sel.delete(i) : S.sel.add(i);
+  render();
+}
+
+function startPaste(mode){
+  if(!S.sel || !S.sel.size) return toast('Сначала отметьте тренировки');
+  S.paste = mode; render();
+  toast(mode==='copy' ? 'Куда скопировать? Выберите день' : 'Куда перенести? Выберите день');
+}
+
+/* Относительные промежутки сохраняются: отметили 1-й, 3-й и 6-й дни, вставили
+   с 10-го — лягут на 10-й, 12-й и 15-й. Так «копия недели» остаётся частным
+   случаем, а ритм набора не ломается. */
+function pasteAt(target){
+  const src = [...S.sel].sort((a,b)=>a-b), base = src[0];
+  const need = target + (src[src.length-1] - base);
+  if(need >= program(S.pid).days) return toast('Набор не влезает до конца программы');
+  extendPlan(need);
+  const snap = src.map(i=>({off:i-base, title:plan()[i].title, blocks:copyBlocks(plan()[i].blocks)}));
+  const move = S.paste === 'move';
+  if(move) src.forEach(i=>{ const x=plan()[i]; x.title=''; x.rest=true; x.blocks=[] });
+  snap.forEach(x=>{
+    const t = plan()[target + x.off];
+    t.title = x.title; t.rest = false; t.blocks = x.blocks;
+  });
+  const n = snap.length;
+  S.sel = null; S.paste = null; S.i = target; render();
+  toast((move?'Перенесено ':'Скопировано ') + n + ' ' +
+        plural(n,'тренировка','тренировки','тренировок') + ' с дня ' + (target+1));
+}
+
+/* Продлеваем план до индекса включительно, дописывая пустые дни.
+   Именно дописываем, а не пересобираем через buildPlan: пересборка создаёт
+   новые объекты дней и стирает всё, что тренер уже наредактировал в
+   остальных днях и ещё не сохранил. Первая версия делала ровно это и вдобавок
+   зависала: длина проверялась у старого массива и не менялась никогда. */
+function extendPlan(upto){
+  while(plan().length <= upto){
+    const i = plan().length;
+    PLAN[S.pid].push(null);
+    plan().push(buildDay(S.pid, i));
+  }
+}
+
 /* Продление плана: день добавляется в конец, и это единственный способ
    расти — решётки, которую можно «открыть на неделю вперёд», больше нет. */
 function addDay(){
   const p = program(S.pid);
   if(plan().length >= p.days) return toast('План уже составлен до конца программы');
-  PLAN[S.pid].push(null);
-  PCACHE[S.pid] = buildPlan(S.pid);
+  extendPlan(plan().length);
   S.i = plan().length - 1; S.compose = null; render();
   toast('День ' + (S.i+1) + ' добавлен');
 }
@@ -765,6 +830,188 @@ function tplLabel(t){
 }
 
 /* Шаблон недели раскладывается по семи дням; null — день отдыха (TPL-2). */
+/* ═══════════ СЛОЙ ВЗАИМОДЕЙСТВИЯ ═══════════
+   Клики, клавиатура и drag-and-drop конструктора. Восстановлен после того,
+   как был вырезан вместе с недельными функциями: они лежали в одном диапазоне
+   файла, и удаление по границам функций захватило и его. */
+document.addEventListener('click', e=>{
+  const d = e.target.closest('[data-day]');
+  if(d){
+    const i = +d.dataset.day;
+    /* В режиме выбора клик по дню не переключает день, а отмечает его:
+       иначе набор нельзя собрать, не потеряв уже отмеченное. */
+    if(S.sel){ toggleSel(i); return }
+    if(S.paste){ pasteAt(i); return }
+    S.i = i; S.compose = null; closeSug(); render(); return;
+  }
+  if(e.target.closest('#dayPrev')){ S.i = Math.max(0, S.i-1); S.compose = null; render(); return }
+  if(e.target.closest('#dayNext')){ S.i = Math.min(plan().length-1, S.i+1); S.compose = null; render(); return }
+  if(e.target.closest('#repeatPrev')){ repeatPrev(); return }
+  if(e.target.closest('#daySave')){ saveWorkout(); return }
+  if(e.target.closest('#addDay')){ addDay(); return }
+  if(e.target.closest('#selStart')){ S.sel = new Set(); S.paste = null; render(); return }
+  if(e.target.closest('#selCancel')){ S.sel = null; S.paste = null; render(); return }
+  if(e.target.closest('#selCopy')){ startPaste('copy'); return }
+  if(e.target.closest('#selMove')){ startPaste('move'); return }
+
+  const tb = e.target.closest('[data-tab]');
+  if(tb){ S.tab = tb.dataset.tab;
+          $$('#tabs button').forEach(x=>x.classList.toggle('on', x===tb)); renderSrc(); return }
+
+  /* Кликается вся карточка, а не только «+»: маленькая кнопка была
+     единственным способом добавить, и по ней приходилось целиться. */
+  const ae = e.target.closest('[data-ex]');  if(ae){ addEx(ae.dataset.ex); return }
+  const at = e.target.closest('[data-tpl]'); if(at){ addTpl(tplById(at.dataset.tpl)); return }
+
+  const add = e.target.closest('[data-add]');
+  if(add){
+    const b = day().blocks.find(x=>x.id===add.dataset.add);
+    b.items.push(rawItem('')); render();
+    const last = $$(`[data-blk="${b.id}"] [data-edit]`).pop(); if(last) last.focus();
+    return;
+  }
+  if(e.target.closest('#w-hand')){
+    day().blocks.unshift(blockOf('', []));
+    S.compose = null; render();
+    const t = $('.blk .bt'); if(t) t.focus();
+    return;
+  }
+  if(e.target.closest('#w-ai')){ S.compose = 'text'; render(); $('#paste').focus(); return }
+  if(e.target.closest('#pt-back')){ S.compose = null; render(); return }
+  if(e.target.closest('#pt-go')){ applyText($('#paste').value); return }
+  if(e.target.closest('#w-prev')){ copyPrev(); return }
+  if(e.target.closest('#pd-yes')){ acceptPending(); return }
+  if(e.target.closest('#pd-no')){  cancelPending(); return }
+  if(e.target.closest('#pd-src')){ showSource();   return }
+  if(e.target.closest('#sav-wo')){ saveWorkout(); return }
+  if(e.target.closest('#clr-wo')){ askClear(); return }
+  const sb = e.target.closest('[data-savblk]');
+  if(sb){ openFolder(sb); return }
+  if(e.target.closest('#add-blk')){
+    /* Кнопка стоит сверху — значит и блок появляется сверху, под курсором,
+       а не улетает в конец длинного дня. */
+    day().blocks.unshift(mkBlock('strength','','',null,[]));
+    render();
+    const t = document.querySelector('.blk .bt'); if(t) t.focus();
+    return;
+  }
+  const db = e.target.closest('[data-delblk]');
+  if(db){ const d2 = day(); d2.blocks = d2.blocks.filter(b=>b.id!==db.dataset.delblk); render(); return }
+  const dl = e.target.closest('[data-del]');
+  if(dl){ const {b} = findItem(dl.dataset.del); b.items = b.items.filter(x=>x.id!==dl.dataset.del); render(); return }
+  const pc = e.target.closest('[data-pct]'); if(pc){ openPct(pc); return }
+  const pf = e.target.closest('[data-pickfor]');
+  if(pf){ const {i} = findItem(pf.dataset.pickfor);
+          showSug(pf, i.raw || '');
+          if(SUG){ SUG.dataset.forItem = pf.dataset.pickfor; SUG.dataset.text = i.raw || '' }
+          return; }
+
+  const pick = e.target.closest('[data-pick]');
+  if(pick && SUG){
+    const {i} = findItem(SUG.dataset.forItem);
+    if(i){ const cur = parseLine(SUG.dataset.text) || {};
+           Object.assign(i, {exId:pick.dataset.pick, scheme:cur.scheme||'', pct:cur.pct??null,
+                             unit:cur.unit||'', val:cur.val||'', raw:''}) }
+    closeSug(); render(); return;
+  }
+  if(e.target.closest('#assign')){ openAssign(); return }
+  if(e.target.closest('#md-cancel') || e.target.closest('#md-x') ||
+     e.target === $('#ov') || e.target.closest('#md-ok')){
+    $('#ov').classList.remove('on'); return }
+  const cl = e.target.closest('[data-cl]');
+  if(cl){ const id = cl.dataset.cl;
+          PICK.has(id) ? PICK.delete(id) : PICK.add(id);
+          cl.classList.toggle('on', PICK.has(id)); paintPick(); return }
+  if(e.target.closest('#md-all')){
+    PICK = PICK.size === CLIENTS.length ? new Set() : new Set(CLIENTS.map(c=>c.id));
+    $$('.md .cl').forEach(x=>x.classList.toggle('on', PICK.has(x.dataset.cl)));
+    paintPick(); return;
+  }
+  if(!e.target.closest('.sug')) closeSug();
+});
+
+/* Вставка многострочного текста — куда бы её ни сделали. Одна строка
+   проходит обычным путём, без подтверждения: там нечего проверять. */
+document.addEventListener('paste', e=>{
+  const t = (e.clipboardData || window.clipboardData).getData('text') || '';
+  if(!/\n/.test(t.trim())) return;
+  const into = e.target.closest('#paste, [data-edit]');
+  if(!into) return;
+  e.preventDefault();
+  closeSug();
+  applyText(t);
+});
+/* В пустом дне то же поле работает и на набор: Ctrl/⌘+Enter разбирает. */
+document.addEventListener('keydown', e=>{
+  if(e.target.id === 'paste' && e.key === 'Enter' && (e.metaKey || e.ctrlKey)){
+    e.preventDefault(); applyText(e.target.value);
+  }
+});
+
+document.addEventListener('input', e=>{
+  const ed = e.target.closest('[data-edit]');
+  if(ed){
+    ed.closest('.line').classList.add('edit');
+    showSug(ed, ed.textContent);
+    if(SUG){ SUG.dataset.forItem = ed.dataset.edit; SUG.dataset.text = ed.textContent }
+    return;
+  }
+  const f = e.target.closest('[data-f]');
+  if(f){
+    const b = day().blocks.find(x=>x.id === f.closest('[data-blk]').dataset.blk);
+    b[f.dataset.f] = f.value;
+    if(f.dataset.f === 'title'){
+      /* Формат — не отдельное поле, а то, что парсер нашёл в названии
+         (TMR-1). Пересобираем на лету и сразу показываем расшифровку. */
+      b.fmt = fmtPart(f.value);
+      renderWeek();
+    }
+    return;
+  }
+  if(e.target.id === 'd-title'){ day().title = e.target.value; renderWeek(); return }
+  if(e.target.id === 'w-msg'){ setTrainerMsg(day().date, e.target.value); return }
+  if(e.target.id === 'q'){ S.q = e.target.value; renderSrc(); return }
+});
+document.addEventListener('change', e=>{
+  if(e.target.id === 'cli'){ S.cid = e.target.value; renderDoc(); }   /* сообщение — тоже своё у каждого */
+});
+document.addEventListener('keydown', e=>{
+  const ed = e.target.closest('[data-edit]');
+  if(e.target.id === 'w-msg' && e.key === 'Enter'){
+    /* Поле пишет в модель на каждый символ, так что Enter ничего не «сохраняет».
+       Но тренеру нужен сигнал, что он закончил мысль, — Enter снимает фокус
+       и подтверждает галочкой. Подсказка висит только пока поле активно. */
+    e.preventDefault();
+    const k = e.target.closest('.wmsg').querySelector('.ent');
+    k.textContent = '✓ Записано'; k.classList.add('done');
+    e.target.blur();
+    setTimeout(()=>{ k.textContent = '↵ Enter'; k.classList.remove('done') }, 1400);
+    return;
+  }
+  if(ed && e.key === 'Enter'){ e.preventDefault();
+    const id = ed.dataset.edit, txt = ed.textContent; closeSug(); commitLine(id, txt); return }
+  if(e.key === 'Escape'){ closeSug(); $('#ov').classList.remove('on') }
+});
+document.addEventListener('focusout', e=>{
+  const ed = e.target.closest('[data-edit]');
+  if(ed) setTimeout(()=>{ if(!SUG) commitLine(ed.dataset.edit, ed.textContent) }, 120);
+});
+
+/* ═══════════ ПЕРЕТАСКИВАНИЕ (CON-8, CON-13) ═══════════
+   Три уровня, одна механика: упражнение таскается между блоками, блок —
+   между блоками и на другой день, тренировка целиком — только на день.
+   Тащить можно лишь за ручку: строка редактируемая, и если сделать
+   draggable всю, в ней перестанет выделяться текст. Поэтому draggable
+   включается по нажатию на ручку и снимается по окончании. */
+let DRAG = null;
+const dayOf = i => plan()[i];
+
+document.addEventListener('mousedown', e=>{
+  const gr = e.target.closest('.gr'); if(!gr) return;
+  const host = gr.closest('.line') || gr.closest('.blk') || gr.closest('.doc');
+  if(host) host.draggable = true;
+});
+
 function clearDrag(){
   DRAG = null;
   $$('[draggable="true"]').forEach(x=>x.draggable = false);
@@ -780,7 +1027,7 @@ document.addEventListener('dragstart', e=>{
   const blk = e.target.closest('.blk');
   if(blk && blk.draggable){ DRAG = {t:'block', v:blk.dataset.blk}; return }
   const doc = e.target.closest('.doc');
-  if(doc && doc.draggable){ DRAG = {t:'workout', v:S.day}; return }
+  if(doc && doc.draggable){ DRAG = {t:'workout', v:S.i}; return }
   e.preventDefault();
 });
 document.addEventListener('dragover', e=>{
@@ -852,7 +1099,7 @@ function dropBlock(e){
 /* Перенос на другой день (CON-13). После переноса открываем тот день,
    куда положили: иначе тренер не увидит результата своего действия. */
 function dropOnDay(idx){
-  if(idx === S.day && DRAG.t !== 'line'){ clearDrag(); return }
+  if(idx === S.i && DRAG.t !== 'line'){ clearDrag(); return }
   const src = day(), dst = dayOf(idx);
   if(DRAG.t === 'workout'){
     dst.title = src.title; dst.blocks = src.blocks;
@@ -869,9 +1116,9 @@ function dropOnDay(idx){
     from.items.splice(from.items.indexOf(item), 1);
     dst.blocks[dst.blocks.length-1].items.push(item);
   }
-  else if(DRAG.t === 'tpl'){ S.day = idx; addTplRaw(tplById(DRAG.v)) }
+  else if(DRAG.t === 'tpl'){ S.i = idx; addTplRaw(tplById(DRAG.v)) }
   clearDrag();
-  S.day = idx;
+  S.i = idx;
   render();
 }
 
@@ -915,7 +1162,7 @@ function openAssign(){
   PICK = new Set([S.cid]);
   $('#md-title').textContent = d.title || 'Без названия';
   $('#md-sub').textContent = `день ${S.i+1} из ${program(S.pid).days} · ` +
-    `${DOW[S.day].toLowerCase()}, ${dt.getDate()} ${MON[dt.getMonth()]} · ` +
+    `${DOW[dowMon(day().date)].toLowerCase()}, ${dt.getDate()} ${MON[dt.getMonth()]} · ` +
     `${d.blocks.length} ${plural(d.blocks.length,'блок','блока','блоков')} · ` +
     `${n} ${plural(n,'упражнение','упражнения','упражнений')}`;
   /* Граница простая: программа едет, переписка остаётся. Всё, что
