@@ -825,8 +825,8 @@ const STATE = (function(){
   const def = {online:true, queue:0, ids:false, navc:false, curClient:'c1', curProg:'p1', curWeek:4,
                pm:Object.fromEntries(CLIENTS.map(c=>[c.id, {...c.pm}])), replied:{}, days:{}};
   let s = def;
-  try{ const raw = localStorage.getItem('fitbaza.state'); if(raw) s = Object.assign({}, def, JSON.parse(raw)) }catch(_){}
+  try{ const raw = localStorage.getItem('trenergram.state'); if(raw) s = Object.assign({}, def, JSON.parse(raw)) }catch(_){}
   return s;
 })();
-function saveState(){ try{ localStorage.setItem('fitbaza.state', JSON.stringify(STATE)) }catch(_){} }
+function saveState(){ try{ localStorage.setItem('trenergram.state', JSON.stringify(STATE)) }catch(_){} }
 const pmOf = cid => (STATE.pm[cid] ||= {...(client(cid)?.pm||{})});

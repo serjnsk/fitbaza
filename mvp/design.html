@@ -82,7 +82,7 @@ body{background:var(--bg);color:var(--tx1);font:400 14px/1.55 var(--ui)}
 .d-ico{display:grid;place-items:center;background:var(--acc);flex:none;
   width:var(--s);height:var(--s);border-radius:calc(var(--s)*.225);overflow:hidden}
 .d-ico i{font-style:normal;color:#fff;display:block;
-  font:900 calc(var(--s)*.58)/1 "Montserrat",var(--ui);letter-spacing:-.04em;
+  font:900 calc(var(--s)*.42)/1 "Montserrat",var(--ui);letter-spacing:-.05em;   /* две буквы «ТМ» — мельче, чем одна */
   clip-path:polygon(calc(var(--s)*.11) 0,100% 0,100% calc(100% - var(--s)*.11),calc(100% - var(--s)*.11) 100%,0 100%,0 calc(var(--s)*.11))}
 .d-mocks{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;max-width:960px}
 .d-mocks2{display:grid;grid-template-columns:repeat(2,1fr);gap:28px;max-width:960px;margin-top:30px}
@@ -222,7 +222,7 @@ document.getElementById('rad').innerHTML =
     `<div><i style="border-radius:${tok(v)}"></i><s>${esc(v)} ${esc(tok(v))}</s></div>`).join('');
 
 /* ── заставки ── */
-const NAME = {n:'Тренерграм', w:'ТРЕНЕРГРАМ', ini:'Т'};
+const NAME = {n:'Тренерграм', w:'ТРЕНЕРГРАМ', ini:'ТМ'};
 const ICONS = `
 <span style="display:flex;align-items:center;gap:5px">
 <svg width="17" height="11" viewBox="0 0 17 11" fill="#fff"><rect x="0" y="7" width="3" height="4" rx=".7"/><rect x="4.5" y="5" width="3" height="6" rx=".7"/><rect x="9" y="2.5" width="3" height="8.5" rx=".7"/><rect x="13.5" y="0" width="3" height="11" rx=".7"/></svg>

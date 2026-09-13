@@ -7,7 +7,7 @@
 `archive/screens-4-styles`), где лежали пять
 стилистик. Итоговый выбор — вариант 01 «Список», он доведён до полного
 объёма MVP и лежит в `mvp/` этой ветки (`prototypes`); публикуется на
-<https://serjnsk.github.io/fitbaza/prototype/>. Черновые итерации остались
+<https://serjnsk.github.io/trenergram/prototype/>. Черновые итерации остались
 под тегами `archive/screens-4-styles` и `archive/constructor-styles` —
 ветки удалены, коммиты сохранены.
 
@@ -21,7 +21,7 @@
 | `prototypes/screens/` | Предыдущая итерация: те же экраны в четырёх стилистиках | Заменено showcase, оставлено для сравнения |
 | `prototypes/constructor-styles/` | Самая первая проба: конструктор в пяти направлениях | Историческое, можно не открывать |
 
-Итоговый прототип: <https://serjnsk.github.io/fitbaza/prototype/>
+Итоговый прототип: <https://serjnsk.github.io/trenergram/prototype/>
 
 Сводная страница пяти стилистик осталась только под тегом
 `archive/screens-4-styles` (`prototypes/showcase/index.html`) — на Pages

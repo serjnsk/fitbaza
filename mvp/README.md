@@ -1,12 +1,12 @@
-# fitbaza MVP · вариант «Strava»
+# Тренерграм MVP · вариант «Strava»
 
-Кликабельный прототип полного объёма MVP (см. [`03 — MVP и роадмап`](https://serjnsk.github.io/fitbaza/docs/03-mvp-and-roadmap/)) в светлой оранжевой стилистике — референс Strava, плоский визуальный язык без карточек и теней.
+Кликабельный прототип полного объёма MVP (см. [`03 — MVP и роадмап`](https://serjnsk.github.io/trenergram/docs/03-mvp-and-roadmap/)) в светлой оранжевой стилистике — референс Strava, плоский визуальный язык без карточек и теней.
 
 ## 🔗 Прототип
 
-**[Открыть прототип →](https://serjnsk.github.io/fitbaza/prototype/)**
+**[Открыть прототип →](https://serjnsk.github.io/trenergram/prototype/)**
 
-Прямая ссылка на конструктор (ядро продукта): [constructor.html](https://serjnsk.github.io/fitbaza/prototype/constructor.html)
+Прямая ссылка на конструктор (ядро продукта): [constructor.html](https://serjnsk.github.io/trenergram/prototype/constructor.html)
 
 Открывается в браузере, полностью кликабельно — данные демонстрационные (тестовый тренер, 6 клиентов, 3 программы), состояние сохраняется в `localStorage` браузера.
 
@@ -14,20 +14,20 @@
 
 | Страница | Что показывает |
 |---|---|
-| [Дашборд](https://serjnsk.github.io/fitbaza/prototype/) | Что сегодня требует внимания: тренировки дня, непрочитанные комментарии, новые рекорды, простаивающие клиенты, недели программ без содержания |
-| [Клиенты](https://serjnsk.github.io/fitbaza/prototype/clients.html) | Рабочий список тренера — поиск, фильтры, прогресс по программе, динамика показателя |
-| [Карточка клиента](https://serjnsk.github.io/fitbaza/prototype/client.html?id=c1) | Профиль спортсмена: факты, история максимума на графике, записанные результаты, персональные максимумы, антропометрия, обратная связь |
-| [Календарь](https://serjnsk.github.io/fitbaza/prototype/calendar.html) | Месяц / неделя по всем клиентам, фильтр по клиенту |
-| [Программы](https://serjnsk.github.io/fitbaza/prototype/programs.html) | Карточки программ с прогрессом составления, недельная таблица |
-| **[Конструктор](https://serjnsk.github.io/fitbaza/prototype/constructor.html)** | **Ядро продукта — см. разбор функций ниже** |
-| [База упражнений](https://serjnsk.github.io/fitbaza/prototype/exercises.html) | Стартовая база + собственные упражнения тренера, поиск и фильтры |
-| [Шаблоны](https://serjnsk.github.io/fitbaza/prototype/templates.html) | Библиотека пяти уровней — упражнение → блок → тренировка → неделя → программа |
-| [Бренд и профиль](https://serjnsk.github.io/fitbaza/prototype/brand.html) | Оформление профиля тренера, пригласительная ссылка, живой превью в телефоне |
-| [Карта сайта](https://serjnsk.github.io/fitbaza/prototype/sitemap.html) | Объём MVP и то, что сознательно осталось за скобками первой версии |
+| [Дашборд](https://serjnsk.github.io/trenergram/prototype/) | Что сегодня требует внимания: тренировки дня, непрочитанные комментарии, новые рекорды, простаивающие клиенты, недели программ без содержания |
+| [Клиенты](https://serjnsk.github.io/trenergram/prototype/clients.html) | Рабочий список тренера — поиск, фильтры, прогресс по программе, динамика показателя |
+| [Карточка клиента](https://serjnsk.github.io/trenergram/prototype/client.html?id=c1) | Профиль спортсмена: факты, история максимума на графике, записанные результаты, персональные максимумы, антропометрия, обратная связь |
+| [Календарь](https://serjnsk.github.io/trenergram/prototype/calendar.html) | Месяц / неделя по всем клиентам, фильтр по клиенту |
+| [Программы](https://serjnsk.github.io/trenergram/prototype/programs.html) | Карточки программ с прогрессом составления, недельная таблица |
+| **[Конструктор](https://serjnsk.github.io/trenergram/prototype/constructor.html)** | **Ядро продукта — см. разбор функций ниже** |
+| [База упражнений](https://serjnsk.github.io/trenergram/prototype/exercises.html) | Стартовая база + собственные упражнения тренера, поиск и фильтры |
+| [Шаблоны](https://serjnsk.github.io/trenergram/prototype/templates.html) | Библиотека пяти уровней — упражнение → блок → тренировка → неделя → программа |
+| [Бренд и профиль](https://serjnsk.github.io/trenergram/prototype/brand.html) | Оформление профиля тренера, пригласительная ссылка, живой превью в телефоне |
+| [Карта сайта](https://serjnsk.github.io/trenergram/prototype/sitemap.html) | Объём MVP и то, что сознательно осталось за скобками первой версии |
 
 Конструктор (`constructor.html`) — точная копия дизайн-концепции `showcase/01-strava/trainer.html` (тег `archive/screens-4-styles`), доведённая до полноценного MVP остальными восемью страницами в том же визуальном языке.
 
-## Функции конструктора (по [`02 — Функциональные требования`](https://serjnsk.github.io/fitbaza/docs/02-functional-requirements/), раздел CON)
+## Функции конструктора (по [`02 — Функциональные требования`](https://serjnsk.github.io/trenergram/docs/02-functional-requirements/), раздел CON)
 
 **Составление**
 - **CON-1** Создание программы вручную (свободный ввод) — строка блока редактируется как обычный текст
