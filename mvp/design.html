@@ -283,7 +283,7 @@ document.getElementById('mocks2').innerHTML = `
     <div class="d-cap"><b>Шапка веб-версии</b><s>логотип в рабочем интерфейсе тренера</s></div>
     <div class="d-card" style="padding:14px">
       <div class="d-top">
-        <span class="wm">${esc(NAME.w)}</span>
+        <span class="wm"><b style="color:var(--acc)">${esc(NAME.w[0])}</b>${esc(NAME.w.slice(1,-1))}<b style="color:var(--acc)">${esc(NAME.w.slice(-1))}</b></span>
         <span class="cr">База программ / Сила + кроссфит / Неделя 4</span>
         <span class="btn2">Создать тренировку</span>
       </div>

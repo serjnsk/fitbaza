@@ -39,6 +39,7 @@ button{cursor:pointer}
 .nh .logo i{font-style:normal;display:block;width:fit-content;color:var(--ink);
   font:900 22px/1 "Montserrat",var(--ui);letter-spacing:-.035em;text-transform:uppercase;
   clip-path:polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px)}
+.nh .logo i b{font-weight:inherit;color:var(--acc)}
 .nbody{flex:1;overflow-y:auto;padding:12px 10px 16px}
 .ngrp{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
   color:var(--tx4);padding:14px 8px 6px}
@@ -526,7 +527,7 @@ button{cursor:pointer}
    уступает место знаку. Название пункта остаётся в title — иначе свёрнутое
    меню превращается в ребус из восьми одинаковых квадратов. */
 .nh .logo em{display:none;font-style:normal;font:900 22px/1 "Montserrat",var(--ui);
-  letter-spacing:-.04em;color:var(--ink)}
+  letter-spacing:-.04em;color:var(--acc)}
 .navtog{margin-left:auto;width:26px;height:26px;border-radius:var(--rad-s);flex:none;
   display:grid;place-items:center;color:var(--tx4);opacity:.75;transition:opacity .12s}
 .nav:hover .navtog{opacity:1}
