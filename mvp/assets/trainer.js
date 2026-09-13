@@ -282,9 +282,9 @@ function blockHTML(b){
   return `<div class="blk ${PENDING && PENDING.ids.has(b.id) ? 'pending' : ''}" data-blk="${b.id}">
     <div class="blkh">
       <span class="gr" title="Перетащить блок">${ICON.grip}</span>
-      <button class="ftype ${b.fmt?'on':''}" data-ftype="${b.id}" title="${b.fmt ? esc(fmtDesc(b.fmt)) : 'Тип блока: AMRAP, EMOM, на время, табата…'}">${b.fmt ? esc(fmtLabel(b.fmt)) : 'тип'}</button>
       <input class="bt" data-f="title" value="${esc(b.title)}"
              placeholder="${b.fmt ? 'Название блока (необязательно)' : 'Введите название блока'}">
+      <button class="ftype ${b.fmt?'on':''}" data-ftype="${b.id}" title="${b.fmt ? esc(fmtDesc(b.fmt)) : 'AMRAP, EMOM, на время, табата…'}">${b.fmt ? esc(fmtLabel(b.fmt)) : 'тип блока'}</button>
       <button class="x ${b.note?'note-on':''}" data-notetog="${b.id}" title="${b.note?'Заметка к блоку':'Добавить заметку к блоку'}">${ICON.chat}</button>
       <button class="x" data-savblk="${b.id}" title="Сохранить блок в библиотеку">${ICON.star}</button>
       <button class="x" data-delblk="${b.id}">${ICON.x}</button>
@@ -990,7 +990,7 @@ function openFtype(btn){
   };
   const sync = () => {
     const chip = $(`[data-ftype="${b.id}"]`);
-    if(chip){ chip.textContent = b.fmt ? fmtLabel(b.fmt) : 'тип'; chip.classList.toggle('on', !!b.fmt); chip.title = b.fmt ? fmtDesc(b.fmt) : '' }
+    if(chip){ chip.textContent = b.fmt ? fmtLabel(b.fmt) : 'тип блока'; chip.classList.toggle('on', !!b.fmt); chip.title = b.fmt ? fmtDesc(b.fmt) : '' }
     const hs = box.querySelector('.st-head s'); if(hs) hs.textContent = b.fmt ? fmtDesc(b.fmt) : 'обычный список подходов';
     const rs = box.querySelector('.st-v .st-res'); if(rs && b.fmt && b.fmt.k==='EMOM') rs.textContent = 'всего ' + mmss(b.fmt.total);
   };
@@ -1437,6 +1437,10 @@ document.addEventListener('keydown', e=>{
   }
   if(ed && e.key === 'Enter'){ e.preventDefault();
     const id = ed.dataset.edit, txt = ed.textContent; closeSug(); commitLine(id, txt); return }
+  /* Enter в названии блока или тренировки — «готово»: снимаем фокус, а
+     change уже подхватывает набранный формат («AMRAP 15») как тип. */
+  if(e.key === 'Enter' && (e.target.closest('[data-f="title"]') || e.target.id === 'd-title')){
+    e.preventDefault(); e.target.dispatchEvent(new Event('change', {bubbles:true})); e.target.blur(); return }
   if(e.key === 'Escape'){ closeSug(); $('#ov').classList.remove('on'); const w = $('#wz'); if(w) w.remove() }
 });
 document.addEventListener('focusout', e=>{
