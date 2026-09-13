@@ -55,14 +55,17 @@
    на 1920 пустых полей по бокам нет, на ноутбуке ничего не теснится. */
 .md-grid{max-width:none}
 .md-main__inner{margin:0;display:flex}
-.md-sidebar{width:272px;padding:0;top:var(--uih)}
-.md-sidebar--secondary{width:236px}
+/* Три колонки во всю ширину: меню 300 / текст — всё остальное / оглавление 300.
+   Текст не центрируется и не ограничен по ширине: таблицы требований
+   занимают всю среднюю колонку. */
+.md-sidebar{width:300px;padding:0;top:var(--uih)}
+.md-sidebar--secondary{width:300px}
 .md-sidebar__scrollwrap{max-height:calc(100vh - var(--uih))}
 .md-content{max-width:none;flex:1;min-width:0}
 .md-content__inner,
 [dir=ltr] .md-sidebar--primary:not([hidden])~.md-content>.md-content__inner,
 [dir=ltr] .md-sidebar--secondary:not([hidden])~.md-content>.md-content__inner{
-  max-width:920px;margin:0 auto;padding:6px 48px 56px}
+  max-width:none;margin:0;padding:6px 40px 56px 36px}
 .md-content__inner::before{display:none}
 
 /* ── Шапка ────────────────────────────────────────────────── */
@@ -106,7 +109,7 @@
 
 /* ── Левое меню ───────────────────────────────────────────── */
 .md-sidebar--primary .md-sidebar__scrollwrap{border-right:1px solid var(--line);
-  margin:0;padding:18px 14px 30px 18px}
+  margin:0;padding:18px 18px 30px 22px}
 .md-nav{font-size:.675rem}
 .md-nav__title{display:none}
 .md-nav__list{padding:0}
@@ -125,8 +128,8 @@
   color:var(--dim);margin:20px 10px 6px;padding:0;background:none;pointer-events:none}
 
 /* ── Оглавление справа ────────────────────────────────────── */
-.md-sidebar--secondary .md-sidebar__scrollwrap{border-left:0;
-  margin:0;padding:24px 22px 26px 6px}
+.md-sidebar--secondary .md-sidebar__scrollwrap{border-left:1px solid var(--line);
+  margin:0;padding:24px 22px 26px 14px}
 /* Material переводит заголовок TOC как «Содержание»; в lovix-docs он
    называется «На этой странице» — отдельной настройки для строки нет,
    поэтому подменяем текст. */
@@ -169,6 +172,7 @@
 .md-typeset table:not([class]) tr:nth-child(even) td{background:#fafbfc}
 .md-typeset table:not([class]) tr:hover{background:none}
 @media(min-width:1081px){.md-typeset table:not([class]){display:table;width:100%}}
+.md-typeset table:not([class]) td{white-space:normal}
 
 /* Код */
 .md-typeset code{background:var(--band);border:1px solid var(--line);border-radius:5px;
