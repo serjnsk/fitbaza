@@ -535,10 +535,15 @@ function buildSets(item, pm){
   return out;
 }
 
+/* Ключ максимума: у базовых движений он общий (присед — для всех вариантов
+   с ключом squat), у остальных упражнений с весом — их собственный id. Так
+   «% от ПМ» доступен для любого упражнения со штангой или гантелями. */
+const pmKey = e => e ? (e.pm || ((e.u||[]).includes('кг') ? e.id : null)) : null;
 function workKg(item, pm){
   const e = item.exId && byId(item.exId);
-  if(!e || !e.pm || item.pct == null || !pm) return null;
-  const max = pm[e.pm];
+  const k = pmKey(e);
+  if(!k || item.pct == null || !pm) return null;
+  const max = pm[k];
   if(!max) return null;
   return Math.round(max * item.pct / 100 / 2.5) * 2.5;
 }

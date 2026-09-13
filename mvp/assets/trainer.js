@@ -281,7 +281,7 @@ function lineHTML(it){
   </div>`;
 }
 /* Подпись чипа: «5×3 · 80 %», «500 м», «3×12 · RPE 8». */
-const itemLoad = it => it.pct ? fmtN(it.pct)+' %' : (it.val ? (it.unit==='RPE' ? 'RPE '+it.val : it.val+' '+it.unit) : '');
+const itemLoad = it => it.pct ? fmtN(it.pct)+' %' : (it.val ? it.val+' '+it.unit : '');
 const itemChip = it => [it.scheme, itemLoad(it)].filter(Boolean).join(' · ');
 function blockHTML(b){
   const f = findFmt(b.title);
@@ -824,54 +824,76 @@ const PCTS = [60,65,70,75,80,85,90,95];
 /* Одна панель на всё: подходы × повторы, лесенка, нагрузка в нужной единице.
    Меняется на лету — строка и вес пересчитываются без перерисовки документа,
    чтобы панель не пропадала под руками. Enter/Готово/клик мимо закрывают. */
-const LOAD_UNITS = ['кг','сек','м','кал'];
+/* Панель настройки упражнения: подписи слева, значения справа, два ряда.
+   «Вес» — для упражнений с весом (% от ПМ / кг / без веса), «Объём» — для
+   остальных (м / сек / кал). Максимум клиента вводится здесь же и сохраняется.
+   Меняется на лету — строка и вес пересчитываются без перерисовки документа. */
+const VOL_UNITS = ['м','сек','кал'];
 function openSetup(btn){
   closeSug();
   const {i} = findItem(btn.dataset.setup); if(!i) return;
-  const ex = byId(i.exId);
-  const units = [...(ex.pm ? ['%'] : []), ...(ex.u||[]).filter(u=>LOAD_UNITS.includes(u))];
-  if(!units.length) units.push('кг');
-  if(i.unit && !units.includes(i.unit) && i.unit!=='RPE') units.push(i.unit);
-  units.push('RPE');
-  let cur = i.pct != null ? '%' : (i.unit || units[0]);
+  const ex = byId(i.exId), key = pmKey(ex), weighted = !!key;
+  const units = [...(weighted ? ['%','кг'] : []), ...(ex.u||[]).filter(u=>VOL_UNITS.includes(u))];
+  if(i.unit && i.val && i.unit!=='RPE' && !units.includes(i.unit)) units.push(i.unit);
+  const hasLoad = units.length > 0;
+  let cur = i.pct != null ? '%' : (i.unit || 'none');
+  const ui = {ladder: !!(i.scheme && !/^\d+×\d*$/.test(i.scheme)), pm:false};
   const box = document.createElement('div');
   box.className = 'sug setup';
-  const r = btn.getBoundingClientRect();
-  box.style.left = Math.max(12, Math.min(r.left, innerWidth - 372)) + 'px';
-  box.style.top  = (r.bottom + window.scrollY + 6) + 'px';
   document.body.appendChild(box); SUG = box;
-  const simple = () => (i.scheme||'').match(/^(\d+)×(\d*)$/);
-  const draw = () => {
-    const m = simple(), kg = workKg(i, PM());
+  /* Панель прижата правым краем к чипу и всегда внутри окна; если снизу
+     не хватает места — раскрывается вверх. Размеры известны только после
+     первой отрисовки, поэтому позиционируем после draw(). */
+  const place = () => {
+    const r = btn.getBoundingClientRect(), W = document.documentElement.clientWidth, H = innerHeight;
+    box.style.left = Math.max(12, Math.min(r.right - box.offsetWidth, W - box.offsetWidth - 12)) + 'px';
+    const below = r.bottom + 6 + box.offsetHeight <= H - 8;
+    box.style.top = (window.scrollY + (below ? r.bottom + 6 : Math.max(8, r.top - box.offsetHeight - 6))) + 'px';
+  };
+  const pmVal = () => PM()[key];
+  const readout = () => {
+    const kg = workKg(i, PM());
+    if(cur==='%') return kg!=null ? `% → <b>${fmtN(kg)} кг</b>` : (pmVal() ? '%' : '% · <i>ПМ не задан</i>');
+    return cur==='none' ? '' : esc(cur);
+  };
+  const headPM = () => weighted ? `${pmVal() ? 'ПМ '+fmtN(pmVal())+' кг' : 'ПМ не задан'} · <a class="st-lnk" data-st-pm>${pmVal() ? 'изменить' : 'ввести'}</a>` : '';
+  let draw = () => {
+    const m = (i.scheme||'').match(/^(\d+)×(\d*)$/);
     box.innerHTML = `
-      <div class="cap">Подходы × повторы</div>
-      <div class="st-row">
-        <input class="st-n" id="st-sets" type="number" min="1" max="99" placeholder="подх." value="${m ? m[1] : ''}">
-        <b>×</b>
-        <input class="st-n" id="st-reps" type="number" min="1" max="999" placeholder="повт." value="${m ? m[2] : ''}">
-        <span class="st-pre">${['3×10','4×8','5×5','5×3'].map(s=>`<button data-st-pre="${s}" class="${i.scheme===s?'on':''}">${s}</button>`).join('')}</span>
+      <div class="st-head"><b>${esc(ex.ru)}</b><s id="st-headpm">${headPM()}</s></div>
+      ${ui.pm ? `<div class="st-pmrow"><span>Максимум клиента</span><input class="st-n" id="st-pm" type="number" min="0" step="2.5" value="${pmVal() ?? ''}" placeholder="0"><span>кг</span>
+        <s>1ПМ или расчётный — по нему считаются проценты</s></div>` : ''}
+      <div class="st-grid">
+        <span class="st-l">Подходы × повторы</span>
+        <span class="st-v">
+          <input class="st-n" id="st-sets" type="number" min="1" max="99" placeholder="—" value="${m ? m[1] : ''}">
+          <i>×</i>
+          <input class="st-n" id="st-reps" type="number" min="1" max="999" placeholder="—" value="${m ? m[2] : ''}">
+          ${ui.ladder ? '' : `<a class="st-lnk" data-st-ladder>лесенка</a>`}
+        </span>
+        ${ui.ladder ? `<span class="st-l"></span><span class="st-v"><input class="st-n wide" id="st-scheme" placeholder="5-5-3-3-1" value="${m ? '' : esc(i.scheme||'')}"><a class="st-lnk" data-st-noladder>обычная схема</a></span>` : ''}
+        ${hasLoad ? `
+        <span class="st-l">${weighted ? 'Вес' : 'Объём'}</span>
+        <span class="st-v">
+          <span class="st-seg">${[...units,'none'].map(u=>`<button data-st-u="${u}" class="${cur===u?'on':''}">${u==='%'?'% от ПМ':u==='none'?(weighted?'без веса':'нет'):u}</button>`).join('')}</span>
+          ${cur==='none' ? '' : `<input class="st-n" id="st-val" type="number" min="0" step="${cur==='%'?'5':cur==='кг'?'2.5':cur==='м'?'50':'1'}" placeholder="${cur==='%'?'80':'0'}"
+                 value="${cur==='%' ? (i.pct ?? '') : (i.unit===cur ? esc(i.val||'') : '')}">
+          <s class="st-res" id="st-res">${readout()}</s>`}
+        </span>` : ''}
       </div>
-      <input class="st-free" id="st-scheme" placeholder="или лесенка: 5-5-3-3-1" value="${m ? '' : esc(i.scheme||'')}">
-      <div class="cap">Нагрузка</div>
-      <div class="st-units">${units.map(u=>`<button data-st-u="${u}" class="${cur===u?'on':''}">${u==='%'?'% от ПМ':u}</button>`).join('')}</div>
-      <div class="st-row">
-        <input class="st-n wide" id="st-val" type="number" min="0" step="${cur==='RPE'?'0.5':cur==='%'?'5':'any'}" placeholder="${cur==='%'?'80':cur==='RPE'?'8':'0'}"
-               value="${cur==='%' ? (i.pct ?? '') : (i.unit===cur ? esc(i.val||'') : '')}">
-        <span class="st-u">${cur==='%'?'%':cur}</span>
-        <s class="st-kg" id="st-kg">${kg!=null ? '→ '+fmtN(kg)+' кг' : (cur==='%' && !PM()[ex.pm] ? 'ПМ не задан' : '')}</s>
-      </div>
-      ${cur==='%' ? `<div class="st-pre pcts">${PCTS.map(p=>`<button data-st-pct="${p}" class="${i.pct===p?'on':''}">${p}</button>`).join('')}</div>` : ''}
-      <div class="ok st-foot"><button class="lnk" data-st-clear>Убрать параметры</button><span class="sp"></span><button class="btn sm" data-st-ok>Готово ↵</button></div>`;
+      <div class="st-foot"><button class="lnk" data-st-clear>Убрать параметры</button><span class="sp"></span><button class="btn sm" data-st-ok>Готово ↵</button></div>`;
   };
   const sync = () => {                       /* строка и вес — без render() */
     const chip = itemChip(i), el = $(`[data-setup="${i.id}"]`);
     if(el){ el.textContent = chip || 'настроить'; el.classList.toggle('none', !chip);
             const kg = workKg(i, PM()); el.parentElement.querySelector('.kg').textContent = kg!=null ? fmtN(kg)+' кг' : '' }
-    const k = $('#st-kg'); if(k){ const kg = workKg(i, PM()); k.textContent = kg!=null ? '→ '+fmtN(kg)+' кг' : '' }
+    const rs = $('#st-res'); if(rs) rs.innerHTML = readout();
+    const hp = $('#st-headpm'); if(hp) hp.innerHTML = headPM();
   };
   const setLoad = v => {
     const num = v === '' ? null : +v;
-    if(cur==='%'){ i.pct = num || null; i.unit=''; i.val=''; }
+    if(cur==='none'){ i.pct = null; i.unit = ''; i.val = ''; }
+    else if(cur==='%'){ i.pct = num || null; i.unit=''; i.val=''; }
     else { i.pct = null; i.unit = num==null ? '' : cur; i.val = num==null ? '' : String(v); }
     sync();
   };
@@ -879,23 +901,28 @@ function openSetup(btn){
     const id = e.target.id;
     if(id==='st-sets' || id==='st-reps'){
       const s = $('#st-sets').value.trim(), rp = $('#st-reps').value.trim();
-      i.scheme = s && rp ? `${s}×${rp}` : s ? `${s}×` : ''; $('#st-scheme').value = ''; sync(); return }
+      i.scheme = s && rp ? `${s}×${rp}` : s ? `${s}×` : ''; sync(); return }
     if(id==='st-scheme'){ i.scheme = e.target.value.trim(); $('#st-sets').value = ''; $('#st-reps').value = ''; sync(); return }
     if(id==='st-val'){ setLoad(e.target.value.trim()); return }
+    if(id==='st-pm'){ const v = +e.target.value; if(v > 0) PM()[key] = v; else delete PM()[key]; saveState(); sync(); return }
   });
   /* Клик внутри панели не должен дойти до общего обработчика: тот закрывает
      всплывашки по клику «мимо», а после перерисовки панели нажатая кнопка
      уже отвязана от DOM и выглядит как клик мимо. */
   box.addEventListener('click', e=>{
     e.stopPropagation();
-    const pre = e.target.closest('[data-st-pre]'); if(pre){ i.scheme = pre.dataset.stPre; draw(); sync(); return }
     const u = e.target.closest('[data-st-u]');
-    if(u){ const v = $('#st-val').value.trim(); cur = u.dataset.stU; setLoad(v); draw(); return }
-    const pc = e.target.closest('[data-st-pct]'); if(pc){ i.pct = +pc.dataset.stPct; i.unit=''; i.val=''; draw(); sync(); return }
-    if(e.target.closest('[data-st-clear]')){ Object.assign(i, {scheme:'', pct:null, unit:'', val:''}); cur = units[0]; draw(); sync(); return }
+    if(u){ const v = $('#st-val') ? $('#st-val').value.trim() : ''; cur = u.dataset.stU; setLoad(v); draw(); const f = $('#st-val'); if(f) f.focus(); return }
+    if(e.target.closest('[data-st-ladder]')){ ui.ladder = true; draw(); $('#st-scheme').focus(); return }
+    if(e.target.closest('[data-st-noladder]')){ ui.ladder = false; if(!/^\d+×\d*$/.test(i.scheme||'')) i.scheme = ''; draw(); sync(); return }
+    if(e.target.closest('[data-st-pm]')){ ui.pm = !ui.pm; draw(); const f = $('#st-pm'); if(f) f.focus(); return }
+    if(e.target.closest('[data-st-clear]')){ Object.assign(i, {scheme:'', pct:null, unit:'', val:''}); cur = 'none'; ui.ladder = false; draw(); sync(); return }
     if(e.target.closest('[data-st-ok]')){ closeSug(); render(); return }
   });
-  box.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); closeSug(); render() } });
+  box.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); if(e.target.id==='st-pm'){ ui.pm = false; draw(); sync(); return } closeSug(); render() } });
+  const draw0 = draw;
+  const drawAndPlace = () => { draw0(); place() };
+  draw = drawAndPlace;
   draw();
   const f = $('#st-sets'); if(f) f.focus();
 }
@@ -1467,7 +1494,7 @@ function dropOnDay(idx){
 let PICK = new Set();
 /* Какой максимум показать справа: тот, от которого считается эта тренировка. */
 function mainPm(d){
-  const ids = d.blocks.flatMap(b=>b.items).filter(i=>i.exId && i.pct!=null).map(i=>byId(i.exId).pm);
+  const ids = d.blocks.flatMap(b=>b.items).filter(i=>i.exId && i.pct!=null).map(i=>pmKey(byId(i.exId)));
   return ids.find(Boolean) || 'dead';
 }
 function clientRow(c, key, needsPm){
