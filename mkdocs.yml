@@ -1,6 +1,6 @@
 site_name: Внутренняя документация
-site_url: https://serjnsk.github.io/fitbaza/docs/
-repo_url: https://github.com/serjnsk/fitbaza
+site_url: https://serjnsk.github.io/trenergram/docs/
+repo_url: https://github.com/serjnsk/trenergram
 docs_dir: docs
 
 theme:
@@ -39,7 +39,7 @@ nav:
   - 05 — Решения и открытые вопросы: 05-decisions.md
   - 06 — Технологический стек: 06-tech-stack.md
   - 07 — Оффлайн-режим: 07-offline-mode.md
-  - Прототип ↗: https://serjnsk.github.io/fitbaza/prototype/
+  - Прототип ↗: https://serjnsk.github.io/trenergram/prototype/
 
 markdown_extensions:
   - tables

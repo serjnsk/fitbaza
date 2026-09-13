@@ -7,11 +7,11 @@
 Ветки параллельны, одна в другую не вложена. Ничего, кроме документации, в `main` не попадает; ничего, кроме прототипа, — в `prototypes`.
 
 ## Публикация (всегда по этой схеме)
-1. Коммит и пуш в нужную ветку `origin` = https://github.com/serjnsk/fitbaza. Автор коммитов: serjnsk / imhtsolutions@gmail.com, сообщения по-русски.
+1. Коммит и пуш в нужную ветку `origin` = https://github.com/serjnsk/trenergram. Автор коммитов: serjnsk / imhtsolutions@gmail.com, сообщения по-русски.
 2. Дальше ничего делать не надо: workflow `.github/workflows/pages.yml` срабатывает на push в `main` **или** в `prototypes` и собирает сайт целиком:
-   - `https://serjnsk.github.io/fitbaza/` — заглавная из `landing/index.html`
-   - `https://serjnsk.github.io/fitbaza/docs/` — MkDocs из ветки `main`
-   - `https://serjnsk.github.io/fitbaza/prototype/` — содержимое `mvp/` из ветки `prototypes`
+   - `https://serjnsk.github.io/trenergram/` — заглавная из `landing/index.html`
+   - `https://serjnsk.github.io/trenergram/docs/` — MkDocs из ветки `main`
+   - `https://serjnsk.github.io/trenergram/prototype/` — содержимое `mvp/` из ветки `prototypes`
 3. Проверить, что опубликованные страницы отвечают 200.
 
 **Workflow лежит в обеих ветках и обязан быть одинаковым.** Actions запускает его из той ветки, в которую был push, а собирает он всегда обе по явным `ref` — результат не зависит от триггера. Правите в одной ветке — сразу перенесите во вторую, иначе поведение разойдётся.
@@ -26,7 +26,7 @@
 
 ## Прототип
 - Локально: `cd mvp && python3 -m http.server 8765`.
-- Относительные пути обязательны: прототип отдаётся из подпапки `/fitbaza/prototype/`, любой путь от корня (`/assets/...`) сломается.
+- Относительные пути обязательны: прототип отдаётся из подпапки `/trenergram/prototype/`, любой путь от корня (`/assets/...`) сломается.
 - Доменная модель — `mvp/assets/data.js`. Сущности по документации: упражнение → блок → тренировка → неделя → программа → шаблон.
 - **Ловушка в регулярках:** `\w` не матчит кириллицу, на этом дважды ломался разбор текста. Писать `[а-яё]` явно.
 - Решения, которые не стоит переигрывать без запроса заказчика, и открытые вопросы к нему — в `HANDOVER.md` ветки `prototypes`.
