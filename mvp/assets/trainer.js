@@ -57,9 +57,9 @@ const TIMER = false;
    и пересобирает их через mkItem. Если передать туда готовые объекты, он
    молча вернёт блок с пустыми упражнениями — без ошибки, без предупреждения.
    Там, где элементы уже собраны, пользуемся этим: он их не трогает. */
-const blockOf = (title, items, note, kind) => ({
+const blockOf = (title, items, note, kind, fmt) => normFmt({
   id: nid('b'), kind: kind || 'strength', title: title || '',
-  note: note || '', fmt: fmtPart(title) || null, items: items || [],
+  note: note || '', fmt: fmt || null, items: items || [],
 });
 
 /* «Отдых» и «—» приходят из модели как заглушки пустого дня, а не как
@@ -84,7 +84,7 @@ const PCACHE = {};
    программы, и после смены клиента чужие блоки приходили без формата. */
 const planOf = pid => PCACHE[pid] ||= (b => {
   b.forEach(d=>{
-    d.blocks.forEach(fmtIntoTitle);
+    d.blocks.forEach(normFmt);
     /* fmtIntoTitle меняет названия блоков после снятия слепка — без обновления
        любой день с форматом («For time», EMOM) считался бы черновиком. */
     if(!d.draft) d.pub = serializeDay(d);
@@ -240,7 +240,7 @@ function renderStrip(){
           ${n ? `<span class="t">${esc(REST_TITLES.has(x.title) ? 'Без названия' : x.title)}</span>` : '<span class="e">отдых</span>'}
           ${isDraft(x) && (n || x.title) ? `<span class="dr">черновик</span>` : ''}
           ${n ? `<span class="k">${bl} ${plural(bl,'блок','блока','блоков')} · ${n} упр</span>` : ''}
-          ${n ? `<span class="bl">${x.blocks.filter(b=>b.items.some(y=>y.exId)).map(b=>`<i>${esc(b.title||'блок')}</i>`).join('')}</span>` : ''}
+          ${n ? `<span class="bl">${x.blocks.filter(b=>b.items.some(y=>y.exId)).map(b=>`<i>${esc(b.title || fmtLabel(b.fmt) || 'блок')}</i>`).join('')}</span>` : ''}
           <span class="ld"><i style="flex:${n}"></i><u style="flex:${Math.max(1,10-n)}"></u><s>${n||''}</s></span>
         </button>`;
       }).join('')}
@@ -250,12 +250,7 @@ function renderStrip(){
 /* ─── документ дня ─── */
 /* Расшифровка формата словами — пригодится, когда вернётся таймер.
    Пока не вызывается ниоткуда: подтверждать разбор мы перестали. */
-function tmSub(f){
-  if(f.rest>0)      return `${f.rounds} × ${mmss(f.work)} через ${mmss(f.rest)}`;
-  if(f.k==='EMOM')  return `${f.rounds} × ${mmss(f.work)} · всего ${mmss(f.total)}`;
-  if(f.k==='AMRAP') return `максимум раундов за ${mmss(f.total)}`;
-  return `на время · лимит ${mmss(f.total)}`;
-}
+const tmSub = f => fmtDesc(f);
 function lineHTML(it){
   const ex = it.exId ? byId(it.exId) : null;
   /* Нераспознанная строка — предусмотренное состояние, а не ошибка:
@@ -282,14 +277,14 @@ function lineHTML(it){
 }
 /* Подпись чипа: «5×3 · 80 %», «500 м», «3×12 · RPE 8». */
 const itemLoad = it => it.pct ? fmtN(it.pct)+' %' : (it.val ? it.val+' '+it.unit : '');
-const itemChip = it => [it.scheme, itemLoad(it)].filter(Boolean).join(' · ');
+const itemChip = it => it.txt ? it.txt : [it.scheme, itemLoad(it)].filter(Boolean).join(' · ');
 function blockHTML(b){
-  const f = findFmt(b.title);
   return `<div class="blk ${PENDING && PENDING.ids.has(b.id) ? 'pending' : ''}" data-blk="${b.id}">
     <div class="blkh">
       <span class="gr" title="Перетащить блок">${ICON.grip}</span>
+      <button class="ftype ${b.fmt?'on':''}" data-ftype="${b.id}" title="${b.fmt ? esc(fmtDesc(b.fmt)) : 'Тип блока: AMRAP, EMOM, на время, табата…'}">${b.fmt ? esc(fmtLabel(b.fmt)) : 'тип'}</button>
       <input class="bt" data-f="title" value="${esc(b.title)}"
-             placeholder="Введите название блока">
+             placeholder="${b.fmt ? 'Название блока (необязательно)' : 'Введите название блока'}">
       <button class="x ${b.note?'note-on':''}" data-notetog="${b.id}" title="${b.note?'Заметка к блоку':'Добавить заметку к блоку'}">${ICON.chat}</button>
       <button class="x" data-savblk="${b.id}" title="Сохранить блок в библиотеку">${ICON.star}</button>
       <button class="x" data-delblk="${b.id}">${ICON.x}</button>
@@ -412,7 +407,7 @@ function renderSrc(){
     $('#railfoot').textContent = 'Всё это можно просто напечатать в строке — панель нужна, когда хочется посмотреть, что есть.';
   } else {
     const lvl = S.tab === 'blk' ? 'блок' : 'тренировка';
-    TPL.filter(t=>t.lvl==='блок').forEach(fmtIntoTitle);   /* формат — в название */
+    TPL.filter(t=>t.lvl==='блок').forEach(normFmt);        /* формат — в тип, название чистое */
     /* inline — записи, созданные ради ссылок внутри недели. Они не выбор
        тренера, а внутренняя кухня, и в источниках им не место. */
     const list = TPL.filter(t => t.lvl===lvl && !t.inline &&
@@ -420,11 +415,11 @@ function renderSrc(){
     box.innerHTML = list.map(t=>`
       <div class="tplc" draggable="true" data-tpl="${t.id}">
         <div class="h">
-          <span class="nm">${esc(t.title)}</span>
+          <span class="nm">${esc(t.title || (t.fmt ? fmtLabel(t.fmt) : ''))}</span>${t.fmt && t.title ? `<s class="ft">${esc(fmtLabel(t.fmt))}</s>` : ''}
           </div>
         <div class="ls">${lvl==='блок'
           ? t.items.map(i=>{ const e=byId(i[0]) || {ru:i[0]};   /* неизвестный id — показываем как есть, не роняем панель */
-              const v = i[2] ? ` · ${i[2]}${i[3]==='%'?' %':' '+(i[3]||'')}` : '';
+              const v = i[4] ? ` · ${i[4]}` : i[2] ? ` · ${i[2]}${i[3]==='%'?' %':' '+(i[3]||'')}` : '';
               return `<span>${esc(e.ru)}${i[1]?' — '+esc(i[1]):''}${esc(v)}</span>` }).join('')
           : (t.blocks||[]).map(id=>{ const b=tplById(id); return b?`<span>${esc(b.title)}</span>`:'' }).join('')}</div>
       </div>`).join('') || '<div class="empty">Пусто</div>';
@@ -813,8 +808,8 @@ function commitLine(id, text){
   /* В тексте теперь только название, поэтому «Присед» без цифр — это
      переименование, а не сброс схемы: параметры берём из текста, если они
      там есть, иначе оставляем прежние. */
-  const hasParams = p && (p.scheme || p.pct != null || p.val);
-  if(p) Object.assign(i, {exId:p.exId, raw:'', ...(hasParams ? {scheme:p.scheme||'', pct:p.pct??null, unit:p.unit||'', val:p.val||''} : {})});
+  const hasParams = p && (p.scheme || p.pct != null || p.val || p.txt);
+  if(p) Object.assign(i, {exId:p.exId, raw:'', ...(hasParams ? {scheme:p.scheme||'', pct:p.pct??null, unit:p.unit||'', val:p.val||'', txt:p.txt||''} : {})});
   else { i.exId = null; i.raw = (text||'').trim() }
   render();
 }
@@ -867,8 +862,8 @@ function openSetup(btn){
       ${ui.pm ? `<div class="st-pmrow"><span>Максимум клиента</span><input class="st-n" id="st-pm" type="number" min="0" step="2.5" value="${pmVal() ?? ''}" placeholder="0"><span>кг</span>
         <s>1ПМ или расчётный — по нему считаются проценты</s></div>` : ''}
       <div class="st-grid">
-        <span class="st-l">Подходы × повторы</span>
-        <span class="st-v">
+        <span class="st-l dim">Подходы × повторы</span>
+        <span class="st-v dim">
           <input class="st-n" id="st-sets" type="number" min="1" max="99" placeholder="—" value="${m ? m[1] : ''}">
           <i>×</i>
           <input class="st-n" id="st-reps" type="number" min="1" max="999" placeholder="—" value="${m ? m[2] : ''}">
@@ -876,13 +871,15 @@ function openSetup(btn){
         </span>
         ${ui.ladder ? `<span class="st-l"></span><span class="st-v"><input class="st-n wide" id="st-scheme" placeholder="5-5-3-3-1" value="${m ? '' : esc(i.scheme||'')}"><a class="st-lnk" data-st-noladder>обычная схема</a></span>` : ''}
         ${hasLoad ? `
-        <span class="st-l">${weighted ? 'Вес' : 'Объём'}</span>
+        <span class="st-l dim">${weighted ? 'Вес' : 'Объём'}</span>
         <span class="st-v">
           <span class="st-seg">${units.map(u=>`<button data-st-u="${u}" class="${cur===u?'on':''}">${u==='%'?'% от ПМ':u}</button>`).join('')}</span>
           <input class="st-n" id="st-val" type="number" min="0" step="${cur==='%'?'5':cur==='кг'?'2.5':cur==='м'?'50':'1'}" placeholder="—"
                  value="${cur==='%' ? (i.pct ?? '') : (i.unit===cur ? esc(i.val||'') : '')}">
           <s class="st-res" id="st-res">${readout()}</s>
         </span>` : ''}
+        <span class="st-l">Текстом</span>
+        <span class="st-v"><input class="st-n full" id="st-txt" placeholder="60×5, 70×5, 80×3×3 — любой формат, когда схема не ложится" value="${esc(i.txt||'')}"></span>
       </div>
       <div class="st-foot"><button class="lnk" data-st-clear>Убрать параметры</button><span class="sp"></span><button class="btn sm" data-st-ok>Готово ↵</button></div>`;
   };
@@ -899,8 +896,17 @@ function openSetup(btn){
     else { i.pct = null; i.unit = num==null ? '' : cur; i.val = num==null ? '' : String(v); }
     sync();
   };
+  /* Текст и структура взаимоисключающие: заполнил текст — подходы и вес
+     очищаются и гаснут; тронул структуру — текст уходит. */
+  const dropTxt = () => { if(i.txt){ i.txt=''; const f=$('#st-txt'); if(f) f.value=''; } box.classList.remove('txt-on') };
   box.addEventListener('input', e=>{
     const id = e.target.id;
+    if(id==='st-txt'){
+      i.txt = e.target.value.trim();
+      if(i.txt){ Object.assign(i, {scheme:'', pct:null, unit:'', val:''}); ['st-sets','st-reps','st-val','st-scheme'].forEach(x=>{ const f=$('#'+x); if(f) f.value='' }); box.classList.add('txt-on') }
+      else box.classList.remove('txt-on');
+      sync(); return }
+    if(id==='st-sets' || id==='st-reps' || id==='st-scheme' || id==='st-val') dropTxt();
     if(id==='st-sets' || id==='st-reps'){
       const s = $('#st-sets').value.trim(), rp = $('#st-reps').value.trim();
       i.scheme = s && rp ? `${s}×${rp}` : s ? `${s}×` : ''; sync(); return }
@@ -926,7 +932,79 @@ function openSetup(btn){
   const drawAndPlace = () => { draw0(); place() };
   draw = drawAndPlace;
   draw();
-  const f = $('#st-sets'); if(f) f.focus();
+  if(i.txt) box.classList.add('txt-on');
+  const f = $(i.txt ? '#st-txt' : '#st-sets'); if(f) f.focus();
+}
+
+/* ═══════════ ТИП БЛОКА ═══════════
+   Панель под чипом типа: выбор типа и его параметры. Меняется на лету,
+   чип в шапке блока обновляется без перерисовки документа. */
+function openFtype(btn){
+  closeSug();
+  const b = day().blocks.find(x=>x.id===btn.dataset.ftype); if(!b) return;
+  const box = document.createElement('div'); box.className = 'sug setup ftp';
+  document.body.appendChild(box); SUG = box;
+  const place = () => {
+    const r = btn.getBoundingClientRect(), W = document.documentElement.clientWidth, H = innerHeight;
+    box.style.left = Math.max(12, Math.min(r.left, W - box.offsetWidth - 12)) + 'px';
+    const below = r.bottom + 6 + box.offsetHeight <= H - 8;
+    box.style.top = (window.scrollY + (below ? r.bottom + 6 : Math.max(8, r.top - box.offsetHeight - 6))) + 'px';
+  };
+  const num = (id, ph, step=1, w='') => `<input class="st-n ${w}" id="${id}" type="number" min="0" step="${step}" placeholder="${ph}" value="">`;
+  const ms = (id, sec) => `<input class="st-n" id="${id}-m" type="number" min="0" placeholder="0" value="${Math.floor(sec/60)}"><i>мин</i><input class="st-n" id="${id}-s" type="number" min="0" max="59" step="5" placeholder="00" value="${sec%60}"><i>сек</i>`;
+  const params = () => {
+    const f = b.fmt; if(!f) return '';
+    switch(f.k){
+      case 'AMRAP':     return `<span class="st-l">Время</span><span class="st-v">${ms('ft-total', f.total)}</span>`;
+      case 'EMOM':      return `<span class="st-l">Раундов</span><span class="st-v"><input class="st-n" id="ft-rounds" type="number" min="1" value="${f.rounds}"><s class="st-res">всего ${mmss(f.total)}</s></span>
+                                <span class="st-l">Интервал</span><span class="st-v"><span class="st-seg">${[60,90,120,180].map(w=>`<button data-ft-work="${w}" class="${f.work===w?'on':''}">${mmss(w)}</button>`).join('')}</span></span>`;
+      case 'FOR TIME':  return `<span class="st-l">Раундов</span><span class="st-v"><input class="st-n" id="ft-rounds" type="number" min="1" value="${f.rounds}"><s class="st-res">1 — один проход (чиппер)</s></span>
+                                <span class="st-l">Лимит</span><span class="st-v">${ms('ft-total', f.total)}<s class="st-res">0 — без лимита</s></span>`;
+      case 'TABATA':
+      case 'ИНТЕРВАЛЫ': return `<span class="st-l">Раундов</span><span class="st-v"><input class="st-n" id="ft-rounds" type="number" min="1" value="${f.rounds}"></span>
+                                <span class="st-l">Работа</span><span class="st-v">${ms('ft-work', f.work)}</span>
+                                <span class="st-l">Отдых</span><span class="st-v">${ms('ft-rest', f.rest)}</span>`;
+      case 'DEATH BY':  return `<span class="st-l">Интервал</span><span class="st-v"><span class="st-seg">${[60,90,120].map(w=>`<button data-ft-work="${w}" class="${f.work===w?'on':''}">${mmss(w)}</button>`).join('')}</span></span>
+                                <span class="st-l">Старт</span><span class="st-v"><input class="st-n" id="ft-start" type="number" min="1" value="${f.start||1}"><i>повт</i></span>`;
+    }
+    return '';
+  };
+  const draw = () => {
+    box.innerHTML = `
+      <div class="st-head"><b>Тип блока</b><s>${b.fmt ? esc(fmtDesc(b.fmt)) : 'обычный список подходов'}</s></div>
+      <div class="ft-list">${FMT_TYPES.map(t=>`<button data-ft-k="${t.k||''}" class="${(b.fmt?b.fmt.k:null)===t.k?'on':''}">${t.n}</button>`).join('')}</div>
+      ${b.fmt && b.fmt.k!=='NFT' ? `<div class="st-grid">${params()}</div>` : ''}
+      <div class="st-foot"><span class="sp"></span><button class="btn sm" data-st-ok>Готово ↵</button></div>`;
+    place();
+  };
+  const recalc = () => {
+    const f = b.fmt; if(!f) return;
+    const sec = id => { const m=$('#'+id+'-m'), s=$('#'+id+'-s'); return m && s ? (+m.value||0)*60 + (+s.value||0) : null };
+    const r = $('#ft-rounds'); if(r) f.rounds = Math.max(1, +r.value||1);
+    const st = $('#ft-start'); if(st) f.start = Math.max(1, +st.value||1);
+    if(f.k==='AMRAP'){ const v = sec('ft-total'); if(v!=null){ f.total = v; f.work = v } }
+    if(f.k==='FOR TIME'){ const v = sec('ft-total'); if(v!=null) f.total = v }
+    if(f.k==='TABATA' || f.k==='ИНТЕРВАЛЫ'){ const w=sec('ft-work'), rs=sec('ft-rest'); if(w!=null) f.work=w; if(rs!=null) f.rest=rs; f.total = f.rounds*(f.work+f.rest) }
+    if(f.k==='EMOM') f.total = f.rounds*f.work;
+    sync();
+  };
+  const sync = () => {
+    const chip = $(`[data-ftype="${b.id}"]`);
+    if(chip){ chip.textContent = b.fmt ? fmtLabel(b.fmt) : 'тип'; chip.classList.toggle('on', !!b.fmt); chip.title = b.fmt ? fmtDesc(b.fmt) : '' }
+    const hs = box.querySelector('.st-head s'); if(hs) hs.textContent = b.fmt ? fmtDesc(b.fmt) : 'обычный список подходов';
+    const rs = box.querySelector('.st-v .st-res'); if(rs && b.fmt && b.fmt.k==='EMOM') rs.textContent = 'всего ' + mmss(b.fmt.total);
+  };
+  box.addEventListener('input', recalc);
+  box.addEventListener('click', e=>{
+    e.stopPropagation();
+    const k = e.target.closest('[data-ft-k]');
+    if(k){ const t = FMT_TYPES.find(x=>(x.k||'')===k.dataset.ftK); b.fmt = t.k ? {k:t.k, ...t.d} : null; draw(); sync(); return }
+    const w = e.target.closest('[data-ft-work]');
+    if(w && b.fmt){ b.fmt.work = +w.dataset.ftWork; if(b.fmt.k==='EMOM') b.fmt.total = b.fmt.rounds*b.fmt.work; draw(); sync(); return }
+    if(e.target.closest('[data-st-ok]')){ closeSug(); render(); return }
+  });
+  box.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); closeSug(); render() } });
+  draw();
 }
 
 /* ─── вставка из панели источников ─── */
@@ -965,10 +1043,10 @@ const FOLDER_OF = b => fmtPart(b.title) ? 'Комплексы'
 function blockToTpl(b, folder){
   const t = {
     id: nid('t'), lvl:'блок', folder: folder || FOLDER_OF(b), used: 0,
-    title: b.title || 'Блок без названия', fmt: fmtPart(b.title) || null,
+    title: b.title || (b.fmt ? fmtLabel(b.fmt) : 'Блок без названия'), fmt: b.fmt ? {...b.fmt} : null,
     items: b.items.filter(i=>i.exId).map(i =>
-      i.pct != null ? [i.exId, i.scheme||'', i.pct, '%']
-                    : [i.exId, i.scheme||'', i.val||'', i.unit||'']),
+      i.pct != null ? [i.exId, i.scheme||'', i.pct, '%', i.txt||'']
+                    : [i.exId, i.scheme||'', i.val||'', i.unit||'', i.txt||'']),
   };
   TPL.unshift(t);
   return t.id;
@@ -1048,7 +1126,7 @@ const addTpl = t => {
 /* CON-4 — «копирование предыдущей недели как основа новой»: неделя целиком,
    а не открытый день. Копия глубокая, иначе правки поедут в обе недели. */
 const copyBlocks = bs => bs.map(b =>
-  blockOf(b.title, b.items.map(i => ({...i, id:nid('i')})), b.note, b.kind));
+  blockOf(b.title, b.items.map(i => ({...i, id:nid('i')})), b.note, b.kind, b.fmt ? {...b.fmt} : null));
 /* ═══════════ ПРОИЗВОЛЬНЫЙ НАБОР ТРЕНИРОВОК (CON-4, CON-14) ═══════════
    Копия недели была частным случаем: отметить семь подряд и вставить семью
    днями позже. Здесь набор произвольный — подряд или вразбивку. */
@@ -1253,6 +1331,7 @@ document.addEventListener('click', e=>{
   const dl = e.target.closest('[data-del]');
   if(dl){ const {b} = findItem(dl.dataset.del); b.items = b.items.filter(x=>x.id!==dl.dataset.del); render(); return }
   const st = e.target.closest('[data-setup]'); if(st){ openSetup(st); return }
+  const ft = e.target.closest('[data-ftype]'); if(ft){ openFtype(ft); return }
   const pf = e.target.closest('[data-pickfor]');
   if(pf){ const {i} = findItem(pf.dataset.pickfor);
           showSug(pf, i.raw || '');
@@ -1316,19 +1395,20 @@ document.addEventListener('input', e=>{
   if(f){
     const b = day().blocks.find(x=>x.id === f.closest('[data-blk]').dataset.blk);
     b[f.dataset.f] = f.value;
-    if(f.dataset.f === 'title'){
-      /* Формат — не отдельное поле, а то, что парсер нашёл в названии
-         (TMR-1). Пересобираем на лету и сразу показываем расшифровку. */
-      b.fmt = fmtPart(f.value);
-      renderWeek();
-    }
+    if(f.dataset.f === 'title') renderStrip();
     return;
   }
-  if(e.target.id === 'd-title'){ day().title = e.target.value; renderWeek(); return }
+  if(e.target.id === 'd-title'){ day().title = e.target.value; renderStrip(); return }
   if(e.target.id === 'w-msg'){ setTrainerMsg(day().date, e.target.value); return }
   if(e.target.id === 'q'){ S.q = e.target.value; renderSrc(); return }
 });
 document.addEventListener('change', e=>{
+  const tf = e.target.closest('[data-f="title"]');
+  if(tf){
+    const b = day().blocks.find(x=>x.id === tf.closest('[data-blk]').dataset.blk);
+    if(b && !b.fmt && findFmt(tf.value)){ normFmt(b); render(); toast('Тип блока: ' + fmtLabel(b.fmt)) }
+    return;
+  }
   if(e.target.id === 'pt-photo'){
     const f = e.target.files && e.target.files[0];
     if(f){ $('#pt-photo-name').textContent = f.name; toast('Фото прикреплено. Распознавание с фото появится вместе с ИИ-модулем — пока разбираем текст') }

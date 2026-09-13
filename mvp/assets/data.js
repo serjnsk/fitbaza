@@ -196,7 +196,7 @@ const TPL = [
   items:[['press','5×5',70,'%'],['ttb','3×10']]},
  {id:'sb5', lvl:'блок', own:false, folder:'Комплексы', kind:'metcon', title:'«Cindy» · AMRAP 20', used:0, fmt:'AMRAP 20',
   items:[['pullup','5'],['pushup','10'],['squat','15']]},
- {id:'sb6', lvl:'блок', own:false, folder:'Комплексы', kind:'metcon', title:'«Helen» · 3 раунда', used:0, fmt:'For time 3',
+ {id:'sb6', lvl:'блок', own:false, folder:'Комплексы', kind:'metcon', title:'«Helen»', used:0, fmt:'3 раунда на время',
   items:[['row','',400,'м'],['kbs','21'],['pullup','12']]},
  {id:'sb7', lvl:'блок', own:false, folder:'Заминки', kind:'cooldown', title:'Растяжка задней цепи · 6 мин', used:0,
   items:[['couch','2×',60,'сек']]},
@@ -235,10 +235,11 @@ function tplKind(t){
 }
 
 /* Разворачивание шаблона в рабочие сущности — уровень определяет результат */
-function tplLine([ex, scheme, val, unit]){
+function tplLine([ex, scheme, val, unit, txt]){
   const i = mkItem(ex, scheme||'');
   if(unit==='%') i.pct = parseFloat(val);
   else if(val!=null && val!==''){ i.unit = unit || i.unit; i.val = String(val) }
+  if(txt) i.txt = txt;
   return i;
 }
 const tplToBlock = t => ({id:nid('b'), kind:t.kind||'strength', title:t.title.replace(/\s·.*$/,''),
@@ -333,13 +334,16 @@ const program = id => PROGRAMS.find(p=>p.id===id);
 
 /* ═══════ Тренировки, блоки, недели ═══════ */
 let uid = 0; const nid = p => p+(++uid);
-function mkItem(exId, scheme='', pct=null, unit=null, val=''){
+/* txt — «как в тетради»: сложная запись (разный вес по подходам, дроп-сет…),
+   которая не ложится в подходы×повторы + нагрузка. Заполнен txt — структурные
+   поля пусты, клиент видит текст как есть. */
+function mkItem(exId, scheme='', pct=null, unit=null, val='', txt=''){
   const e = byId(exId);
-  return {id:nid('i'), exId, raw:null, scheme, pct, unit: unit || (e ? e.u[0] : ''), val};
+  return {id:nid('i'), exId, raw:null, scheme, pct, unit: unit || (e ? e.u[0] : ''), val, txt: txt||''};
 }
-const rawItem = txt => ({id:nid('i'), exId:null, raw:txt, scheme:'', pct:null, unit:'', val:''});
+const rawItem = txt => ({id:nid('i'), exId:null, raw:txt, scheme:'', pct:null, unit:'', val:'', txt:''});
 const mkBlock = (kind,title,note,fmt,items) => ({id:nid('b'), kind, title, note:note||'', fmt:fmt||null,
-  items:(items||[]).map(a=>mkItem(a[0],a[1]||'',a[2]??null,a[3]||null,a[4]||''))});
+  items:(items||[]).map(a=>mkItem(a[0],a[1]||'',a[2]??null,a[3]||null,a[4]||'',a[5]||''))});
 
 /* Недельный рисунок программы: 7 дней, null = отдых */
 /* ─── Фактически записанные результаты (CLI-2) ───
@@ -492,9 +496,9 @@ function buildDay(pid, i){
    такой блок на каждом открытом пустом дне, и без этого правила любой клик
    по дню помечал бы его черновиком. */
 const serializeDay = x => JSON.stringify({t: x.title||'', b: (x.blocks||[]).filter(b=>(b.items||[]).length || b.title || b.note).map(b=>({k:b.kind, t:b.title||'', n:b.note||'', f:b.fmt||null,
-  i:(b.items||[]).map(it=>({e:it.exId||null, r:it.raw||null, s:it.scheme||'', p:it.pct??null, u:it.unit||'', v:it.val||''}))}))});
+  i:(b.items||[]).map(it=>({e:it.exId||null, r:it.raw||null, s:it.scheme||'', p:it.pct??null, u:it.unit||'', v:it.val||'', x:it.txt||''}))}))});
 const restoreBlocks = rec => (rec.b||[]).map(b=>({id:nid('b'), kind:b.k||'strength', title:b.t||'', note:b.n||'', fmt:b.f||null,
-  items:(b.i||[]).map(it=>({id:nid('i'), exId:it.e||null, raw:it.r||null, scheme:it.s||'', pct:it.p??null, unit:it.u||'', val:it.v||''}))}));
+  items:(b.i||[]).map(it=>({id:nid('i'), exId:it.e||null, raw:it.r||null, scheme:it.s||'', pct:it.p??null, unit:it.u||'', val:it.v||'', txt:it.x||''}))}));
 const savedDay = (pid,i) => ((STATE.days||{})[pid]||{})[i] || null;
 /* Черновики могут лежать за концом заготовок — план дотягиваем до них. */
 function planLength(pid){
@@ -571,13 +575,19 @@ const mmssRaw = t => Math.floor(t/60)+':'+String(Math.round(t)%60).padStart(2,'0
 function parseFmt(s){
   if(!s) return null;
   const t = s.trim(); let m;
-  if((m=t.match(/^EMOM\s*(\d+)/i)))       return {k:'EMOM',rounds:+m[1],work:60,rest:0,total:+m[1]*60,label:'каждую минуту'};
-  if((m=t.match(/^E(\d+)MOM\s*(\d+)/i)))  return {k:'EMOM',rounds:+m[2],work:+m[1]*60,rest:0,total:+m[2]*+m[1]*60,label:'каждые '+m[1]+' мин'};
-  if((m=t.match(/^AMRAP\s*(\d+)/i)))      return {k:'AMRAP',rounds:1,work:+m[1]*60,rest:0,total:+m[1]*60,label:'максимум раундов'};
-  if(/^TABATA/i.test(t))                  return {k:'TABATA',rounds:8,work:20,rest:10,total:240,label:'20 / 10'};
-  if((m=t.match(/^FOR\s*TIME\s*(\d+)?/i)))return {k:'FOR TIME',rounds:1,work:(+m[1]||20)*60,rest:0,total:(+m[1]||20)*60,label:'лимит времени'};
+  /* src — что именно совпало: по нему формат вырезается из названия блока,
+     когда становится типом. */
+  if((m=t.match(/^EMOM\s*(\d+)/i)))       return {src:m[0],k:'EMOM',rounds:+m[1],work:60,rest:0,total:+m[1]*60};
+  if((m=t.match(/^E(\d+)MOM\s*(\d+)/i)))  return {src:m[0],k:'EMOM',rounds:+m[2],work:+m[1]*60,rest:0,total:+m[2]*+m[1]*60};
+  if((m=t.match(/^AMRAP\s*(\d+)/i)))      return {src:m[0],k:'AMRAP',rounds:1,work:+m[1]*60,rest:0,total:+m[1]*60};
+  if((m=t.match(/^(?:TABATA|табата)\w*/i))) return {src:m[0],k:'TABATA',rounds:8,work:20,rest:10,total:240};
+  if((m=t.match(/^(\d+)\s*(?:RFT|раунд[а-яё]*\s*на\s*время|rounds?\s*for\s*time)\s*(\d+)?/i)))
+    return {src:m[0],k:'FOR TIME',rounds:+m[1],work:0,rest:0,total:m[2]?+m[2]*60:0};
+  if((m=t.match(/^FOR\s*TIME\s*(\d+)?/i)))return {src:m[0],k:'FOR TIME',rounds:1,work:0,rest:0,total:m[1]?+m[1]*60:0};
+  if((m=t.match(/^(?:death\s*by|дез\s*бай)\s*(\d+)?/i))) return {src:m[0],k:'DEATH BY',rounds:0,work:(+m[1]||1)*60,rest:0,total:0,start:1};
+  if((m=t.match(/^(?:not\s*for\s*time|не\s*на\s*время|NFT)/i))) return {src:m[0],k:'NFT',rounds:1,work:0,rest:0,total:0};
   if((m=t.match(/(\d+)\s*(?:rounds?|раунд\w*)\D+(\d+)\s*(?:sec|сек)\D+(\d+)\s*(?:sec|сек)/i)))
-    return {k:'ИНТЕРВАЛЫ',rounds:+m[1],work:+m[2],rest:+m[3],total:+m[1]*(+m[2]+ +m[3]),label:m[2]+' / '+m[3]+' сек'};
+    return {src:m[0],k:'ИНТЕРВАЛЫ',rounds:+m[1],work:+m[2],rest:+m[3],total:+m[1]*(+m[2]+ +m[3])};
   /* Русские формулировки. В TMR-1 оба примера англоязычные, но тренер
      пишет по-русски — «каждые 90 секунд», «5 раундов по 3 минуты». Без
      этих шаблонов он не получал таймер и не понимал почему.
@@ -585,18 +595,78 @@ function parseFmt(s){
      ловим явным [а-яё]*, иначе «раундов» не съедается после «раунд». */
   if((m=t.match(/кажд[а-яё]*\s*(\d+)\s*(сек|мин)[а-яё]*\D+(\d+)\s*(?:раунд|круг|повтор)[а-яё]*/i))){
     const w = m[2].toLowerCase()==='мин' ? +m[1]*60 : +m[1];
-    return {k:'EMOM',rounds:+m[3],work:w,rest:0,total:+m[3]*w,
-            label:'каждые '+m[1]+' '+(m[2].toLowerCase()==='мин'?'мин':'сек')};
+    return {src:m[0],k:'EMOM',rounds:+m[3],work:w,rest:0,total:+m[3]*w};
   }
   if((m=t.match(/(\d+)\s*(?:раунд|круг)[а-яё]*\s*по\s*(\d+)\s*(мин|сек)[а-яё]*(?:[^\d]*отдых\D*?(\d+)\s*(мин|сек)[а-яё]*)?/i))){
     const sec = (v,u) => u && u.toLowerCase()==='мин' ? +v*60 : +v;
     const w = sec(m[2], m[3]), r = m[4] ? sec(m[4], m[5]) : 0;
-    return {k: r ? 'ИНТЕРВАЛЫ' : 'РАУНДЫ', rounds:+m[1], work:w, rest:r,
-            total:+m[1]*(w+r), label:r ? mmssRaw(w)+' через '+mmssRaw(r) : mmssRaw(w)+' в раунде'};
+    return {src:m[0],k: r ? 'ИНТЕРВАЛЫ' : 'РАУНДЫ', rounds:+m[1], work:w, rest:r, total:+m[1]*(w+r)};
   }
   if((m=t.match(/^на\s*время\s*(\d+)?/i)))
-    return {k:'FOR TIME',rounds:1,work:(+m[1]||20)*60,rest:0,total:(+m[1]||20)*60,label:'лимит времени'};
+    return {src:m[0],k:'FOR TIME',rounds:1,work:0,rest:0,total:m[1]?+m[1]*60:0};
   return null;
+}
+/* ═══════ Тип блока ═══════
+   Тип — явное поле блока (fmt), а не часть названия. Название остаётся
+   чистым; набранное в нём «AMRAP 15» распознаётся и переезжает в тип. */
+const FMT_TYPES = [
+  {k:null,       n:'без типа'},
+  {k:'AMRAP',    n:'AMRAP',        d:{rounds:1,work:900,rest:0,total:900}},
+  {k:'EMOM',     n:'EMOM',         d:{rounds:12,work:60,rest:0,total:720}},
+  {k:'FOR TIME', n:'На время',     d:{rounds:1,work:0,rest:0,total:0}},
+  {k:'TABATA',   n:'Табата',       d:{rounds:8,work:20,rest:10,total:240}},
+  {k:'ИНТЕРВАЛЫ',n:'Интервалы',    d:{rounds:4,work:180,rest:60,total:960}},
+  {k:'DEATH BY', n:'Death by',     d:{rounds:0,work:60,rest:0,total:0,start:1}},
+  {k:'NFT',      n:'Не на время',  d:{rounds:1,work:0,rest:0,total:0}},
+];
+const plural3 = (n,a,b,c) => { const m=n%10, h=n%100; return h>=11&&h<=14 ? c : m===1 ? a : m>=2&&m<=4 ? b : c };
+const mmssShort = s => s%60 ? mmssRaw(s) : String(s/60);
+/* Короткая подпись типа — для чипа в шапке блока и карточек. */
+function fmtLabel(f){
+  if(!f) return '';
+  switch(f.k){
+    case 'AMRAP':     return 'AMRAP ' + mmssShort(f.total);
+    case 'EMOM':      return (f.work===60 ? 'EMOM ' : 'E' + mmssShort(f.work) + 'MOM ') + f.rounds;
+    case 'FOR TIME':  return (f.rounds>1 ? f.rounds+' '+plural3(f.rounds,'раунд','раунда','раундов')+' на время' : 'На время') + (f.total ? ' · до '+mmssShort(f.total)+' мин' : '');
+    case 'TABATA':    return `Табата ${f.rounds} × ${f.work}/${f.rest}`;
+    case 'ИНТЕРВАЛЫ': return `${f.rounds} × ${mmssRaw(f.work)} / ${mmssRaw(f.rest)}`;
+    case 'РАУНДЫ':    return `${f.rounds} × ${mmssRaw(f.work)}`;
+    case 'DEATH BY':  return 'Death by · ' + mmssRaw(f.work);
+    case 'NFT':       return 'Не на время';
+  }
+  return f.k;
+}
+/* Что увидит клиент: расшифровка типа человеческим языком. */
+function fmtDesc(f){
+  if(!f) return '';
+  switch(f.k){
+    case 'AMRAP':     return 'максимум раундов за ' + mmssRaw(f.total);
+    case 'EMOM':      return 'каждые ' + mmssRaw(f.work) + ' новый подход, ' + f.rounds + ' раз · всего ' + mmssRaw(f.total);
+    case 'FOR TIME':  return (f.rounds>1 ? f.rounds+' '+plural3(f.rounds,'раунд','раунда','раундов')+' как можно быстрее' : 'как можно быстрее') + (f.total ? ', лимит ' + mmssRaw(f.total) : '');
+    case 'TABATA':
+    case 'ИНТЕРВАЛЫ': return f.rounds + ' × ' + mmssRaw(f.work) + ' работы через ' + mmssRaw(f.rest) + ' отдыха';
+    case 'РАУНДЫ':    return f.rounds + ' × ' + mmssRaw(f.work);
+    case 'DEATH BY':  return 'каждые ' + mmssRaw(f.work) + ' на один повтор больше — до отказа';
+    case 'NFT':       return 'без таймера, на качество';
+  }
+  return '';
+}
+/* Вырезать формат из названия: «EMOM 12 · сила + кардио» → «сила + кардио». */
+function stripFmt(title){
+  return String(title||'').split(/\s*·\s*/).map(seg => {
+    const f = parseFmt(seg); if(!f || RE_SCHEME.test(seg)) return seg;
+    return seg.replace(f.src,'').replace(/^[\s:\-–—,]+|[\s:\-–—,]+$/g,'').trim();
+  }).filter(Boolean).join(' · ');
+}
+/* Нормализация блока: строковый fmt из старых данных → объект; формат из
+   названия → тип, название очищается. Одно место истины — b.fmt. */
+function normFmt(b){
+  if(typeof b.fmt === 'string') b.fmt = parseFmt(b.fmt) || null;
+  const fromTitle = findFmt(b.title);
+  if(!b.fmt && fromTitle) b.fmt = fromTitle;
+  if(fromTitle) b.title = stripFmt(b.title);
+  if(b.fmt) delete b.fmt.src;
+  return b;
 }
 
 /* ═══════ Текст → структура (CON-5, OQ-10) ═══════ */
@@ -653,6 +723,13 @@ function parseText(txt){
     const item = mkItem(e.id, scheme);
     item.pct = pct;
     if(unit){ item.unit=unit; item.val=val }
+    /* После схемы, процента и единицы в строке остались цифры — значит запись
+       сложнее, чем «подходы × повторы + нагрузка» («60×5, 70×5, 80×3×3»).
+       Не теряем её молча: упражнение узнано, всё после названия — текстом. */
+    if(/\d/.test(rest)){
+      const mp2 = L.match(/^([^\d@%(]+?)\s+(?=[\d@%(])(.+)$/);
+      if(mp2){ item.txt = mp2[2].trim(); item.scheme=''; item.pct=null; item.val=''; item.unit = e.u[0]||''; }
+    }
     out.push({type:'ok',src:L,item,ex:e});
   }
   return out;
