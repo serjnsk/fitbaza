@@ -118,12 +118,17 @@ button{cursor:pointer}
   white-space:nowrap}
 .wkh .cp:hover,.docacts .cp:hover{color:var(--acc)}
 .wkh .cp svg,.docacts .cp svg{width:14px;height:14px}
-/* Лента, а не сетка: раскладка по семь в ряд визуально возвращала неделю,
-   которой в модели больше нет. План идёт подряд и прокручивается. */
-.days{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity}
-.days .day{flex:0 0 132px;scroll-snap-align:center}
-.days::-webkit-scrollbar{height:6px}
-.days::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
+/* Лента недели — семь равных колонок на всю ширину: чем шире экран, тем
+   крупнее день и тем больше о нём видно (список блоков появляется от 900px
+   ширины самой ленты — container query, а не окна: панель справа может быть
+   свёрнута или развёрнута). */
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;container-type:inline-size}
+.day .bl{display:none;flex-direction:column;gap:2px;margin-top:6px;padding-top:6px;border-top:1px solid var(--line)}
+.day .bl i{font-style:normal;font-size:11px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@container (min-width:900px){
+  .day{min-height:118px;padding:11px 12px 12px}
+  .day .bl{display:flex}
+}
 .day{border-radius:var(--rad-m);background:var(--s1);padding:9px 9px 10px;text-align:left;min-height:76px;
   display:flex;flex-direction:column;gap:4px;transition:.14s;border:1.5px solid transparent}
 .day:hover{background:var(--s2)}
@@ -606,3 +611,6 @@ body.railmin .rail::after{content:"Источники";position:absolute;top:46p
 .wkh .hint{text-decoration:none;font-size:12.5px;color:var(--acc-d);font-weight:600}
 /* действия тренировки — под названием, над блоками */
 .docacts{display:flex;gap:4px;flex-wrap:wrap;padding:0 0 8px}
+
+/* заголовок панели источников */
+.railttl{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tx4);margin:0 0 9px 2px}

@@ -231,8 +231,9 @@ function renderStrip(){
                         data-day="${c.i}" style="--load:${n||0}">
           ${S.sel ? `<span class="tick">${picked?ICON.chk:''}</span>` : ''}
           ${head}
-          ${n ? `<span class="t">${esc(x.title)}</span>` : '<span class="e">отдых</span>'}
+          ${n ? `<span class="t">${esc(REST_TITLES.has(x.title) ? 'Без названия' : x.title)}</span>` : '<span class="e">отдых</span>'}
           ${n ? `<span class="k">${bl} ${plural(bl,'блок','блока','блоков')} · ${n} упр</span>` : ''}
+          ${n ? `<span class="bl">${x.blocks.filter(b=>b.items.some(y=>y.exId)).map(b=>`<i>${esc(b.title||'блок')}</i>`).join('')}</span>` : ''}
           <span class="ld"><i style="flex:${n}"></i><u style="flex:${Math.max(1,10-n)}"></u><s>${n||''}</s></span>
         </button>`;
       }).join('')}
@@ -365,8 +366,9 @@ function renderDoc(){
     ${propose}
     ${empty ? emptyDay()
       : PENDING ? ''    /* пока не принято, добавлять блоки рано */
-      : `<button class="addb" id="add-blk">${ICON.plus} Добавить блок</button>`}
-    ${d.blocks.map(blockHTML).join('')}`;
+      : ''}
+    ${d.blocks.map(blockHTML).join('')}
+    ${empty ? '' : `<button class="addb" id="add-blk">${ICON.plus} Добавить блок</button>`}`;
 }
 
 /* ─── панель источников: три уровня, которыми наполняют день ─── */
@@ -398,7 +400,7 @@ function renderSrc(){
           <span class="nm">${esc(t.title)}</span>
           </div>
         <div class="ls">${lvl==='блок'
-          ? t.items.map(i=>{ const e=byId(i[0]);
+          ? t.items.map(i=>{ const e=byId(i[0]) || {ru:i[0]};   /* неизвестный id — показываем как есть, не роняем панель */
               const v = i[2] ? ` · ${i[2]}${i[3]==='%'?' %':' '+(i[3]||'')}` : '';
               return `<span>${esc(e.ru)}${i[1]?' — '+esc(i[1]):''}${esc(v)}</span>` }).join('')
           : (t.blocks||[]).map(id=>{ const b=tplById(id); return b?`<span>${esc(b.title)}</span>`:'' }).join('')}</div>
@@ -946,7 +948,7 @@ document.addEventListener('click', e=>{
     return;
   }
   if(e.target.closest('#w-hand')){
-    day().blocks.unshift(blockOf('', []));
+    day().blocks.push(blockOf('', []));
     S.compose = null; render();
     const t = $('.blk .bt'); if(t) t.focus();
     return;
@@ -965,7 +967,7 @@ document.addEventListener('click', e=>{
   if(e.target.closest('#add-blk')){
     /* Кнопка стоит сверху — значит и блок появляется сверху, под курсором,
        а не улетает в конец длинного дня. */
-    day().blocks.unshift(mkBlock('strength','','',null,[]));
+    day().blocks.push(mkBlock('strength','','',null,[]));
     render();
     const t = document.querySelector('.blk .bt'); if(t) t.focus();
     return;
