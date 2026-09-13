@@ -99,6 +99,12 @@ function bindClient(cid, date){
 /* Если из адреса пришло что-то негодное — откатываемся на клиента по умолчанию
    и сегодня, редактор должен открыться в любом случае. */
 if(!bindClient(S.cid, S.date)) bindClient('c1', TODAY);
+/* «Создать тренировку» без параметров — это новая тренировка, а не правка
+   существующей: открываем первый ещё не составленный день, он пуст. */
+if(!Q.get('date')){
+  const n = composedDays(S.pid);
+  if(n < program(S.pid).days){ extendPlan(n); S.i = n; S.date = plan()[n].date; }
+}
 const day  = () => plan()[S.i];
 const PM   = () => pmOf(S.cid);
 
@@ -141,7 +147,7 @@ function renderTop(){
      относятся к тренировке, а не к приложению. */
   $('#topbar').innerHTML = `
     <span class="sp"></span>
-    <a class="btn gh" href="constructor.html">${ICON.build} Создать тренировку</a>`;
+    <a class="btn" href="constructor.html">${ICON.build} Создать тренировку</a>`;
 }
 
 function renderHead(){
@@ -186,51 +192,51 @@ function planStat(){
    непрерывная дорожка дней программы: тренер ставит тренировки в любом ритме,
    а не заполняет семь ячеек. Полоса прокручивается, выбранный день в центре. */
 function renderStrip(){
-  const d = plan(), p = program(S.pid);
+  const d = plan(), p = program(S.pid), cur = d[S.i];
+  /* Лента — семь дней текущей недели: неделя осталась представлением, и здесь
+     она уместна. Дни за концом плана, но в сроке программы — пустые, клик по
+     такому продлевает план. */
+  const wk0 = addDays(cur.date, -dowMon(cur.date));
+  const cells = Array.from({length:7}, (_,k)=>{
+    const date = addDays(wk0, k), i = daysBetween(p.start, date);
+    return {date, i, inPlan: i>=0 && i<d.length, inProg: i>=0 && i<p.days};
+  });
   $('#wk').innerHTML = `
     <div class="wkh">
       <select class="cliSel" id="cli" title="Клиент">${CLIENTS.filter(c=>c.prog).map(c=>
         `<option value="${c.id}" ${c.id===S.cid?'selected':''}>${esc(c.n)}</option>`).join('')}</select>
       <span class="wkn">
         <button id="dayPrev" title="Предыдущий день" ${S.i<1?'disabled':''}>${ICON.back}</button>
-        <button id="dayNext" title="Следующий день" ${S.i>=d.length-1?'disabled':''}>${ICON.arr}</button>
+        <button id="dayNext" title="Следующий день" ${S.i>=p.days-1?'disabled':''}>${ICON.arr}</button>
       </span>
-      <b>День ${S.i+1} из ${p.days} · ${dm(d[S.i].date)}</b><s>${S.paste
-        ? (S.paste==='copy'?'выберите день, куда скопировать':'выберите день, куда перенести')
-        : planStat()}</s>
       <span class="sp"></span>
       ${S.sel ? `
         <b class="seln">Выбрано ${S.sel.size}</b>
         <button class="cp" id="selCopy" ${S.sel.size?'':'disabled'}>${ICON.copy} Скопировать</button>
         <button class="cp" id="selMove" ${S.sel.size?'':'disabled'}>${ICON.arr} Перенести</button>
         <button class="cp" id="selCancel">${ICON.x} Отмена</button>
-      ` : `
-        <button class="cp" id="fromTpl">${ICON.tpl} Из шаблона</button>
-        <button class="cp" id="copyFrom">${ICON.copy} Скопировать существующую</button>
-        <button class="cp" id="daySave">${ICON.star} Сохранить день</button>
-        <button class="cp" id="selStart">${ICON.chk} Выбрать несколько</button>
-        <button class="cp" id="addDay">${ICON.plus} Добавить день</button>
-      `}
+      ` : (S.paste ? `<s class="hint">${S.paste==='copy'?'выберите день, куда скопировать':'выберите день, куда перенести'}</s>` : '')}
     </div>
     <div class="days" id="strip">
-      ${d.map((x,i)=>{
-        const dt = new Date(x.date + 'T00:00:00');
+      ${cells.map(c=>{
+        const dt = new Date(c.date + 'T00:00:00');
+        const head = `<span class="d">${RU[dowMon(c.date)]} ${dt.getDate()}</span>`;
+        if(!c.inProg) return `<span class="day void">${head}</span>`;
+        if(!c.inPlan) return `<button class="day empty" data-day="${c.i}" title="Составить этот день">${head}<span class="e">не составлено</span></button>`;
+        const x = d[c.i];
         const bl = x.blocks.filter(b=>b.items.some(y=>y.exId)).length;
         const n  = x.blocks.reduce((a,b)=>a+b.items.filter(y=>y.exId).length, 0);
-        const picked = S.sel && S.sel.has(i);
-        return `<button class="day ${i===S.i&&!S.sel?'on':''}${n?'':' rest'}${picked?' picked':''}${S.paste?' target':''}"
-                        data-day="${i}" style="--load:${n||0}">
+        const picked = S.sel && S.sel.has(c.i);
+        return `<button class="day ${c.i===S.i&&!S.sel?'on':''}${n?'':' rest'}${picked?' picked':''}${S.paste?' target':''}"
+                        data-day="${c.i}" style="--load:${n||0}">
           ${S.sel ? `<span class="tick">${picked?ICON.chk:''}</span>` : ''}
-          <span class="d">${x.w} ${dt.getDate()}</span>
+          ${head}
           ${n ? `<span class="t">${esc(x.title)}</span>` : '<span class="e">отдых</span>'}
           ${n ? `<span class="k">${bl} ${plural(bl,'блок','блока','блоков')} · ${n} упр</span>` : ''}
           <span class="ld"><i style="flex:${n}"></i><u style="flex:${Math.max(1,10-n)}"></u><s>${n||''}</s></span>
         </button>`;
       }).join('')}
     </div>`;
-  /* Выбранный день подкручиваем в вид: дорожка длиной в 35+ дней не влезает. */
-  const cur = $('#strip .day.on');
-  if(cur) cur.scrollIntoView({block:'nearest', inline:'center'});
 }
 
 /* ─── документ дня ─── */
@@ -317,7 +323,7 @@ function emptyDay(){
         </button>
       </div>
       ${S.i > 0 ? `<div class="orelse">
-        или <button class="lnk" id="w-prev">возьмите копию прошлой недели</button>
+        или <button class="lnk" id="w-prev">возьмите повторите предыдущую тренировку</button>
       </div>` : ''}
     </div>`;
 }
@@ -345,6 +351,11 @@ function renderDoc(){
         <span class="stat">${d.blocks.length} ${plural(d.blocks.length,'блок','блока','блоков')} · ${n} ${plural(n,'упражнение','упражнения','упражнений')}${raw?` · ${raw} остались текстом`:''}</span>
         <button class="x" id="sav-wo" title="Сохранить тренировку в библиотеку">${ICON.star}</button>
         <button class="x rm" id="clr-wo" title="Очистить день">${ICON.x}</button>`}
+    </div>
+    <div class="docacts">
+      <button class="cp" id="fromTpl">${ICON.tpl} Из шаблона</button>
+      <button class="cp" id="copyFrom">${ICON.copy} Скопировать существующую</button>
+      <button class="cp" id="selStart">${ICON.chk} Выбрать несколько</button>
     </div>
     <label class="fld wmsg"><span class="k">${ICON.chat} Клиенту</span>
       <input id="w-msg" value="${esc(trainerMsg(d.date))}"
@@ -904,16 +915,15 @@ document.addEventListener('click', e=>{
     const i = +d.dataset.day;
     /* В режиме выбора клик по дню не переключает день, а отмечает его:
        иначе набор нельзя собрать, не потеряв уже отмеченное. */
-    if(S.sel){ toggleSel(i); return }
+    if(S.sel){ if(i < plan().length) toggleSel(i); return }
     if(S.paste){ pasteAt(i); return }
+    extendPlan(i);
     S.i = i; S.compose = null; closeSug(); render(); return;
   }
   if(e.target.closest('#dayPrev')){ S.i = Math.max(0, S.i-1); S.compose = null; render(); return }
-  if(e.target.closest('#dayNext')){ S.i = Math.min(plan().length-1, S.i+1); S.compose = null; render(); return }
+  if(e.target.closest('#dayNext')){ const i = Math.min(program(S.pid).days-1, S.i+1); extendPlan(i); S.i = i; S.compose = null; render(); return }
   if(e.target.closest('#fromTpl')){ pickTemplate(); return }
   if(e.target.closest('#copyFrom')){ pickExisting(); return }
-  if(e.target.closest('#daySave')){ saveWorkout(); return }
-  if(e.target.closest('#addDay')){ addDay(); return }
   if(e.target.closest('#selStart')){ S.sel = new Set(); S.paste = null; render(); return }
   if(e.target.closest('#selCancel')){ S.sel = null; S.paste = null; render(); return }
   if(e.target.closest('#selCopy')){ startPaste('copy'); return }

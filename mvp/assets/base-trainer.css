@@ -114,10 +114,10 @@ button{cursor:pointer}
 .wkh b{font-size:14.5px;font-weight:700;letter-spacing:-.02em}
 .wkh s{text-decoration:none;font-size:12.5px;color:var(--tx3)}
 .wkh .sp{flex:1}
-.wkh .cp{font-size:12.5px;font-weight:500;color:var(--tx3);display:flex;align-items:center;gap:6px;
+.wkh .cp,.docacts .cp{font-size:12.5px;font-weight:500;color:var(--tx3);display:flex;align-items:center;gap:6px;
   white-space:nowrap}
-.wkh .cp:hover{color:var(--acc)}
-.wkh .cp svg{width:14px;height:14px}
+.wkh .cp:hover,.docacts .cp:hover{color:var(--acc)}
+.wkh .cp svg,.docacts .cp svg{width:14px;height:14px}
 /* Лента, а не сетка: раскладка по семь в ряд визуально возвращала неделю,
    которой в модели больше нет. План идёт подряд и прокручивается. */
 .days{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity}
@@ -550,7 +550,7 @@ body.navmin .nh .logo{cursor:pointer}
    Панель нужна, когда набирают тренировку из базы, и мешает, когда печатают
    текстом — поэтому сворачивается в колонку 44px. Внутренности не скрываются
    поштучно: прячем всё содержимое и оставляем только кнопку с подписью. */
-.rail{position:relative}
+/* .rail остаётся sticky: он и так позиционирован, absolute-кнопке этого достаточно. */
 .railtog{position:absolute;top:10px;right:10px;width:26px;height:26px;z-index:2;
   border-radius:var(--rad-s);display:grid;place-items:center;color:var(--tx4);
   background:var(--bg);opacity:0;transition:opacity .12s}
@@ -581,11 +581,12 @@ body.railmin .rail::after{content:"Источники";position:absolute;top:46p
 .day.target:hover{border-color:var(--acc);background:var(--acc-a)}
 
 /* ─── конструктор: клиент в строке дорожки ─── */
-.wkh .cliSel{height:32px;padding:0 30px 0 11px;border-radius:var(--rad-m);background:var(--s1);
-  font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;-webkit-appearance:none;appearance:none;
+.wkh .cliSel{height:32px;padding:0 30px 0 11px;border-radius:var(--rad-m);background:var(--acc-a);
+  border:1.5px solid var(--acc);font-size:13px;font-weight:700;color:var(--acc-d);cursor:pointer;
+  -webkit-appearance:none;appearance:none;
   background-image:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%235E5E5E' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6.5 8 10.5l4-4'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 9px center;background-size:13px;margin-right:6px}
-.wkh .cliSel:hover{background-color:var(--s2)}
+.wkh .cliSel:hover{background-color:var(--acc-p)}
 
 /* выбор источника в модалке копирования */
 .pk-src{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:12.5px;color:var(--tx3)}
@@ -597,3 +598,11 @@ body.railmin .rail::after{content:"Источники";position:absolute;top:46p
 .pk:hover{background:var(--s2)}
 .pk b{font-size:13.5px;font-weight:600}
 .pk s{text-decoration:none;font-size:11.5px;color:var(--tx3)}
+
+/* ─── лента недели: пустые и несуществующие дни ─── */
+.day.void{visibility:hidden}
+.day.empty{background:none;border:1.5px dashed var(--line2);color:var(--tx4)}
+.day.empty:hover{border-color:var(--acc);color:var(--acc-d)}
+.wkh .hint{text-decoration:none;font-size:12.5px;color:var(--acc-d);font-weight:600}
+/* действия тренировки — под названием, над блоками */
+.docacts{display:flex;gap:4px;flex-wrap:wrap;padding:0 0 8px}
